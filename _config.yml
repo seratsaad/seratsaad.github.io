@@ -26,7 +26,7 @@ author:
   pronouns         : # example: "she/her"  
   bio              : "Undergraduate Student @ Vanderbilt"
   location         : "Nashville, TN"
-  employer         : "Vanderbilt University"
+  employer         : #"Vanderbilt University"
   uri              : # URL
   email            : "seratmahmudsaad (at) gmail (dot) com" 
 
