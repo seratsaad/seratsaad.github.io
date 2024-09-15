@@ -5,17 +5,17 @@
 # prevent it from being included in the site.
 
 main:  
-  - title: "CV"
-    url: /publication/
-
   - title: "Research"
-    url: /talks/    
+    url: /research/
+
+  #- title: "Talks"
+  #  url: /talks/    
 
   - title: "Teaching"
     url: /teaching/   
 
-  #- title: "CV"
-  #  url: /cv/
+  - title: "CV"
+    url: /cv/
     
   #- title: "Portfolio"
   #  url: /portfolio/
