@@ -12,9 +12,9 @@ title                    : "Serat M. Saad"
 title_separator          : "-"
 name                     : &name "Serat M. Saad"
 description              : &description "personal description"
-url                      : https://academicpages.github.io # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
+url                      : https://seratsaad.github.io # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : "" # the subpath of your site, e.g. "/blog"
-repository               : "academicpages/academicpages.github.io"
+repository               : "seratsaad/seratsaad.github.io"
 
 # Site Author - The following control what appear as part of the author content on the side bar.
 #               If a field is blank the icon and link will not appear, otherwise it will be shown.
@@ -24,7 +24,7 @@ author:
   avatar           : "profile.png"
   name             : "Serat M. Saad"
   pronouns         : # example: "she/her"  
-  bio              : "Undergraduate Student. Interested in Astrophysics."
+  bio              : "Undergraduate Student @ Vanderbilt"
   location         : "Nashville, TN"
   employer         : "Vanderbilt University"
   uri              : # URL
