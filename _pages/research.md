@@ -29,7 +29,7 @@ author_profile: true
   <div id="blackhole-slider" style="position: relative; width: 100%; max-width: 600px; margin: auto;">
     <img src="https://seratsaad.github.io/images/comparison_spectra.jpg" alt="Black Hole Research 1" style="width:100%" class="blackhole-image">
     <img src="https://seratsaad.github.io/images/hbeta_fullfit.jpg" alt="Black Hole Research 2" style="width:100%" class="blackhole-image" style="display:none;">
-    <img src="https://seratsaad.github.io/images/halpha_fullfit-2.jpg" alt="Black Hole Research 3" style="width:100%" class="blackhole-image" style="display:none;">
+    <img src="https://seratsaad.github.io/images/halpha_fullfit-2.jpg" alt="Black Hole Research 3" style="height:70%" class="blackhole-image" style="display:none;">
   </div>
 </div>
 
