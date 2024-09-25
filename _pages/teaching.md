@@ -9,5 +9,8 @@ redirect_from:
 
 {% include base_path %}
 
+The Wond'ry Qunatum Studio:
+======
 
-![The Wond'ry Quantum Studio](https://github.com/user-attachments/assets/b4444a95-7700-46f4-b75e-efb3abc82c9b)
+<img src="https://seratsaad.github.io/images/twqs.jpg" alt="The Wond'ry Quantum Studio" width="500">
+
