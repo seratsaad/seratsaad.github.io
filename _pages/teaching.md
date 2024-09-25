@@ -17,10 +17,8 @@ redirect_from:
 
 ## Bangladesh Olympiad on Astronomy and Astrophysics:
 
-<div style="display: flex; flex-direction: column; align-items: center;">
 
-  <img src="https://seratsaad.github.io/images/bdoaa1.jpg" alt="Image 1" width="300">
-  <img src="https://seratsaad.github.io/images/bdoaa2.jpg" alt="Image 2" width="300">
-  <img src="https://seratsaad.github.io/images/bdoaa3.jpg" alt="Image 3" width="300">
+<img src="https://seratsaad.github.io/images/bdoaa1.jpg" alt="Image 1" width="500">
+<img src="https://seratsaad.github.io/images/bdoaa2.jpg" alt="Image 2" width="500">
+<img src="https://seratsaad.github.io/images/bdoaa3.jpg" alt="Image 3" width="500">
 
-</div>
