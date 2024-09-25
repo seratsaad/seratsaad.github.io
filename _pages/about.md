@@ -8,7 +8,7 @@ redirect_from:
 ---
 
 
-I am studying Physics and Mathematics at Vanderbilt University. I live in Nashvill,e TN, USA. I'm originally from Dhaka, Bangladesh.
+I am studying Physics and Mathematics at Vanderbilt University. I live in Nashville, TN, USA. I'm originally from Dhaka, Bangladesh.
 
 My research topics inlcude stellar formation and accretion, classical t-tauri stars, supermassive binary blackholes, active galactic nuclei (AGN), etc.
 
