@@ -5,10 +5,9 @@ permalink: /research/
 author_profile: true
 ---
 
-# Stellar Formation Research
+## Stellar Formation Research
 
 <div style="text-align:center;">
-  <h2>Stellar Formation Research</h2>
   <!-- Image Slider for Stellar Formation Research -->
   <div id="stellar-slider" style="position: relative; width: 100%; max-width: 600px; margin: auto;">
     <img src="https://seratsaad.github.io/images/pms1.jpg" alt="Stellar Research 1" style="height:100%; object-fit: contain;" class="stellar-image">
@@ -17,17 +16,15 @@ author_profile: true
   </div>
 </div>
 
-<!-- Links for Stellar Formation -->
-- [Paper](#)
-- [Paper in progress](#)
-- [Code (GitHub Repo)](https://github.com/your-github-repo)
+<!-- Works -->
+- Papers:
+- Presentations:
 
 ---
 
-# Supermassive Black Hole Binaries
+## Supermassive Black Hole Binaries
 
 <div style="text-align:center;">
-  <h2>Supermassive Black Hole Binaries</h2>
   <!-- Image Slider for Supermassive Black Hole Binaries -->
   <div id="blackhole-slider" style="position: relative; width: 100%; max-width: 600px; margin: auto;">
     <img src="https://seratsaad.github.io/images/halpha_fullfit.jpg" alt="Black Hole Research 1" style="width:100%" class="blackhole-image">
@@ -36,10 +33,10 @@ author_profile: true
   </div>
 </div>
 
-<!-- Links for Supermassive Black Hole Binaries -->
-- [Paper](#)
-- [Paper in progress](#)
-- [Code (GitHub Repo)](https://github.com/your-github-repo)
+<!-- Works -->
+- Papers:
+- Presentations:
+
 
 ---
 
