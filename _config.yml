@@ -8,9 +8,9 @@
 
 # Basic Site Settings
 locale                   : "en-US"
-title                    : "Serat M. Saad"
+title                    : "Main"
 title_separator          : "-"
-name                     : &name "Serat M. Saad"
+name                     : &name "Serat Mahmud Saad"
 description              : &description "personal description"
 url                      : https://seratsaad.github.io # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : "" # the subpath of your site, e.g. "/blog"
@@ -22,9 +22,9 @@ repository               : "seratsaad/seratsaad.github.io"
 author:
   # Biographic information
   avatar           : "serat.png"
-  name             : "Serat M. Saad"
+  name             : "Serat Saad"
   pronouns         : # example: "she/her"  
-  bio              : "Undergraduate Student @ Vanderbilt"
+  bio              : "Undergraduate Student @ Vanderbilt University"
   location         : #"Nashville, TN"
   employer         : #"Vanderbilt University"
   uri              : # URL
@@ -57,7 +57,7 @@ author:
   keybase          : # Username
   instagram        : # Username
   lastfm           : # Username
-  linkedin         : # Username
+  linkedin         : "https://www.linkedin.com/in/seratmahmud/"
   mastodon         : # URL
   medium           : # URL
   pinterest        : # Username
