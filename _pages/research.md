@@ -30,9 +30,9 @@ author_profile: true
   <h2>Supermassive Black Hole Binaries</h2>
   <!-- Image Slider for Supermassive Black Hole Binaries -->
   <div id="blackhole-slider" style="position: relative; width: 100%; max-width: 600px; margin: auto;">
-    <img src="{{ site.baseurl }}/assets/images/blackhole1.jpg" alt="Black Hole Research 1" style="width:100%" class="blackhole-image">
-    <img src="{{ site.baseurl }}/assets/images/blackhole2.jpg" alt="Black Hole Research 2" style="width:100%" class="blackhole-image" style="display:none;">
-    <img src="{{ site.baseurl }}/assets/images/blackhole3.jpg" alt="Black Hole Research 3" style="width:100%" class="blackhole-image" style="display:none;">
+    <img src="https://seratsaad.github.io/images/halpha_fullfit.jpg" alt="Black Hole Research 1" style="width:100%" class="blackhole-image">
+    <img src="https://seratsaad.github.io/images/hbeta_fullfit.jpg" alt="Black Hole Research 2" style="width:100%" class="blackhole-image" style="display:none;">
+    <img src="https://seratsaad.github.io/images/halpha_fullfit-2.jpg" alt="Black Hole Research 3" style="width:100%" class="blackhole-image" style="display:none;">
   </div>
 </div>
 
