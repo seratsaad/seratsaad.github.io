@@ -11,10 +11,10 @@ author_profile: true
   <h2>Stellar Formation Research</h2>
   <!-- Image Slider for Stellar Formation Research -->
   <div id="stellar-slider" style="position: relative; width: 100%; max-width: 600px; margin: auto;">
-    <img src="https://seratsaad.github.io/images/pms1.jpg" alt="Stellar Research 1" style="height:400px; object-fit: contain;" class="stellar-image">
-    <img src="https://seratsaad.github.io/images/pms2.jpg" alt="Stellar Research 2" style="height:400px; object-fit: contain;" class="stellar-image" style="display:none;">
-    <img src="https://seratsaad.github.io/images/decrement.jpg" alt="Stellar Research 3" style="height:350px; object-fit: contain;" class="stellar-image" style="display:none;">
-    <img src="https://seratsaad.github.io/images/Halpha_eqw.jpg" alt="Stellar Research 4" style="height:400px; object-fit: contain;" class="stellar-image" style="display:none;">
+    <img src="https://seratsaad.github.io/images/pms1.jpg" alt="Stellar Research 1" style="height:100%; object-fit: contain;" class="stellar-image">
+    <img src="https://seratsaad.github.io/images/pms2.jpg" alt="Stellar Research 2" style="height:100%; object-fit: contain;" class="stellar-image" style="display:none;">
+    <img src="https://seratsaad.github.io/images/decrement.jpg" alt="Stellar Research 3" style="height:70%; object-fit: contain;" class="stellar-image" style="display:none;">
+    <img src="https://seratsaad.github.io/images/Halpha_eqw.jpg" alt="Stellar Research 4" style="height:100%; object-fit: contain;" class="stellar-image" style="display:none;">
   </div>
 </div>
 
