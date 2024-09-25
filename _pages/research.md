@@ -5,7 +5,7 @@ permalink: /research/
 author_profile: true
 ---
 
-## Stellar Formation Research
+## Stellar Formation
 
 <div style="text-align:center;">
   <!-- Image Slider for Stellar Formation Research -->
