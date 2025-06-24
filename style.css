@@ -1,0 +1,86 @@
+body {
+  background: #fff;
+  color: #000;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+nav {
+  background: #0072B2;
+  padding: 0.5em 0;
+}
+nav ul {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+}
+nav ul li {
+  margin: 0 1em;
+}
+nav ul li a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+  padding: 0.5em 1em;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+nav ul li a.active, nav ul li a:hover {
+  background: #fff;
+  color: #0072B2;
+}
+main {
+  max-width: 700px;
+  margin: 2em auto;
+  padding: 1em;
+}
+h1 {
+  color: #0072B2;
+}
+#blog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  margin-bottom: 2em;
+}
+#blog-form input, #blog-form textarea {
+  padding: 0.5em;
+  border: 1px solid #0072B2;
+  border-radius: 4px;
+  font-size: 1em;
+}
+#blog-form button {
+  background: #0072B2;
+  color: #fff;
+  border: none;
+  padding: 0.5em 1em;
+  border-radius: 4px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+#blog-form button:hover {
+  background: #005a87;
+}
+#posts {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5em;
+}
+.post {
+  border: 1px solid #0072B2;
+  border-radius: 4px;
+  padding: 1em;
+  background: #f9f9f9;
+}
+.post-title {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #0072B2;
+  margin-bottom: 0.5em;
+}
+.post-content {
+  color: #000;
+} 
