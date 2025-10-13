@@ -1,89 +1,136 @@
+/* ========== BASE STYLES ========== */
 body {
-  background: #fff;
-  color: #000;
-  font-family: 'Roboto', Arial, sans-serif;
+  background: #f4f6f9;
+  color: #1b1b1b;
+  font-family: 'Inter', 'Roboto', Arial, sans-serif;
   margin: 0;
   padding: 0;
+  line-height: 1.6;
+  scroll-behavior: smooth;
 }
+
+/* ========== NAVIGATION ========== */
 nav {
-  background: #0072B2;
-  padding: 0.5em 0;
+  background: linear-gradient(90deg, #0057a0, #0096c7);
+  padding: 0.8em 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 nav ul {
   list-style: none;
   display: flex;
   justify-content: center;
+  align-items: center;
   margin: 0;
   padding: 0;
+  flex-wrap: wrap;
 }
 nav ul li {
   margin: 0 1em;
 }
 nav ul li a {
-  color: #fff;
+  color: #ffffff;
   text-decoration: none;
-  font-weight: bold;
+  font-weight: 600;
   padding: 0.5em 1em;
-  border-radius: 4px;
-  transition: background 0.2s;
+  border-radius: 6px;
+  transition: background 0.3s, color 0.3s, transform 0.2s;
 }
-nav ul li a.active, nav ul li a:hover {
-  background: #fff;
-  color: #0072B2;
+nav ul li a.active,
+nav ul li a:hover {
+  background: #ffffff;
+  color: #0057a0;
+  transform: translateY(-2px);
 }
+
+/* ========== MAIN CONTENT ========== */
 main {
-  max-width: 700px;
-  margin: 2em auto;
-  padding: 1em;
+  max-width: 800px;
+  margin: 2.5em auto;
+  padding: 1.5em;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+/* ========== HEADINGS ========== */
+h1, h2, h3 {
+  color: #0057a0;
+  margin-bottom: 0.6em;
 }
 h1 {
-  color: #0072B2;
+  font-size: 2em;
+  font-weight: 700;
+  border-bottom: 3px solid #0096c7;
+  display: inline-block;
+  padding-bottom: 0.2em;
 }
+
+/* ========== BLOG FORM ========== */
 #blog-form {
   display: flex;
   flex-direction: column;
-  gap: 0.5em;
+  gap: 0.8em;
   margin-bottom: 2em;
 }
-#blog-form input, #blog-form textarea {
-  padding: 0.5em;
-  border: 1px solid #0072B2;
-  border-radius: 4px;
+#blog-form input, 
+#blog-form textarea {
+  padding: 0.8em;
+  border: 1.5px solid #0096c7;
+  border-radius: 6px;
   font-size: 1em;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+#blog-form input:focus, 
+#blog-form textarea:focus {
+  border-color: #0057a0;
+  box-shadow: 0 0 5px rgba(0,86,179,0.2);
+  outline: none;
 }
 #blog-form button {
-  background: #0072B2;
+  background: linear-gradient(90deg, #0057a0, #0096c7);
   color: #fff;
   border: none;
-  padding: 0.5em 1em;
-  border-radius: 4px;
+  padding: 0.7em 1.2em;
+  border-radius: 6px;
   font-size: 1em;
   cursor: pointer;
-  transition: background 0.2s;
+  font-weight: 600;
+  transition: background 0.3s, transform 0.2s;
 }
 #blog-form button:hover {
-  background: #005a87;
+  transform: translateY(-2px);
+  background: linear-gradient(90deg, #004075, #007ba2);
 }
+
+/* ========== POSTS ========== */
 #posts {
   display: flex;
   flex-direction: column;
-  gap: 1.5em;
+  gap: 1.8em;
 }
 .post {
-  border: 1px solid #0072B2;
-  border-radius: 4px;
-  padding: 1em;
-  background: #f9f9f9;
+  border: 1px solid #d9e3f0;
+  border-radius: 10px;
+  padding: 1.2em;
+  background: #ffffff;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.post:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
 }
 .post-title {
-  font-size: 1.2em;
-  font-weight: bold;
-  color: #0072B2;
-  margin-bottom: 0.5em;
+  font-size: 1.3em;
+  font-weight: 700;
+  color: #0057a0;
+  margin-bottom: 0.4em;
 }
 .post-content {
-  color: #000;
+  color: #333;
 }
+
+/* ========== PROFILE IMAGE ========== */
 .profile-pic {
   display: block;
   margin: 2em auto 1.5em auto;
@@ -91,25 +138,67 @@ h1 {
   height: 200px;
   object-fit: cover;
   border-radius: 50%;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.10);
-  border: 4px solid #0072B2;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  border: 4px solid #0096c7;
+  transition: transform 0.3s;
 }
+.profile-pic:hover {
+  transform: scale(1.05);
+}
+
+/* ========== CV LINK BUTTON ========== */
 .cv-link {
   display: block;
   margin: 2em auto 0 auto;
   padding: 0.75em 2em;
-  border: 2px solid #0072B2;
-  color: #0072B2;
+  border: 2px solid #0096c7;
+  color: #0096c7;
   background: none;
   text-decoration: none;
-  border-radius: 6px;
+  border-radius: 8px;
   font-weight: bold;
   font-size: 1.1em;
   text-align: center;
   width: fit-content;
-  transition: background 0.2s, color 0.2s;
+  transition: all 0.3s ease;
 }
 .cv-link:hover {
-  background: #0072B2;
+  background: #0096c7;
   color: #fff;
-} 
+  transform: translateY(-2px);
+}
+
+/* ========== FOOTER ========== */
+footer {
+  text-align: center;
+  padding: 1em 0;
+  background: #0057a0;
+  color: #ffffff;
+  margin-top: 3em;
+  font-size: 0.9em;
+  box-shadow: 0 -2px 6px rgba(0,0,0,0.05);
+}
+
+/* ========== SCROLL TO TOP ========== */
+#scrollTopBtn {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  background: #0057a0;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  font-size: 1.2em;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  transition: background 0.3s, transform 0.2s;
+}
+#scrollTopBtn:hover {
+  background: #007ba2;
+  transform: translateY(-2px);
+}
