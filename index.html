@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>About | Serat Saad</title>
-  <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -15,15 +15,44 @@
       <li><a href="teaching.html">Teaching</a></li>
     </ul>
   </nav>
+
   <main>
     <section class="about">
       <img src="dp.jpg" alt="Serat Saad profile photo" class="profile-pic">
-      <h1>Hello, <span style="font-size:1.2em">👋</span> I'm Serat Saad!</h1>
-      <p>I am an <strong>astronomy PhD student at The Ohio State University</strong>.<br><br>
-      I recently graduated from <strong>Vanderbilt University</strong>, double-majored in <strong>Physics & Mathematics</strong> with minors in <strong>Astronomy & Scientific Computing</strong> <span style="font-size:1.2em">🌌</span>.<br><br>
-      My journey into Astronomy began in high school through participating in international Olympiads, where I developed a deep love for the stars and problem-solving. Since then, my passion has driven me to publish research, present at international conferences, and lead impactful educational initiatives.</p>
-      <p><a href="Serat_Mahmud_Saad_CV.pdf" target="_blank" class="cv-link">See my CV/Resume</a></p>
+
+      <h1>Hello, I’m <span style="color:#8fd6ff;">Serat Saad</span> 🌌</h1>
+
+      <p>
+        I am a Ph.D. student in Astronomy at The Ohio State University, where I study wide binary stars and their dynamics in the context of galactic structure, planet engulfment, and Modified Newtonian Dynamics (MOND). 
+      </p>
+
+      <p>
+        I earned my bachelor’s degree from Vanderbilt University, where I double-majored in Physics and Mathematics and minored in Astronomy and Scientific Computing. 
+        At Vanderbilt, I worked on research projects involving young stellar objects using BOSS data from SDSS-V, and later worked on active galactic nuclei and supermassive black hole binary spectroscopy. 
+      </p>
+
+      <p>
+        Beyond research, I’m passionate about science communication, Astronomy Olympiad, and problem solving.
+      </p>
+
+      <p>
+        <a href="Serat_Mahmud_Saad_CV.pdf" target="_blank" class="cv-link">See my CV / Resume</a>
+      </p>
     </section>
   </main>
+
+  <footer>
+    © 2025 Serat Saad — The Ohio State University | Inspired by a clear night sky that I never experienced ✨
+  </footer>
+
+  <!-- Optional Scroll-to-top Button -->
+  <button id="scrollTopBtn" title="Back to top">↑</button>
+  <script>
+    const btn = document.getElementById('scrollTopBtn');
+    window.onscroll = () => {
+      btn.style.display = (document.documentElement.scrollTop > 200) ? 'flex' : 'none';
+    };
+    btn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+  </script>
 </body>
-</html> 
+</html>
