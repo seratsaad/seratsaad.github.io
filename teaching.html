@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Teaching | Serat Saad</title>
-  <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -16,17 +16,67 @@
       <li><a href="fun.html">Fun</a></li>
     </ul>
   </nav>
+
   <main>
     <section class="teaching">
-      <h1>Teaching & Outreach</h1>
-      <p>Throughout my academic journey, I have been passionate about sharing knowledge and inspiring others. My teaching philosophy centers on fostering curiosity, critical thinking, and inclusivity in the classroom and beyond.</p>
-      <ul>
-        <li>Led and mentored students in international Olympiads, helping them develop problem-solving skills and a love for astronomy.</li>
-        <li>Organized and participated in educational initiatives to make science accessible and engaging for diverse audiences.</li>
-        <li>Developed open-access resources and guides, such as the <a href="https://github.com/seratsaad/qc-prep" target="_blank">Quantum Computing Education Guide</a>, to support learners at all levels.</li>
-      </ul>
-      <p>I look forward to continuing to teach, mentor, and inspire the next generation of scientists.</p>
+      <h1>🪐 Teaching & Outreach</h1>
+
+      <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.2); margin: 2em 0;">
+
+      <!-- ===== ASTRONOMY EDUCATION ===== -->
+      <h2>🌟 Astronomy Education & Olympiads</h2>
+      <p>
+        My teaching journey began with the Bangladesh Olympiad on Astronomy and Astrophysics (BDOAA), where I have served as a mentor, problem author, and organizing committee member.  
+        The BDOAA’s mission is to inspire high school and college students across Bangladesh to engage with the cosmos through problem-solving and collaborative learning.
+      </p>
+      <p>
+        I trained and mentored students who went on to represent Bangladesh at the  International Olympiad on Astronomy and Astrophysics (IOAA). In 2022, I served as the Team Leader for Bangladesh at the IOAA held in Kutaisi, Georgia.
+      </p>
+      <p>
+        Learn more about our national astronomy initiative at  
+        <a href="https://bdoaa.org/team" target="_blank"><strong>bdoaa.org/team</strong></a>.
+      </p>
+
+      <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.2); margin: 2em 0;">
+
+      <!-- ===== QUANTUM EDUCATION ===== -->
+      <h2>⚛️ Quantum Computing Education</h2>
+      <p>
+        In addition to astronomy, I am passionate about quantum computing education and the democratization of emerging technologies.  
+        As one of the founding members of <a href="https://www.vanderbilt.edu/thewondry/programs/quantum-studio/" target="_blank">The Wond’ry Quantum Studio</a>at Vanderbilt University, I helped create a nationwide network of students and researchers dedicated to advancing quantum literacy.
+      </p>
+
+      <p>
+        At the Quantum Studio, I co-developed an open-access curriculum that introduced students and professionals to quantum computing, quantum algorithms, and quantum machine learning.  
+        I also led workshops that translated complex quantum mechanics concepts into intuitive, visual learning experiences.
+      </p>
+
+      <div style="text-align:center; margin:2em 0;">
+        <a href="https://www.vanderbilt.edu/thewondry/programs/quantum-studio/" target="_blank">
+          <img src="57728930-85b4-4f0e-b793-3e5b8c72219a.png" alt="The Wond'ry Quantum Studio team photo" style="max-width:80%; border-radius:10px; box-shadow:0 0 20px rgba(94,200,255,0.5);">
+        </a>
+        <p style="color:#9ed9ff; font-size:0.9em; margin-top:0.5em;">
+          With members of The Wond’ry Quantum Studio after our inaugural teaching cohort.
+        </p>
+      </div>
+
+
+      <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.2); margin: 2em 0;">
     </section>
   </main>
+
+  <footer>
+    © 2025 Serat Saad — Columbus, Ohio</em>
+  </footer>
+
+  <!-- Scroll to Top -->
+  <button id="scrollTopBtn" title="Back to top">↑</button>
+  <script>
+    const btn = document.getElementById('scrollTopBtn');
+    window.onscroll = () => {
+      btn.style.display = (document.documentElement.scrollTop > 200) ? 'flex' : 'none';
+    };
+    btn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+  </script>
 </body>
-</html> 
+</html>
