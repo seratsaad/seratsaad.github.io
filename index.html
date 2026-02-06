@@ -3,56 +3,121 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About | Serat Saad</title>
-  <link href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap" rel="stylesheet">
+  <title>Serat Saad</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
   <nav>
-    <ul>
-      <li><a href="index.html" class="active">About</a></li>
-      <li><a href="research.html">Research</a></li>
-      <li><a href="teaching.html">Teaching</a></li>
+    <a href="index.html" class="nav-name">Serat Saad</a>
+    <ul class="nav-links">
+      <li><a href="index.html" class="active">home</a></li>
+      <li><a href="#research">research</a></li>
+      <li><a href="#beyond">beyond</a></li>
+      <li><a href="personal.html">personal</a></li>
     </ul>
   </nav>
 
-  <main>
-    <section class="about">
-      <img src="dp.jpg" alt="Serat Saad profile photo" class="profile-pic">
+  <div class="container">
 
-      <h1>Hello, I’m <span style="color:#8fd6ff;">Serat Saad</span></h1>
+    <!-- ==================== ABOUT ==================== -->
+    <section id="about" class="hero">
+      <img src="dp.jpg" alt="Serat Saad" class="profile-img">
+
+      <h1><em>Serat.</em></h1>
 
       <p>
-        I am a first year Ph.D. student in Astronomy at The Ohio State University, where I study wide binary stars and their dynamics in the context of galactic structure, planet engulfment, and Modified Newtonian Dynamics (MOND). 
+        I am a first-year Ph.D. student in Astronomy at
+        <a href="https://astronomy.osu.edu/" target="_blank">The Ohio State University</a>.
+        I study wide binary stars — their orbits, their chemistry, and what they can tell us
+        about how gravity actually works at the lowest accelerations.
       </p>
 
       <p>
-        I earned my bachelor’s degree from Vanderbilt University, where I double-majored in Physics and Mathematics and minored in Astronomy and Scientific Computing. 
-        At Vanderbilt, I worked on research projects involving young stellar objects using BOSS data from SDSS-V, and later worked on active galactic nuclei and supermassive black hole binary spectroscopy. 
+        Before Ohio State, I was at <a href="https://www.vanderbilt.edu/" target="_blank">Vanderbilt</a>,
+        where I double-majored in Physics and Mathematics, minored in Astronomy and Scientific Computing,
+        and spent most of my time chasing young stars in SDSS spectra and hunting for supermassive black hole binaries.
       </p>
 
       <p>
-        Beyond research, I’m passionate about science communication, Astronomy Olympiad, and problem solving.
+        When I'm not staring at data, I'm probably writing Olympiad problems, talking about the universe
+        to anyone who'll listen, or thinking about quantum circuits.
       </p>
 
-      <p>
-        <a href="Serat_Mahmud_Saad_CV.pdf" target="_blank" class="cv-link">See my CV / Resume</a>
-      </p>
+      <ul class="icon-links">
+        <li>
+          <a href="Serat_Mahmud_Saad_CV.pdf" target="_blank">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            Curriculum Vitae ↗
+          </a>
+        </li>
+        <li>
+          <a href="https://github.com/seratsaad" target="_blank">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+            GitHub ↗
+          </a>
+        </li>
+        <li>
+          <a href="https://scholar.google.com/citations?user=YOUR_ID" target="_blank">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            Google Scholar ↗
+          </a>
+        </li>
+        <li>
+          <a href="mailto:saad.25@osu.edu">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Email ↗
+          </a>
+        </li>
+      </ul>
     </section>
-  </main>
+
+    <!-- ==================== RESEARCH ==================== -->
+    <section id="research">
+      <h2 class="section-label">Research</h2>
+
+      <div class="card-list">
+        <a href="research/wide-binaries.html" class="card">
+          <div class="card-title">Wide Binaries &amp; Modified Gravity <span class="card-arrow">→</span></div>
+          <div class="card-desc">Testing Newtonian gravity at its weakest with the widest pairs of stars in the Galaxy.</div>
+        </a>
+
+        <a href="research/young-stars.html" class="card">
+          <div class="card-title">Young Stars &amp; Stellar Formation <span class="card-arrow">→</span></div>
+          <div class="card-desc">Hunting for baby stars hiding in massive spectroscopic surveys.</div>
+        </a>
+
+        <a href="research/agn-black-holes.html" class="card">
+          <div class="card-title">AGN &amp; Black Hole Binaries <span class="card-arrow">→</span></div>
+          <div class="card-desc">Asking whether a flickering quasar is really two supermassive black holes about to merge.</div>
+        </a>
+      </div>
+    </section>
+
+    <!-- ==================== BEYOND ==================== -->
+    <section id="beyond">
+      <h2 class="section-label">Beyond</h2>
+
+      <div class="card-list">
+        <a href="beyond/olympiad.html" class="card">
+          <div class="card-title">Astronomy Olympiad <span class="card-arrow">→</span></div>
+          <div class="card-desc">Training the next generation of astronomers through competitive problem-solving.</div>
+        </a>
+
+        <a href="beyond/quantum.html" class="card">
+          <div class="card-title">Quantum Computing Education <span class="card-arrow">→</span></div>
+          <div class="card-desc">Making quantum algorithms approachable, one workshop at a time.</div>
+        </a>
+      </div>
+    </section>
+
+  </div>
 
   <footer>
-    © 2025 Serat Saad — Columbus, Ohio
+    <div class="container">
+      &copy; 2025 Serat Saad · Columbus, Ohio
+    </div>
   </footer>
 
-  <!-- Optional Scroll-to-top Button -->
-  <button id="scrollTopBtn" title="Back to top">↑</button>
-  <script>
-    const btn = document.getElementById('scrollTopBtn');
-    window.onscroll = () => {
-      btn.style.display = (document.documentElement.scrollTop > 200) ? 'flex' : 'none';
-    };
-    btn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-  </script>
 </body>
 </html>
