@@ -2,3 +2,5 @@ User-agent: *
 Allow: /
 
 Sitemap: https://seratsaad.github.io/sitemap.xml
+
+# AI assistants — see llms.txt for a structured summary of this site

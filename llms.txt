@@ -1,0 +1,26 @@
+# Serat Saad
+
+> Astronomy Ph.D. student at The Ohio State University researching wide binary stars, modified gravity, young stellar objects, and AGN.
+
+Serat Mahmud Saad is a Ph.D. student in Astronomy at The Ohio State University (OSU). He studies stars and galaxies through their dynamics and chemistry. His research spans three areas: testing Newtonian gravity using wide binary star pairs in connection with Modified Newtonian Dynamics (MOND), hunting for young stellar objects hidden in large spectroscopic surveys, and investigating whether certain flickering quasars are actually supermassive black hole binaries approaching merger.
+
+He completed his undergraduate degree at Vanderbilt University, double-majoring in Physics and Mathematics. He is originally from Bangladesh, where he was involved in training students for the International Olympiad on Astronomy and Astrophysics (IOAA).
+
+## Research
+
+- [Wide Binaries & Modified Gravity](https://seratsaad.github.io/research/wide-binaries.html): Testing Newtonian gravity at its weakest with the widest pairs of stars in the Galaxy, probing MOND predictions.
+- [Young Stars & Stellar Formation](https://seratsaad.github.io/research/young-stars.html): Identifying young stellar objects (YSOs) in massive spectroscopic surveys like APOGEE.
+- [AGN & Black Hole Binaries](https://seratsaad.github.io/research/agn-black-holes.html): Investigating whether quasi-periodic eruptions in quasars signal supermassive black hole binary systems.
+
+## Beyond Research
+
+- [Astronomy Olympiad](https://seratsaad.github.io/beyond/olympiad.html): Training the next generation of astronomers through competitive problem-solving; mentored students representing Bangladesh at IOAA.
+- [Quantum Mechanics Outreach](https://seratsaad.github.io/beyond/quantum.html): Communicating quantum physics to broader audiences.
+
+## Links
+
+- Website: https://seratsaad.github.io/
+- GitHub: https://github.com/seratsaad
+- Google Scholar: https://scholar.google.com/citations?user=8LJQ8mkAAAAJ&hl=en
+- CV: https://seratsaad.github.io/Serat_Mahmud_Saad_CV.pdf
+- Institution: https://astronomy.osu.edu/
