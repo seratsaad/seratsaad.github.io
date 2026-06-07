@@ -3,8 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Wide Binaries & Modified Gravity — Serat Saad</title>
+  <title>Wide Binaries & Modified Gravity - Serat Saad</title>
   <link rel="stylesheet" href="../style.css">
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(', '\\)']] },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
 </head>
 <body>
 
@@ -23,13 +30,18 @@
     <div class="detail-header">
       <a href="../index.html#research" class="back-link">← back to research</a>
       <h1>Wide Binaries &amp; Modified Gravity</h1>
-      <div class="detail-meta">Ongoing · The Ohio State University</div>
+      <div class="detail-meta">
+        Saad &amp; Ting
+        <a href="https://arxiv.org/abs/2512.19652" target="_blank">2025</a>
+        · <a href="https://arxiv.org/abs/2603.11015" target="_blank">2026</a>
+        · The Ohio State University
+      </div>
     </div>
 
     <div class="detail-body">
       <p>
         Newton's law of gravity works beautifully until you look at systems where gravitational
-        accelerations drop below about 10e-10 m/s^2. At that threshold, galaxies stop behaving the way
+        accelerations drop below about \(10^{-10}\ \mathrm{m\,s^{-2}}\). At that threshold, galaxies stop behaving the way
         Newton predicts, and the usual fix is to invoke dark matter. But there's another possibility:
         maybe gravity itself changes at very low accelerations. That idea is called
         Modified Newtonian Dynamics, or MOND.
@@ -37,7 +49,7 @@
 
       <p>
         The trouble with testing MOND has always been scale. Galaxy rotation curves are suggestive but
-        messy — full of baryonic uncertainties and modeling assumptions. What you really want is a clean,
+        messy - full of baryonic uncertainties and modeling assumptions. What you really want is a clean,
         local laboratory. Wide binary stars turn out to be exactly that.
       </p>
 
@@ -48,18 +60,70 @@
         higher than what Newton predicts. If Newton (plus dark matter) is right, they shouldn't.
       </p>
 
+      <!-- ============ INTERACTIVE SIMULATION ============ -->
+      <div class="sim" id="wbSim">
+        <div class="sim-title">Newton vs. MOND: a wide binary orbit</div>
+        <div class="sim-sub">
+          Two stars orbit their shared center of mass. The <b style="color:#d4a853">gold</b> star moves at the
+          velocity MOND predicts; the <b style="color:#7a7a82">faint</b> star at the Newtonian velocity.
+          Drag the separation wider and watch them diverge once gravity drops below
+          \(a_0 \approx 1.2\times10^{-10}\ \mathrm{m\,s^{-2}}\).
+        </div>
+
+        <canvas id="wbCanvas" width="760" height="380"></canvas>
+
+        <div class="sim-controls">
+          <div class="sim-control">
+            <label>Separation <b><span id="wbSepVal">10.0</span> kAU</b></label>
+            <input type="range" id="wbSep" min="0.5" max="25" step="0.1" value="10">
+          </div>
+          <div class="sim-control">
+            <label>Total mass <b><span id="wbMassVal">1.5</span> M&#9737;</b></label>
+            <input type="range" id="wbMass" min="0.4" max="3" step="0.1" value="1.5">
+          </div>
+          <div class="sim-btns">
+            <button class="sim-btn" id="wbPause">Pause</button>
+          </div>
+        </div>
+
+        <div class="sim-caption" id="wbReadout">
+          Gravity here is <b><span id="wbG">1.00</span> &times; \(a_0\)</b>.
+          MOND predicts orbital velocities <b><span id="wbBoost">0</span>% faster</b> than Newton<span id="wbNote"></span>
+        </div>
+      </div>
+      <!-- ============ /SIMULATION ============ -->
+
       <p>
         At Ohio State, I'm building the most precise observational test of this prediction. I combine
         Gaia astrometry, which gives exquisite proper motions and parallaxes, with high-resolution
-        radial velocities from Keck, VLT, Magellan, and LBT. The radial velocity component is critical:
-        Gaia gives you the sky-plane motion, but you need the line-of-sight velocity to reconstruct the
-        full 3D relative velocity of each pair.
+        radial velocities from facilities like Keck, VLT, and Magellan. The radial velocity component is
+        critical: Gaia gives you the sky-plane motion, but you need the line-of-sight velocity to
+        reconstruct the full 3D relative velocity of each pair.
       </p>
 
       <p>
-        The analysis is ongoing, and I'll share results here when they're ready. The stakes are high,
-        this is one of the few places where MOND and dark matter make cleanly different, testable predictions
-        with currently available data.
+        In <strong><a href="https://arxiv.org/abs/2512.19652" target="_blank">Saad &amp; Ting (2025)</a></strong>,
+        I introduced a technique to measure differential radial velocities of wide binaries from
+        high-resolution, high signal-to-noise spectra, and applied it to 85 pairs from the C3PO survey.
+        The method reaches a precision of 8 to 15 \(\mathrm{m\,s^{-1}}\) per pair, a median improvement of
+        roughly \(24\times\) over Gaia DR3, finally bringing line-of-sight velocities to the accuracy this
+        test demands. Folding 57 gravitationally bound systems into a hierarchical Bayesian model of their
+        3D orbits, I inferred the global MOND acceleration scale \(a_0\) directly from the data and found
+        tension with MOND: the canonical value is excluded at \(3.1\sigma\) for the simple interpolating
+        function and \(1.9\sigma\) for the standard form. The data and code are on
+        <a href="https://github.com/seratsaad/wb3d-mond" target="_blank">GitHub</a>.
+      </p>
+
+      <p>
+        In a companion paper, <strong><a href="https://arxiv.org/abs/2603.11015" target="_blank">Saad &amp; Ting (2026)</a></strong>,
+        I showed just how sensitive these measurements are to the orbital modeling itself. Chae et al. (2026)
+        had reported a gravitational anomaly, a gravity boost of \(\gamma \approx 1.6\), in a high-quality
+        sample of 36 wide binaries. Reanalyzing the same data with a hierarchical Bayesian model that
+        forward-models the full 3D orbits, I recovered \(\gamma = 1.00 \pm 0.24\), fully consistent with
+        Newtonian gravity. The anomaly reappears only when the semi-major axis is replaced by a geometric
+        de-projection of the observed separation, which pins the discrepancy on the orbit modeling rather
+        than on new physics. The code is on
+        <a href="https://github.com/seratsaad/wb3d-gamma" target="_blank">GitHub</a>.
       </p>
     </div>
 
@@ -68,6 +132,150 @@
   <footer>
     <div class="container">&copy; 2025 Serat Saad · Columbus, Ohio</div>
   </footer>
+
+  <script>
+  (function () {
+    const cv = document.getElementById('wbCanvas');
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+    const sepEl = document.getElementById('wbSep');
+    const massEl = document.getElementById('wbMass');
+    const sepVal = document.getElementById('wbSepVal');
+    const massVal = document.getElementById('wbMassVal');
+    const gEl = document.getElementById('wbG');
+    const boostEl = document.getElementById('wbBoost');
+    const noteEl = document.getElementById('wbNote');
+    const pauseBtn = document.getElementById('wbPause');
+
+    // Physical constants (SI)
+    const G = 6.674e-11, Msun = 1.989e30, AU = 1.496e11, a0 = 1.2e-10;
+
+    let W = cv.width, H = cv.height;
+    function fit() {
+      const cssW = cv.clientWidth || 760;
+      const dpr = window.devicePixelRatio || 1;
+      cv.width = Math.round(cssW * dpr);
+      cv.height = Math.round(cssW * 0.5 * dpr);
+      W = cv.width; H = cv.height;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      W = cssW; H = cssW * 0.5;
+    }
+
+    let thetaM = 0, thetaN = 0, running = true, last = 0;
+
+    // Returns velocity boost v_MOND / v_Newton for a Newtonian acceleration gN.
+    // Uses the radial-acceleration relation (McGaugh et al.).
+    function boost(gN) {
+      const g_obs = gN / (1 - Math.exp(-Math.sqrt(gN / a0)));
+      return Math.sqrt(g_obs / gN);
+    }
+
+    function physics() {
+      const sepKAU = parseFloat(sepEl.value);
+      const Mtot = parseFloat(massEl.value);
+      const r = sepKAU * 1000 * AU;               // separation in metres
+      const gN = G * Mtot * Msun / (r * r);        // Newtonian acceleration
+      return { sepKAU, Mtot, gN, b: boost(gN) };
+    }
+
+    function draw() {
+      const p = physics();
+      ctx.clearRect(0, 0, W, H);
+
+      const cx = W * 0.5, cy = H * 0.52;
+      // orbit radius grows mildly with separation so it always fits
+      const R = Math.min(H, W) * (0.18 + 0.012 * p.sepKAU);
+      const Rc = Math.min(R, Math.min(W, H) * 0.42);
+
+      // starfield
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      for (let i = 0; i < 40; i++) {
+        const a = (i * 2654435761 % 1000) / 1000;
+        const b = (i * 40503 % 1000) / 1000;
+        ctx.globalAlpha = 0.15 + (i % 5) * 0.05;
+        ctx.fillRect(a * W, b * H, 1, 1);
+      }
+      ctx.globalAlpha = 1;
+
+      // orbit ring
+      ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(cx, cy, Rc, 0, Math.PI * 2); ctx.stroke();
+
+      // barycenter
+      ctx.fillStyle = 'rgba(212,168,83,0.5)';
+      ctx.beginPath(); ctx.arc(cx, cy, 2.5, 0, Math.PI * 2); ctx.fill();
+
+      // Newtonian star (faint) - primary + secondary pair
+      function pair(theta, color, glow, rad) {
+        for (const s of [1, -1]) {
+          const x = cx + s * Rc * Math.cos(theta);
+          const y = cy + s * Rc * Math.sin(theta);
+          const g = ctx.createRadialGradient(x, y, 0, x, y, rad * 3);
+          g.addColorStop(0, glow);
+          g.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = g;
+          ctx.beginPath(); ctx.arc(x, y, rad * 3, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = color;
+          ctx.beginPath(); ctx.arc(x, y, s > 0 ? rad : rad * 0.78, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+      pair(thetaN, 'rgba(150,150,160,0.85)', 'rgba(150,150,160,0.25)', 4.5);
+      pair(thetaM, '#f0cc6e', 'rgba(212,168,83,0.45)', 5);
+
+      // legend
+      ctx.font = '11px DM Sans, sans-serif';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#f0cc6e';
+      ctx.fillText('● MOND velocity', 12, 16);
+      ctx.fillStyle = 'rgba(150,150,160,0.9)';
+      ctx.fillText('● Newtonian velocity', 12, 32);
+
+      // regime label
+      const inMond = p.gN < a0;
+      ctx.textAlign = 'right';
+      ctx.fillStyle = inMond ? '#f0cc6e' : 'rgba(150,150,160,0.9)';
+      ctx.fillText(inMond ? 'low-acceleration (MOND) regime' : 'Newtonian regime', W - 12, 16);
+      ctx.textAlign = 'left';
+    }
+
+    function loop(t) {
+      if (!last) last = t;
+      const dt = Math.min((t - last) / 1000, 0.05);
+      last = t;
+      if (running) {
+        const p = physics();
+        const base = 0.9; // base angular speed (rad/s), visual
+        thetaN += base * dt;
+        thetaM += base * p.b * dt;
+      }
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    function update() {
+      sepVal.textContent = parseFloat(sepEl.value).toFixed(1);
+      massVal.textContent = parseFloat(massEl.value).toFixed(1);
+      const p = physics();
+      gEl.textContent = (p.gN / a0).toFixed(2);
+      boostEl.textContent = ((p.b - 1) * 100).toFixed(0);
+      noteEl.textContent = p.b > 1.03
+        ? ', enough to detect with precise radial velocities.'
+        : '; too small to distinguish here, so widen the separation.';
+    }
+    sepEl.addEventListener('input', update);
+    massEl.addEventListener('input', update);
+    pauseBtn.addEventListener('click', () => {
+      running = !running;
+      pauseBtn.textContent = running ? 'Pause' : 'Play';
+      pauseBtn.classList.toggle('active', !running);
+    });
+    window.addEventListener('resize', fit);
+
+    fit(); update();
+    requestAnimationFrame(loop);
+  })();
+  </script>
 
 </body>
 </html>

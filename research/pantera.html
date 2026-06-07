@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Super Metal-Rich Stars (PANTERA) - Serat Saad</title>
+  <link rel="stylesheet" href="../style.css">
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(', '\\)']] },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+</head>
+<body>
+
+  <nav>
+    <a href="../index.html" class="nav-name">Serat Saad</a>
+    <ul class="nav-links">
+      <li><a href="../index.html">home</a></li>
+      <li><a href="../index.html#research" class="active">research</a></li>
+      <li><a href="../index.html#beyond">beyond</a></li>
+      <li><a href="../personal.html">personal</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+
+    <div class="detail-header">
+      <a href="../index.html#research" class="back-link">← back to research</a>
+      <h1>Super Metal-Rich Stars (PANTERA)</h1>
+      <div class="detail-meta">Ongoing · Paper I in preparation · The Ohio State University</div>
+    </div>
+
+    <div class="detail-body">
+      <p>
+        Most stars near the Sun have roughly solar composition, because the local gas they formed from
+        does. So when you find a star in the solar neighborhood with an iron abundance far above solar,
+        \([\mathrm{Fe/H}] > +0.2\) or even \(+0.5\), something is off: that star almost certainly did not
+        form here. It formed in the metal-rich inner Galaxy, the inner disk or bulge, and then migrated
+        out to us through radial migration driven by the bar and spiral arms.
+      </p>
+
+      <p>
+        That makes these super metal-rich (SMR) stars unusually informative messengers. Their chemistry
+        records the enrichment history of the inner Galaxy, which is otherwise hidden behind dust, and
+        their orbits and ages bear on when the Milky Way's bar formed and how efficiently stars churn
+        across the disk. They also probe the very high-metallicity end of chemical evolution models, where
+        the models are barely constrained at all.
+      </p>
+
+      <p>
+        The catch is that nobody has studied them well. The large surveys that find SMR candidates measure
+        only coarse metallicities, and the few detailed high-resolution abundance studies used small,
+        heterogeneous samples picked from old catalogs. With Gaia we can finally do better: pick the most
+        metal-rich nearby stars cleanly, then chase them down at high resolution.
+      </p>
+
+      <img src="../pantera-spectra.png" alt="PEPSI spectra of a metal-rich PANTERA target compared to the benchmark giant mu Leo and the Sun">
+      <div class="img-caption">
+        Two spectral windows of a PANTERA target (blue) next to the benchmark giant \(\mu\)~Leo (grey) and
+        the Sun (pink). The metal-rich stars show markedly stronger absorption lines.
+      </div>
+
+      <p>
+        <strong>PANTERA</strong> is the program we built to do exactly that. We select ultra metal-rich
+        candidates, \([\mathrm{M/H}] > +0.4\) and within 500 pc, from the Andrae et al. (2023) Gaia XP
+        catalog, and observe them with two complementary high-resolution spectrographs: APF at Lick
+        (\(R \sim 110{,}000\)) for a broad confirmation sample, and LBT/PEPSI (\(R \sim 120{,}000\),
+        \(\mathrm{S/N} > 100\)) for full multi-element analysis. I lead the LBT/PEPSI program, targeting
+        the most metal-rich giants, as part of a team at Ohio State.
+      </p>
+
+      <p>
+        The analysis uses spectral synthesis and equivalent-width measurements with
+        <a href="https://github.com/ajwheeler/Korg.jl" target="_blank">Korg</a>, done differentially
+        against the Sun, which is essential at high metallicity where heavy line blanketing makes continuum
+        placement treacherous. From the PEPSI spectra we can measure more than 20 elements, from the light
+        and \(\alpha\) elements through the iron peak to neutron-capture species, and combine them with
+        Gaia kinematics. With these we can ask what the true metallicities are once measured at high
+        resolution (Gaia XP underestimates them by \(0.1\) to \(0.25\) dex), whether the detailed abundance
+        patterns and any chemically distinct subgroups point back to the inner Galaxy, what ages chemical
+        clocks like \([\mathrm{Y/Mg}]\) imply, and ultimately how metal-rich a nearby star can be.
+      </p>
+
+      <!-- ============ INTERACTIVE SIMULATION ============ -->
+      <div class="sim" id="mrSim">
+        <div class="sim-title">Why metal-rich stars stand out</div>
+        <div class="sim-sub">
+          The same spectral window for the Sun (pink, fixed at \([\mathrm{Fe/H}] = 0\)) and a candidate
+          star (gold). Raise the candidate's metallicity and watch its absorption lines deepen and
+          saturate, the signal PANTERA measures to pin down a true \([\mathrm{Fe/H}]\).
+        </div>
+
+        <canvas id="mrCanvas" width="760" height="320"></canvas>
+
+        <div class="sim-controls">
+          <div class="sim-control">
+            <label>Candidate <b>\([\mathrm{Fe/H}]\) = +<span id="mrVal">0.00</span></b></label>
+            <input type="range" id="mrFe" min="0" max="0.6" step="0.01" value="0.35">
+          </div>
+          <div class="sim-btns">
+            <button class="sim-btn" id="mrSweep">Sweep</button>
+          </div>
+        </div>
+
+        <div class="sim-caption" id="mrReadout">
+          At \([\mathrm{Fe/H}]\) = +<span id="mrFehOut">0.35</span>, this star holds about
+          <b><span id="mrRatio">2.2</span>&times;</b> the Sun's iron. Gaia XP would read it about 0.1 to
+          0.25 dex too low; high-resolution spectra set the record straight.
+        </div>
+      </div>
+      <!-- ============ /SIMULATION ============ -->
+
+      <p>
+        PANTERA forms a component of my dissertation. We expect at least two papers from the combined
+        program: the first on the most metal-rich systems with full abundances and orbits, the second on
+        the full sample, the selection strategy, and the comparison to Galactic chemical evolution models.
+        I'll share results here as they come.
+      </p>
+    </div>
+
+  </div>
+
+  <footer>
+    <div class="container">&copy; 2025 Serat Saad · Columbus, Ohio</div>
+  </footer>
+
+  <script>
+  (function () {
+    const cv = document.getElementById('mrCanvas');
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+    const feEl = document.getElementById('mrFe');
+    const feVal = document.getElementById('mrVal');
+    const fehOut = document.getElementById('mrFehOut');
+    const ratioOut = document.getElementById('mrRatio');
+    const sweepBtn = document.getElementById('mrSweep');
+
+    let W, H;
+    function fit() {
+      const cssW = cv.clientWidth || 760;
+      const dpr = window.devicePixelRatio || 1;
+      cv.width = Math.round(cssW * dpr);
+      cv.height = Math.round(cssW * 0.42 * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      W = cssW; H = cssW * 0.42;
+    }
+
+    // Metal absorption lines: position (0..1), base depth at solar, width
+    const lines = [
+      [0.08, 0.42, 0.009], [0.17, 0.30, 0.007], [0.25, 0.50, 0.010],
+      [0.34, 0.26, 0.007], [0.43, 0.38, 0.009], [0.52, 0.46, 0.010],
+      [0.60, 0.22, 0.006], [0.68, 0.40, 0.009], [0.77, 0.33, 0.008],
+      [0.85, 0.48, 0.010], [0.93, 0.28, 0.007]
+    ];
+
+    let sweeping = false, sweepT = 0;
+
+    // Line strength grows with metallicity (curve of growth), saturating near 1.
+    function spectrum(x, feh, t) {
+      let f = 1.0;
+      const mult = Math.pow(10, 0.55 * feh);
+      for (const [pos, depth, wid] of lines) {
+        const dep = Math.min(0.93, depth * mult);
+        f -= dep * Math.exp(-((x - pos) ** 2) / (2 * wid * wid));
+      }
+      f += (Math.sin(x * 880 + t) * 0.5 + Math.sin(x * 287 - t * 1.2) * 0.5) * 0.01;
+      return f;
+    }
+
+    function draw(t) {
+      const feh = parseFloat(feEl.value);
+      ctx.clearRect(0, 0, W, H);
+
+      const padL = 8, padR = 8, padT = 26, padB = 24;
+      const plotW = W - padL - padR, plotH = H - padT - padB;
+      const Y = f => padT + (1 - f / 1.15) * plotH;
+
+      // continuum reference
+      ctx.strokeStyle = 'rgba(255,255,255,0.10)';
+      ctx.setLineDash([4, 4]); ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(padL, Y(1)); ctx.lineTo(W - padR, Y(1)); ctx.stroke();
+      ctx.setLineDash([]);
+
+      function curve(feh_, color, t_) {
+        ctx.beginPath();
+        for (let i = 0; i <= plotW; i++) {
+          const x = i / plotW;
+          const f = spectrum(x, feh_, t_);
+          const px = padL + i, py = Y(Math.max(0, f));
+          if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        }
+        ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.lineJoin = 'round'; ctx.stroke();
+      }
+
+      // Sun (fixed), then candidate on top
+      curve(0, 'rgba(224,140,170,0.85)', t / 320);
+      curve(feh, '#d4a853', t / 300);
+
+      // legend
+      ctx.font = '11px DM Sans, sans-serif'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#f0cc6e'; ctx.fillText('● candidate', 12, 14);
+      ctx.fillStyle = 'rgba(224,140,170,0.95)'; ctx.fillText('● Sun', 110, 14);
+      ctx.fillStyle = 'rgba(150,150,160,0.8)'; ctx.textAlign = 'center';
+      ctx.fillText('wavelength →', W / 2, H - 7); ctx.textAlign = 'left';
+    }
+
+    function update() {
+      const feh = parseFloat(feEl.value);
+      feVal.textContent = feh.toFixed(2);
+      fehOut.textContent = feh.toFixed(2);
+      ratioOut.textContent = Math.pow(10, feh).toFixed(1);
+    }
+
+    function loop(t) {
+      if (sweeping) {
+        sweepT += 0.012;
+        const v = 0.3 * (1 - Math.cos(sweepT));
+        feEl.value = Math.min(0.6, v).toFixed(2);
+        update();
+        if (sweepT >= Math.PI * 2) { sweeping = false; sweepBtn.classList.remove('active'); sweepBtn.textContent = 'Sweep'; }
+      }
+      draw(t);
+      requestAnimationFrame(loop);
+    }
+
+    feEl.addEventListener('input', () => { sweeping = false; sweepBtn.classList.remove('active'); sweepBtn.textContent = 'Sweep'; update(); });
+    sweepBtn.addEventListener('click', () => {
+      sweeping = !sweeping; sweepT = 0;
+      sweepBtn.classList.toggle('active', sweeping);
+      sweepBtn.textContent = sweeping ? 'Stop' : 'Sweep';
+    });
+    window.addEventListener('resize', fit);
+
+    fit(); update();
+    requestAnimationFrame(loop);
+  })();
+  </script>
+
+</body>
+</html>

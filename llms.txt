@@ -1,8 +1,8 @@
 # Serat Saad
 
-> Astronomy Ph.D. student at The Ohio State University researching wide binary stars, modified gravity, young stellar objects, and AGN.
+> Astronomy Ph.D. student at The Ohio State University researching wide binary stars, modified gravity, young stellar objects, AGN, and super metal-rich stars.
 
-Serat Mahmud Saad is a Ph.D. student in Astronomy at The Ohio State University (OSU). He studies stars and galaxies through their dynamics and chemistry. His research spans three areas: testing Newtonian gravity using wide binary star pairs in connection with Modified Newtonian Dynamics (MOND), hunting for young stellar objects hidden in large spectroscopic surveys, and investigating whether certain flickering quasars are actually supermassive black hole binaries approaching merger.
+Serat Mahmud Saad is a Ph.D. student in Astronomy at The Ohio State University (OSU). He studies stars and galaxies through their dynamics and chemistry. His research spans four areas: testing Newtonian gravity using wide binary star pairs in connection with Modified Newtonian Dynamics (MOND), hunting for young stellar objects hidden in large spectroscopic surveys, investigating whether certain flickering quasars are actually supermassive black hole binaries approaching merger, and the chemical analysis of super metal-rich stars that migrated to the solar neighborhood from the inner Galaxy (the PANTERA program).
 
 He completed his undergraduate degree at Vanderbilt University, double-majoring in Physics and Mathematics. He is originally from Bangladesh, where he was involved in training students for the International Olympiad on Astronomy and Astrophysics (IOAA).
 
@@ -11,6 +11,7 @@ He completed his undergraduate degree at Vanderbilt University, double-majoring 
 - [Wide Binaries & Modified Gravity](https://seratsaad.github.io/research/wide-binaries.html): Testing Newtonian gravity at its weakest with the widest pairs of stars in the Galaxy, probing MOND predictions.
 - [Young Stars & Stellar Formation](https://seratsaad.github.io/research/young-stars.html): Identifying young stellar objects (YSOs) in massive spectroscopic surveys like APOGEE.
 - [AGN & Black Hole Binaries](https://seratsaad.github.io/research/agn-black-holes.html): Investigating whether quasi-periodic eruptions in quasars signal supermassive black hole binary systems.
+- [Super Metal-Rich Stars (PANTERA)](https://seratsaad.github.io/research/pantera.html): High-resolution chemical abundance analysis of super metal-rich stars in the solar neighborhood with APF and LBT/PEPSI, tracing radial migration from the inner Galaxy.
 
 ## Beyond Research
 

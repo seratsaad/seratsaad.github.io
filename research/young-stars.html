@@ -3,8 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Young Stars & Stellar Formation — Serat Saad</title>
+  <title>Young Stars & Stellar Formation - Serat Saad</title>
   <link rel="stylesheet" href="../style.css">
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(', '\\)']] },
+      chtml: { scale: 1.0 }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
 </head>
 <body>
 
@@ -45,7 +52,7 @@
       </p>
 
       <img src="https://content.cld.iop.org/journals/1538-3881/167/3/125/revision1/ajad2001f6_hr.jpg" alt="YSO classification pipeline results">
-      <div class="img-caption">Figure from Saad et al. (2024) — YSO classification in SDSS-BOSS spectra.</div>
+      <div class="img-caption">Figure from Saad et al. (2024) - YSO classification in SDSS-BOSS spectra.</div>
 
       <p>
         In <strong>ABYSS II</strong>, I built a full data pipeline to systematically detect and characterize
@@ -53,6 +60,31 @@
         classifies objects by their evolutionary stage. We found hundreds of YSO candidates, many previously
         unrecognized.
       </p>
+
+      <!-- ============ INTERACTIVE SIMULATION ============ -->
+      <div class="sim" id="veSim">
+        <div class="sim-title">How veiling hides a young star</div>
+        <div class="sim-sub">
+          A young star's photosphere shows deep absorption lines. As accretion heats the inner disk,
+          excess continuum "veils" the spectrum - the lines fill in and a strong \(\mathrm{H}\alpha\) emission
+          line appears. Drag the veiling up to see what the pipeline has to detect.
+        </div>
+
+        <canvas id="veCanvas" width="760" height="340"></canvas>
+
+        <div class="sim-controls">
+          <div class="sim-control">
+            <label>Veiling <b>\(r\) = <span id="veVal">0.0</span></b></label>
+            <input type="range" id="veR" min="0" max="5" step="0.05" value="0">
+          </div>
+          <div class="sim-btns">
+            <button class="sim-btn" id="veSweep">Sweep</button>
+          </div>
+        </div>
+
+        <div class="sim-caption" id="veReadout"></div>
+      </div>
+      <!-- ============ /SIMULATION ============ -->
 
       <p>
         In a companion project, I developed an <strong>empirical calibration for stellar veiling</strong>
@@ -73,6 +105,121 @@
   <footer>
     <div class="container">&copy; 2025 Serat Saad · Columbus, Ohio</div>
   </footer>
+
+  <script>
+  (function () {
+    const cv = document.getElementById('veCanvas');
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+    const rEl = document.getElementById('veR');
+    const rVal = document.getElementById('veVal');
+    const readout = document.getElementById('veReadout');
+    const sweepBtn = document.getElementById('veSweep');
+
+    let W, H;
+    function fit() {
+      const cssW = cv.clientWidth || 760;
+      const dpr = window.devicePixelRatio || 1;
+      cv.width = Math.round(cssW * dpr);
+      cv.height = Math.round(cssW * 0.45 * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      W = cssW; H = cssW * 0.45;
+    }
+
+    // Photospheric absorption lines: position (0..1), depth, width
+    const lines = [
+      [0.12, 0.55, 0.010], [0.22, 0.35, 0.008], [0.30, 0.62, 0.011],
+      [0.41, 0.28, 0.007], [0.52, 0.48, 0.009], [0.63, 0.40, 0.010],
+      [0.74, 0.58, 0.011], [0.84, 0.33, 0.008], [0.92, 0.45, 0.009]
+    ];
+    const HA = 0.50; // H-alpha emission position
+
+    let sweeping = false, sweepT = 0;
+
+    function flux(x, r, t) {
+      let f = 1.0;
+      for (const [pos, depth, wid] of lines) {
+        // veiling reduces line depth by 1/(1+r)
+        f -= (depth / (1 + r)) * Math.exp(-((x - pos) ** 2) / (2 * wid * wid));
+      }
+      // accretion-driven H-alpha emission grows with veiling
+      const emAmp = 0.9 * (r / (r + 0.6));
+      f += emAmp * Math.exp(-((x - HA) ** 2) / (2 * 0.006 * 0.006));
+      // a touch of noise
+      f += (Math.sin(x * 920 + t) * 0.5 + Math.sin(x * 311 - t * 1.3) * 0.5) * 0.012;
+      return f;
+    }
+
+    function draw(t) {
+      const r = parseFloat(rEl.value);
+      ctx.clearRect(0, 0, W, H);
+
+      const padL = 8, padR = 8, padT = 14, padB = 26;
+      const plotW = W - padL - padR, plotH = H - padT - padB;
+      const yMax = 2.0, yMin = 0.0;
+      const X = x => padL + x * plotW;
+      const Y = f => padT + (1 - (f - yMin) / (yMax - yMin)) * plotH;
+
+      // continuum reference line at flux = 1
+      ctx.strokeStyle = 'rgba(255,255,255,0.10)';
+      ctx.setLineDash([4, 4]); ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(padL, Y(1)); ctx.lineTo(W - padR, Y(1)); ctx.stroke();
+      ctx.setLineDash([]);
+
+      // spectrum
+      ctx.beginPath();
+      for (let i = 0; i <= plotW; i++) {
+        const x = i / plotW;
+        const f = flux(x, r, t / 300);
+        const px = padL + i, py = Y(f);
+        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.strokeStyle = '#d4a853';
+      ctx.lineWidth = 1.6;
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+
+      // axis labels
+      ctx.font = '11px DM Sans, sans-serif';
+      ctx.fillStyle = 'rgba(150,150,160,0.8)';
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillText('continuum', padL + 2, Y(1) - 5);
+      ctx.textAlign = 'center';
+      ctx.fillText('Hα emission', X(HA), Y(0.06));
+      ctx.fillText('wavelength →', W / 2, H - 7);
+      ctx.textAlign = 'left';
+    }
+
+    function update() { rVal.textContent = parseFloat(rEl.value).toFixed(2); }
+
+    function loop(t) {
+      if (sweeping) {
+        sweepT += 0.012;
+        const r = 2.5 * (1 - Math.cos(sweepT)) ; // 0 -> 5 -> 0
+        rEl.value = Math.min(5, r).toFixed(2);
+        update();
+        if (sweepT >= Math.PI * 2) { sweeping = false; sweepBtn.classList.remove('active'); sweepBtn.textContent = 'Sweep'; }
+      }
+      draw(t);
+      const r = parseFloat(rEl.value);
+      const acc = r < 0.2 ? 'weak / inactive' : r < 1 ? 'moderate' : r < 2.5 ? 'strong' : 'very strong';
+      readout.innerHTML = 'Photospheric lines are now <b>' + (100 / (1 + r)).toFixed(0) +
+        '%</b> of their true depth. Implied accretion: <b>' + acc + '</b>.';
+      requestAnimationFrame(loop);
+    }
+
+    rEl.addEventListener('input', () => { sweeping = false; sweepBtn.classList.remove('active'); sweepBtn.textContent = 'Sweep'; update(); });
+    sweepBtn.addEventListener('click', () => {
+      sweeping = !sweeping; sweepT = 0;
+      sweepBtn.classList.toggle('active', sweeping);
+      sweepBtn.textContent = sweeping ? 'Stop' : 'Sweep';
+    });
+    window.addEventListener('resize', fit);
+
+    fit(); update();
+    requestAnimationFrame(loop);
+  })();
+  </script>
 
 </body>
 </html>
