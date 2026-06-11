@@ -15,6 +15,8 @@ He completed his undergraduate degree at Vanderbilt University, double-majoring 
 
 ## Beyond Research
 
+- [Writing](https://seratsaad.github.io/beyond/writing.html): Author and editor at Astrobites, summarizing new astrophysics research for a broad audience (planet engulfment, tidal disruption events, wormholes).
+- [AI for Science & Education](https://seratsaad.github.io/beyond/ai.html): Building AI tools for research and learning, including PorAI (an educational AI initiative) and Egent, an autonomous LLM agent for stellar equivalent-width measurement (Ting, Saad, Liu & Shen 2025, arXiv:2512.01270).
 - [Astronomy Olympiad](https://seratsaad.github.io/beyond/olympiad.html): Training the next generation of astronomers through competitive problem-solving; mentored students representing Bangladesh at IOAA.
 - [Quantum Mechanics Outreach](https://seratsaad.github.io/beyond/quantum.html): Communicating quantum physics to broader audiences.
 
