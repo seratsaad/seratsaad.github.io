@@ -129,11 +129,6 @@ section:first-of-type {
   letter-spacing: -0.02em;
 }
 
-.hero h1 em {
-  font-style: italic;
-  color: #15161a;
-}
-
 .hero p {
   margin-bottom: 1.2rem;
 }
