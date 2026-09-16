@@ -525,3 +525,11 @@ section:nth-of-type(4) { animation: fadeUp 0.7s 0.2s ease-out both; }
   .container-wide { padding: 0 1.2rem; }
   .card-grid { gap: 1.2rem; }
 }
+
+.img-credits {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  padding-bottom: 4rem;
+  margin-top: 1.7rem;
+}
