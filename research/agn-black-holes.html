@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AGN & Black Hole Binaries - Serat Saad</title>
+  <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+  <meta name="theme-color" content="#ffffff">
   <link rel="stylesheet" href="../style.css">
 </head>
 <body>
@@ -91,7 +93,7 @@
   </div>
 
   <footer>
-    <div class="container">&copy; 2025 Serat Saad · Columbus, Ohio</div>
+    <div class="container">&copy; 2026 Serat Saad · Columbus, Ohio</div>
   </footer>
 
   <script>
@@ -155,7 +157,7 @@
       // ---- top: orbit / disk ----
       const cx = W * 0.5, cy = topH * 0.52;
       // starfield
-      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.fillStyle = 'rgba(0,0,0,0.45)';
       for (let i = 0; i < 30; i++) {
         ctx.globalAlpha = 0.12 + (i % 4) * 0.05;
         ctx.fillRect((i * 2654435761 % 1000) / 1000 * W, (i * 40503 % 1000) / 1000 * topH, 1, 1);
@@ -164,19 +166,19 @@
 
       if (mode === 'binary') {
         const R = Math.min(W, topH) * 0.22;
-        ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+        ctx.strokeStyle = 'rgba(0,0,0,0.10)';
         ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
         for (const s of [1, -1]) {
           const x = cx + s * R * Math.cos(phase);
           const y = cy + s * R * Math.sin(phase) * 0.5;
           const rad = s > 0 ? 9 : 7;
           const g = ctx.createRadialGradient(x, y, 0, x, y, rad * 2.4);
-          g.addColorStop(0, 'rgba(212,168,83,0.55)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+          g.addColorStop(0, 'rgba(176,125,26,0.65)'); g.addColorStop(1, 'rgba(0,0,0,0)');
           ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, rad * 2.4, 0, Math.PI * 2); ctx.fill();
-          ctx.fillStyle = '#0a0a0c'; ctx.beginPath(); ctx.arc(x, y, rad, 0, Math.PI * 2); ctx.fill();
-          ctx.strokeStyle = '#f0cc6e'; ctx.lineWidth = 1.5; ctx.stroke();
+          ctx.fillStyle = '#fbfbfa'; ctx.beginPath(); ctx.arc(x, y, rad, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = '#8a6414'; ctx.lineWidth = 1.5; ctx.stroke();
         }
-        ctx.font = '11px DM Sans, sans-serif'; ctx.fillStyle = 'rgba(150,150,160,0.85)';
+        ctx.font = '11px DM Sans, sans-serif'; ctx.fillStyle = 'rgba(80,82,90,0.85)';
         ctx.fillText('two black holes orbiting', 12, 16);
       } else {
         // single flickering disk
@@ -187,13 +189,13 @@
         g.addColorStop(0.4, 'rgba(212,168,83,' + (0.18 * bright) + ')');
         g.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, R * 2.6, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#0a0a0c'; ctx.beginPath(); ctx.arc(cx, cy, R * 0.34, 0, Math.PI * 2); ctx.fill();
-        ctx.font = '11px DM Sans, sans-serif'; ctx.fillStyle = 'rgba(150,150,160,0.85)';
+        ctx.fillStyle = '#fbfbfa'; ctx.beginPath(); ctx.arc(cx, cy, R * 0.34, 0, Math.PI * 2); ctx.fill();
+        ctx.font = '11px DM Sans, sans-serif'; ctx.fillStyle = 'rgba(80,82,90,0.85)';
         ctx.fillText('single accretion disk, flickering', 12, 16);
       }
 
       // divider
-      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+      ctx.strokeStyle = 'rgba(0,0,0,0.09)';
       ctx.beginPath(); ctx.moveTo(0, topH); ctx.lineTo(W, topH); ctx.stroke();
 
       // ---- bottom: light curve ----
@@ -202,7 +204,7 @@
       const lo = 0.45, hi = 1.55;
       const Y = f => padT + (1 - (f - lo) / (hi - lo)) * plotH;
 
-      ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+      ctx.strokeStyle = 'rgba(0,0,0,0.11)';
       ctx.setLineDash([4, 4]);
       ctx.beginPath(); ctx.moveTo(padL, Y(1)); ctx.lineTo(W - padR, Y(1)); ctx.stroke();
       ctx.setLineDash([]);
@@ -213,9 +215,9 @@
         const py = Y(Math.max(lo, Math.min(hi, curve[i])));
         if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
       }
-      ctx.strokeStyle = '#d4a853'; ctx.lineWidth = 1.6; ctx.lineJoin = 'round'; ctx.stroke();
+      ctx.strokeStyle = '#b07d1a'; ctx.lineWidth = 1.6; ctx.lineJoin = 'round'; ctx.stroke();
 
-      ctx.font = '11px DM Sans, sans-serif'; ctx.fillStyle = 'rgba(150,150,160,0.8)';
+      ctx.font = '11px DM Sans, sans-serif'; ctx.fillStyle = 'rgba(80,82,90,0.8)';
       ctx.fillText('brightness', padL + 2, Y(1) - 5);
       ctx.textAlign = 'center'; ctx.fillText('time →', W / 2, H - 6); ctx.textAlign = 'left';
     }

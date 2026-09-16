@@ -1,21 +1,22 @@
 /* ========================================
    SERAT SAAD - ACADEMIC SITE
-   Warm dark minimal, Instrument Serif + DM Sans
+   Light minimal, DM Sans throughout
    ======================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&display=swap');
 
 :root {
-  --bg: #0e0e10;
-  --surface: #161618;
-  --text: #c8c8cc;
-  --text-muted: #6e6e76;
-  --accent: #d4a853;
-  --accent-dim: rgba(212, 168, 83, 0.12);
-  --link: #d4a853;
-  --link-hover: #f0cc6e;
-  --border: rgba(255,255,255,0.06);
-  --serif: 'Instrument Serif', Georgia, serif;
+  --bg: #ffffff;
+  --surface: #f7f7f5;
+  --text: #26272b;
+  --text-muted: #6b6c73;
+  --accent: #b07d1a;
+  --accent-dim: rgba(176, 125, 26, 0.12);
+  --link: #8a6414;
+  --link-hover: #6d4e0f;
+  --border: rgba(0,0,0,0.10);
+  /* headings use the same face as the nav links */
+  --serif: 'DM Sans', -apple-system, sans-serif;
   --sans: 'DM Sans', -apple-system, sans-serif;
 }
 
@@ -43,7 +44,7 @@ body {
 a {
   color: var(--link);
   text-decoration: none;
-  border-bottom: 1px solid rgba(212, 168, 83, 0.3);
+  border-bottom: 1px solid rgba(176, 125, 26, 0.3);
   transition: color 0.2s, border-color 0.2s;
 }
 a:hover {
@@ -64,14 +65,15 @@ nav {
   align-items: center;
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  background: rgba(14, 14, 16, 0.82);
+  background: rgba(255, 255, 255, 0.88);
   border-bottom: 1px solid var(--border);
 }
 
 .nav-name {
   font-family: var(--serif);
-  font-size: 1.15rem;
-  color: #eee;
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: #1b1c20;
   border: none;
 }
 
@@ -91,7 +93,7 @@ nav {
 }
 .nav-links a:hover,
 .nav-links a.active {
-  color: #eee;
+  color: #1b1c20;
 }
 
 /* ===================== LAYOUT ===================== */
@@ -118,9 +120,10 @@ section:first-of-type {
 /* ===================== HERO ===================== */
 .hero h1 {
   font-family: var(--serif);
-  font-size: 3.8rem;
-  font-weight: 400;
-  color: #f0f0f0;
+  font-size: 3.4rem;
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  color: #1b1c20;
   line-height: 1.1;
   margin-bottom: 2rem;
   letter-spacing: -0.02em;
@@ -128,7 +131,7 @@ section:first-of-type {
 
 .hero h1 em {
   font-style: italic;
-  color: var(--accent);
+  color: #15161a;
 }
 
 .hero p {
@@ -141,8 +144,8 @@ section:first-of-type {
   border-radius: 50%;
   object-fit: cover;
   margin-bottom: 2rem;
-  border: 2px solid rgba(212, 168, 83, 0.3);
-  opacity: 0.92;
+  border: 2px solid rgba(176, 125, 26, 0.45);
+  opacity: 1;
   transition: opacity 0.3s;
 }
 .profile-img:hover { opacity: 1; }
@@ -176,8 +179,9 @@ section:first-of-type {
 /* ===================== SECTION LABEL ===================== */
 .section-label {
   font-family: var(--serif);
-  font-size: 2rem;
-  color: #e0e0e0;
+  font-size: 1.6rem;
+  font-weight: 500;
+  color: #1b1c20;
   margin-bottom: 1.8rem;
   letter-spacing: -0.01em;
 }
@@ -200,15 +204,16 @@ section:first-of-type {
 }
 
 .card:hover {
-  border-color: rgba(212, 168, 83, 0.25);
-  background: rgba(212, 168, 83, 0.04);
+  border-color: rgba(176, 125, 26, 0.25);
+  background: rgba(176, 125, 26, 0.07);
   transform: translateY(-2px);
 }
 
 .card-title {
   font-family: var(--serif);
-  font-size: 1.15rem;
-  color: #e0e0e0;
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: #1b1c20;
   margin-bottom: 0.3rem;
 }
 
@@ -249,9 +254,10 @@ section:first-of-type {
 
 .detail-header h1 {
   font-family: var(--serif);
-  font-size: 2.2rem;
-  font-weight: 400;
-  color: #f0f0f0;
+  font-size: 2rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: #1b1c20;
   line-height: 1.25;
   margin-bottom: 0.6rem;
 }
@@ -277,7 +283,10 @@ section:first-of-type {
 .detail-body img {
   border-radius: 8px;
   margin: 1.8rem 0;
-  opacity: 0.92;
+  opacity: 1;
+  border: 1px solid var(--border);
+  background: #fbfbfa;
+  padding: 0.5rem;
 }
 
 .detail-body .img-caption {
@@ -295,10 +304,11 @@ section:first-of-type {
 
 .story-block h3 {
   font-family: var(--serif);
-  font-size: 1.3rem;
-  color: #e0e0e0;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #1b1c20;
   margin-bottom: 0.8rem;
-  font-weight: 400;
+  font-weight: 500;
 }
 
 .story-block p {
@@ -308,7 +318,7 @@ section:first-of-type {
 .story-img {
   border-radius: 8px;
   margin: 1.5rem 0;
-  opacity: 0.9;
+  opacity: 1;
   transition: opacity 0.3s;
 }
 .story-img:hover { opacity: 1; }
@@ -353,8 +363,9 @@ footer {
 
 .sim-title {
   font-family: var(--serif);
-  font-size: 1.2rem;
-  color: #e6e6e6;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #1b1c20;
   margin-bottom: 0.25rem;
 }
 
@@ -369,7 +380,7 @@ footer {
   display: block;
   width: 100%;
   border-radius: 8px;
-  background: #08080a;
+  background: #fbfbfa;
   border: 1px solid var(--border);
   touch-action: none;
 }
@@ -406,7 +417,7 @@ footer {
   width: 100%;
   height: 3px;
   border-radius: 3px;
-  background: rgba(255,255,255,0.13);
+  background: rgba(0,0,0,0.13);
   outline: none;
 }
 .sim input[type="range"]::-webkit-slider-thumb {
@@ -426,17 +437,17 @@ footer {
   font-size: 0.76rem;
   letter-spacing: 0.03em;
   color: var(--text);
-  background: rgba(255,255,255,0.05);
+  background: rgba(0,0,0,0.04);
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 0.45rem 0.9rem;
   cursor: pointer;
   transition: border-color 0.2s, background 0.2s, color 0.2s;
 }
-.sim-btn:hover { border-color: rgba(212,168,83,0.4); color: #eee; }
+.sim-btn:hover { border-color: rgba(176,125,26,0.55); color: #1b1c20; }
 .sim-btn.active {
   background: var(--accent-dim);
-  border-color: rgba(212,168,83,0.5);
+  border-color: rgba(176,125,26,0.5);
   color: var(--accent);
 }
 
@@ -488,14 +499,14 @@ section:nth-of-type(4) { animation: fadeUp 0.7s 0.2s ease-out both; }
 }
 
 .card-flash:hover {
-  border-color: rgba(212, 168, 83, 0.28);
-  background: rgba(212, 168, 83, 0.04);
+  border-color: rgba(176, 125, 26, 0.28);
+  background: rgba(176, 125, 26, 0.07);
   transform: translateY(-3px);
 }
 
 .card-media {
   aspect-ratio: 16 / 9;
-  background: #08080a;
+  background: #ececea;
   border-bottom: 1px solid var(--border);
   overflow: hidden;
 }
@@ -505,7 +516,7 @@ section:nth-of-type(4) { animation: fadeUp 0.7s 0.2s ease-out both; }
   height: 100%;
   object-fit: cover;
   display: block;
-  opacity: 0.88;
+  opacity: 1;
   transition: opacity 0.3s, transform 0.45s;
 }
 
@@ -517,7 +528,7 @@ section:nth-of-type(4) { animation: fadeUp 0.7s 0.2s ease-out both; }
 .card-body { padding: 1.15rem 1.3rem 1.35rem; }
 
 .card-flash .card-title {
-  font-size: 1.1rem;
+  font-size: 1.02rem;
   margin-bottom: 0.35rem;
 }
 

@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Super Metal-Rich Stars (PANTERA) - Serat Saad</title>
+  <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+  <meta name="theme-color" content="#ffffff">
   <link rel="stylesheet" href="../style.css">
   <script>
     window.MathJax = {
@@ -129,7 +131,7 @@
   </div>
 
   <footer>
-    <div class="container">&copy; 2025 Serat Saad · Columbus, Ohio</div>
+    <div class="container">&copy; 2026 Serat Saad · Columbus, Ohio</div>
   </footer>
 
   <script>
@@ -184,7 +186,7 @@
       const Y = f => padT + (1 - f / 1.15) * plotH;
 
       // continuum reference
-      ctx.strokeStyle = 'rgba(255,255,255,0.10)';
+      ctx.strokeStyle = 'rgba(0,0,0,0.13)';
       ctx.setLineDash([4, 4]); ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(padL, Y(1)); ctx.lineTo(W - padR, Y(1)); ctx.stroke();
       ctx.setLineDash([]);
@@ -201,14 +203,14 @@
       }
 
       // Sun (fixed), then candidate on top
-      curve(0, 'rgba(224,140,170,0.85)', t / 320);
-      curve(feh, '#d4a853', t / 300);
+      curve(0, 'rgba(190,70,115,0.85)', t / 320);
+      curve(feh, '#b07d1a', t / 300);
 
       // legend
       ctx.font = '11px DM Sans, sans-serif'; ctx.textBaseline = 'middle';
-      ctx.fillStyle = '#f0cc6e'; ctx.fillText('● candidate', 12, 14);
-      ctx.fillStyle = 'rgba(224,140,170,0.95)'; ctx.fillText('● Sun', 110, 14);
-      ctx.fillStyle = 'rgba(150,150,160,0.8)'; ctx.textAlign = 'center';
+      ctx.fillStyle = '#8a6414'; ctx.fillText('● candidate', 12, 14);
+      ctx.fillStyle = 'rgba(190,70,115,0.95)'; ctx.fillText('● Sun', 110, 14);
+      ctx.fillStyle = 'rgba(80,82,90,0.8)'; ctx.textAlign = 'center';
       ctx.fillText('wavelength →', W / 2, H - 7); ctx.textAlign = 'left';
     }
 

@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Wide Binaries & Modified Gravity - Serat Saad</title>
+  <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+  <meta name="theme-color" content="#ffffff">
   <link rel="stylesheet" href="../style.css">
   <script>
     window.MathJax = {
@@ -130,7 +132,7 @@
   </div>
 
   <footer>
-    <div class="container">&copy; 2025 Serat Saad · Columbus, Ohio</div>
+    <div class="container">&copy; 2026 Serat Saad · Columbus, Ohio</div>
   </footer>
 
   <script>
@@ -188,7 +190,7 @@
       const Rc = Math.min(R, Math.min(W, H) * 0.42);
 
       // starfield
-      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.fillStyle = 'rgba(0,0,0,0.45)';
       for (let i = 0; i < 40; i++) {
         const a = (i * 2654435761 % 1000) / 1000;
         const b = (i * 40503 % 1000) / 1000;
@@ -198,12 +200,12 @@
       ctx.globalAlpha = 1;
 
       // orbit ring
-      ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+      ctx.strokeStyle = 'rgba(0,0,0,0.11)';
       ctx.lineWidth = 1;
       ctx.beginPath(); ctx.arc(cx, cy, Rc, 0, Math.PI * 2); ctx.stroke();
 
       // barycenter
-      ctx.fillStyle = 'rgba(212,168,83,0.5)';
+      ctx.fillStyle = 'rgba(176,125,26,0.6)';
       ctx.beginPath(); ctx.arc(cx, cy, 2.5, 0, Math.PI * 2); ctx.fill();
 
       // Newtonian star (faint) - primary + secondary pair
@@ -220,21 +222,21 @@
           ctx.beginPath(); ctx.arc(x, y, s > 0 ? rad : rad * 0.78, 0, Math.PI * 2); ctx.fill();
         }
       }
-      pair(thetaN, 'rgba(150,150,160,0.85)', 'rgba(150,150,160,0.25)', 4.5);
-      pair(thetaM, '#f0cc6e', 'rgba(212,168,83,0.45)', 5);
+      pair(thetaN, 'rgba(80,82,90,0.85)', 'rgba(80,82,90,0.28)', 4.5);
+      pair(thetaM, '#8a6414', 'rgba(176,125,26,0.55)', 5);
 
       // legend
       ctx.font = '11px DM Sans, sans-serif';
       ctx.textBaseline = 'middle';
-      ctx.fillStyle = '#f0cc6e';
+      ctx.fillStyle = '#8a6414';
       ctx.fillText('● MOND velocity', 12, 16);
-      ctx.fillStyle = 'rgba(150,150,160,0.9)';
+      ctx.fillStyle = 'rgba(80,82,90,0.9)';
       ctx.fillText('● Newtonian velocity', 12, 32);
 
       // regime label
       const inMond = p.gN < a0;
       ctx.textAlign = 'right';
-      ctx.fillStyle = inMond ? '#f0cc6e' : 'rgba(150,150,160,0.9)';
+      ctx.fillStyle = inMond ? '#8a6414' : 'rgba(80,82,90,0.9)';
       ctx.fillText(inMond ? 'low-acceleration (MOND) regime' : 'Newtonian regime', W - 12, 16);
       ctx.textAlign = 'left';
     }
