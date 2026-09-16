@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 270" preserveAspectRatio="xMidYMid slice">
+  <rect width="480" height="270" fill="#0c0c0e"/>
+  <g stroke="#d4a853" stroke-opacity="0.22" stroke-width="1.2">
+    <line x1="92" y1="72" x2="240" y2="135"/><line x1="92" y1="135" x2="240" y2="72"/>
+    <line x1="92" y1="135" x2="240" y2="198"/><line x1="92" y1="198" x2="240" y2="135"/>
+    <line x1="240" y1="72" x2="388" y2="135"/><line x1="240" y1="135" x2="388" y2="72"/>
+    <line x1="240" y1="135" x2="388" y2="198"/><line x1="240" y1="198" x2="388" y2="135"/>
+    <line x1="92" y1="72" x2="240" y2="72"/><line x1="240" y1="198" x2="388" y2="198"/>
+  </g>
+  <g fill="#0c0c0e" stroke="#d4a853" stroke-opacity="0.75" stroke-width="1.6">
+    <circle cx="92" cy="72" r="7"/><circle cx="92" cy="135" r="7"/><circle cx="92" cy="198" r="7"/>
+    <circle cx="388" cy="72" r="7"/><circle cx="388" cy="135" r="7"/><circle cx="388" cy="198" r="7"/>
+  </g>
+  <circle cx="240" cy="72" r="9" fill="#d4a853" opacity="0.55"/>
+  <circle cx="240" cy="135" r="11" fill="#f0cc6e" opacity="0.9"/>
+  <circle cx="240" cy="198" r="9" fill="#d4a853" opacity="0.55"/>
+</svg>

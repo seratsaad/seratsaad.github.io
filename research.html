@@ -3,95 +3,83 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Research | Serat Saad</title>
-  <link href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap" rel="stylesheet">
+  <title>Research - Serat Saad</title>
+  <meta name="description" content="Research by Serat Saad: wide binary stars and modified gravity (MOND), young stellar objects, AGN and supermassive black hole binaries, and super metal-rich stars in the PANTERA survey.">
+  <link rel="canonical" href="https://seratsaad.github.io/research.html">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
   <nav>
-    <ul>
-      <li><a href="index.html">About</a></li>
-      <li><a href="research.html" class="active">Research</a></li>
-      <li><a href="teaching.html">Teaching</a></li>
+    <a href="index.html" class="nav-name">Serat Saad</a>
+    <ul class="nav-links">
+      <li><a href="index.html">home</a></li>
+      <li><a href="research.html" class="active">research</a></li>
+      <li><a href="beyond.html">beyond</a></li>
+      <li><a href="personal.html">personal</a></li>
     </ul>
   </nav>
 
-  <main>
-    <section class="research">
-      <h1>🔭 My Research</h1>
-      
+  <div class="container-wide">
 
-            <!-- ============ MOND & WIDE BINARIES ============ -->
-      <h2>🌌 Wide Binaries & Modified Gravity (MOND)</h2>
-      <p>
-        At Ohio State, I'm working on wide binary stars as precision tools to test gravitational physics in the low-acceleration regime.  
-        My current research explores how their orbital dynamics can be used to probe deviations from Newtonian gravity under the framework Modified Newtonian Dynamics (MOND). I'm using Gaia astrometry with high-resolution spectroscopic radial velocity data from Keck, VLT, Magellan, and LBT telescopes.
-      </p>
-      <p>I'll update my progress on this project soon.</p>
-
-      <!-- ============ STELLAR FORMATION ============ -->
-      <h2>🌟 Young Stars & Stellar Formation</h2>
-      <div style="text-align:center; margin:2em 0;">
-        <img src="https://content.cld.iop.org/journals/1538-3881/167/3/125/revision1/ajad2001f6_hr.jpg" alt="Research image" style="max-width:85%; border-radius:10px; box-shadow:0 0 20px rgba(94,200,255,0.5);">
+    <div class="detail-header">
+      <h1>Research</h1>
+      <div class="detail-meta">
+        Stars and galaxies, through their dynamics and chemistry · The Ohio State University
       </div>
-      <ul>
-        <li>
-          <strong><a href="https://github.com/seratsaad/ABYSS-II" target="_blank">ABYSS II: Identifying Young Stars in Optical SDSS Spectra</a></strong><br>
-          In this project I developed a full data pipeline to detect and characterize young stellar objects (YSOs) in SDSS-BOSS spectra, measuring veiling and accretion properties.  
-          The work is published in <a href="https://iopscience.iop.org/article/10.3847/1538-3881/ad2001/pdf" target="_blank">The Astronomical Journal</a>.
-        </li>
-        
-        <li>
-          <strong><a href="https://github.com/seratsaad/BOSS-Veiling" target="_blank">Empirical Veiling Measurements in BOSS Spectra</a></strong><br>
-          I also built an empirical calibration for stellar veiling in optical spectra which validates accretion diagnostics for hundreds of YSOs.  
-          The work is also published in <a href="https://iopscience.iop.org/article/10.3847/1538-3881/ade43b" target="_blank">The Astronomical Journal</a> and presented at multiple <a href="https://zenodo.org/records/13007730" target="_blank">conferences</a>.
-        </li>
-      </ul>
+    </div>
 
-      <!-- ============ AGN & SMBH ============ -->
-      <h2>🌀 Active Galactic Nuclei & Black Hole Binaries</h2>
-      <div style="text-align:center; margin:2em 0;">
-        <img src="tick-tock.png" alt="Research image 2" style="max-width:85%; border-radius:10px; box-shadow:0 0 20px rgba(94,200,255,0.5);">
+    <div class="page-grid">
+      <div class="card-grid">
+
+        <a href="research/wide-binaries.html" class="card-flash">
+          <div class="card-media">
+            <img src="images/covers/wide-binaries.svg" alt="">
+          </div>
+          <div class="card-body">
+            <div class="card-title">Wide Binaries &amp; Modified Gravity <span class="card-arrow">→</span></div>
+            <div class="card-desc">Testing Newtonian gravity at its weakest with the widest pairs of stars in the Galaxy.</div>
+          </div>
+        </a>
+
+        <a href="research/young-stars.html" class="card-flash">
+          <div class="card-media">
+            <img src="images/covers/young-stars.svg" alt="">
+          </div>
+          <div class="card-body">
+            <div class="card-title">Young Stars &amp; Stellar Formation <span class="card-arrow">→</span></div>
+            <div class="card-desc">Hunting for baby stars hiding in massive spectroscopic surveys.</div>
+          </div>
+        </a>
+
+        <a href="research/agn-black-holes.html" class="card-flash">
+          <div class="card-media">
+            <img src="tick-tock.png" alt="Analysis of the quasar J1430+2303, known as Tick Tock">
+          </div>
+          <div class="card-body">
+            <div class="card-title">AGN &amp; Black Hole Binaries <span class="card-arrow">→</span></div>
+            <div class="card-desc">Asking whether a flickering quasar is really two supermassive black holes about to merge.</div>
+          </div>
+        </a>
+
+        <a href="research/pantera.html" class="card-flash">
+          <div class="card-media">
+            <img src="pantera-spectra.png" alt="PEPSI spectra of a metal-rich PANTERA target compared with the Sun">
+          </div>
+          <div class="card-body">
+            <div class="card-title">Super Metal-Rich Stars (PANTERA) <span class="card-arrow">→</span></div>
+            <div class="card-desc">Chemical fingerprints of stars that migrated out from the inner Galaxy to the solar neighborhood.</div>
+          </div>
+        </a>
+
       </div>
-      <ul>
-        <li>
-          <strong3><a href="https://github.com/seratsaad/ticktock" target="_blank">Tick Tock: Spectroscopic Analysis of J1430</a></strong><br>
-          I investigated periodic optical variability in the quasar <em>J1430+2303</em> using UV-optical spectra from the Hubble Space Telescope and ground-based facilities.  
-          My final analysis proposed an alternative explanation to the supermassive black hole binary hypothesis - manuscript subitted for publication.
-        </li>
-        <li>
-          <strong><a href="https://github.com/seratsaad/j0950" target="_blank">J0950+5128: Perturbed Accretion Disk Dynamics</a></strong><br>
-          I also participated in a project to perform line-profile decomposition and disk modeling to understand deviations from standard AGN accretion behavior of various AGNs.  
-          This work to constrain disk kinematics and binary-induced perturbations in supermassive black hole accretion disk.
-        </li>
-      </ul>
-      <div style="text-align:center; margin:2em 0;">
-  <img 
-    src="https://news.northwestern.edu/assets/Stories/2023/06/wiit970__FitMaxWzk3MCw2NTBd.jpg" 
-    alt="Science / astronomy image" 
-    style="max-width:85%; border-radius:10px; box-shadow:0 0 20px rgba(94,200,255,0.5);"
-  >
-  <p style="font-size:0.85em; color:#ccc; margin-top:0.5em;">
-    Image credit: NASA
-  </p>
-</div>
+    </div>
 
-    
-    </section>
-  </main>
+  </div>
 
   <footer>
-    © 2025 Serat Saad · Columbus, Ohio
+    <div class="container">&copy; 2025 Serat Saad · Columbus, Ohio</div>
   </footer>
 
-  <!-- Scroll to Top -->
-  <button id="scrollTopBtn" title="Back to top">↑</button>
-  <script>
-    const btn = document.getElementById('scrollTopBtn');
-    window.onscroll = () => {
-      btn.style.display = (document.documentElement.scrollTop > 200) ? 'flex' : 'none';
-    };
-    btn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-  </script>
 </body>
 </html>
