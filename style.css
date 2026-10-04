@@ -539,3 +539,8 @@ section:nth-of-type(4) { animation: fadeUp 0.7s 0.2s ease-out both; }
   padding-bottom: 4rem;
   margin-top: 1.7rem;
 }
+
+/* two cover images side by side in one card */
+.card-media-split { display: flex; }
+.card-media-split img { width: 50%; }
+.card-media-split img + img { border-left: 1px solid var(--border); }

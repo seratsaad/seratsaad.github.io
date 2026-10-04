@@ -1,22 +1,22 @@
 # Serat Saad
 
-> Astronomy Ph.D. student at The Ohio State University researching wide binary stars, modified gravity, young stellar objects, AGN, and super metal-rich stars.
+> Astronomy Ph.D. student at The Ohio State University researching super metal-rich stars, binary stars and modified gravity, and AI agents for astronomy.
 
-Serat Mahmud Saad is a Ph.D. student in Astronomy at The Ohio State University (OSU). He studies stars and galaxies through their dynamics and chemistry. His research spans four areas: testing Newtonian gravity using wide binary star pairs in connection with Modified Newtonian Dynamics (MOND), hunting for young stellar objects hidden in large spectroscopic surveys, investigating whether certain flickering quasars are actually supermassive black hole binaries approaching merger, and the chemical analysis of super metal-rich stars that migrated to the solar neighborhood from the inner Galaxy (the PANTERA program).
+Serat Mahmud Saad is a Ph.D. student in Astronomy at The Ohio State University (OSU). He studies stars and galaxies through their dynamics and chemistry. His research spans three areas: the chemical analysis of super metal-rich stars that migrated to the solar neighborhood from the inner Galaxy (the PANTERA program); binary stars, from testing Newtonian gravity with wide binaries in connection with Modified Newtonian Dynamics (MOND) to a catalog of 41,466 double-lined spectroscopic binaries in APOGEE DR19; and AI agents and open tools for astronomy. As an undergraduate he worked on young stellar objects in large spectroscopic surveys and on whether a flickering quasar is a supermassive black hole binary.
 
 He completed his undergraduate degree at Vanderbilt University, double-majoring in Physics and Mathematics. He is originally from Bangladesh, where he was involved in training students for the International Olympiad on Astronomy and Astrophysics (IOAA).
 
 ## Research
 
-- [Wide Binaries & Modified Gravity](https://seratsaad.github.io/research/wide-binaries.html): Testing Newtonian gravity at its weakest with the widest pairs of stars in the Galaxy, probing MOND predictions.
-- [Young Stars & Stellar Formation](https://seratsaad.github.io/research/young-stars.html): Identifying young stellar objects (YSOs) in massive spectroscopic surveys like APOGEE.
-- [AGN & Black Hole Binaries](https://seratsaad.github.io/research/agn-black-holes.html): Investigating whether quasi-periodic eruptions in quasars signal supermassive black hole binary systems.
 - [Super Metal-Rich Stars (PANTERA)](https://seratsaad.github.io/research/pantera.html): High-resolution chemical abundance analysis of super metal-rich stars in the solar neighborhood with APF and LBT/PEPSI, tracing radial migration from the inner Galaxy.
+- [Binary Stars](https://seratsaad.github.io/research/wide-binaries.html): Testing Newtonian gravity and MOND with wide binaries (Saad & Ting 2025, arXiv:2512.19652; 2026, arXiv:2603.11015), and 41,466 double-lined spectroscopic binaries in APOGEE DR19 (Saad & Ting 2026, arXiv:2608.10866).
+- [AI in Astronomy](https://seratsaad.github.io/research/ai-astronomy.html): Egent for stellar equivalent widths (Ting, Saad, Liu & Shen 2025, arXiv:2512.01270), agent-callable survey analysis tools, AGN-Egent, SkyJev for telescope observing decisions, astrodata-mcp, and a measurement of language-model use in astro-ph papers.
+- [Young Stars & AGN (Undergraduate Work)](https://seratsaad.github.io/research/undergraduate.html): Young stellar objects in SDSS-BOSS spectra (two AJ papers, 2024 and 2025) and the supermassive black hole binary candidate J1430+2303, done at Vanderbilt.
 
 ## Beyond Research
 
 - [Writing](https://seratsaad.github.io/beyond/writing.html): Author and editor at Astrobites, summarizing new astrophysics research for a broad audience (planet engulfment, tidal disruption events, wormholes).
-- [AI for Science & Education](https://seratsaad.github.io/beyond/ai.html): Building AI tools for research and learning, including PorAI (an educational AI initiative) and Egent, an autonomous LLM agent for stellar equivalent-width measurement (Ting, Saad, Liu & Shen 2025, arXiv:2512.01270).
+- [AI for Education](https://seratsaad.github.io/beyond/ai.html): PorAI, an educational AI initiative.
 - [Astronomy Olympiad](https://seratsaad.github.io/beyond/olympiad.html): Training the next generation of astronomers through competitive problem-solving; mentored students representing Bangladesh at IOAA.
 - [Quantum Mechanics Outreach](https://seratsaad.github.io/beyond/quantum.html): Communicating quantum physics to broader audiences.
 

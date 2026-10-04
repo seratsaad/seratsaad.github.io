@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI in Astronomy - Serat Saad</title>
+  <meta name="description" content="Serat Saad builds AI agents and open tools for astronomy: Egent for stellar equivalent widths, an agent-callable SB2 binary search in APOGEE DR19, AGN-Egent, SkyJev for telescope observing decisions, astrodata-mcp, and a measurement of language-model use in the astro-ph literature.">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+  <nav>
+    <a href="../index.html" class="nav-name">Serat Saad</a>
+    <ul class="nav-links">
+      <li><a href="../index.html">home</a></li>
+      <li><a href="../research.html" class="active">research</a></li>
+      <li><a href="../beyond.html">beyond</a></li>
+      <li><a href="../personal.html">personal</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+
+    <div class="detail-header">
+      <a href="../research.html" class="back-link">← back to research</a>
+      <h1>AI in Astronomy</h1>
+      <div class="detail-meta">
+        Ting, Saad et al.
+        <a href="https://arxiv.org/abs/2512.01270" target="_blank">2025</a>
+        · Saad &amp; Ting
+        <a href="https://arxiv.org/abs/2608.10866" target="_blank">2026</a>
+        · The Ohio State University
+      </div>
+    </div>
+
+    <div class="detail-body">
+      <p>
+        A lot of the work in spectroscopy is not hard so much as slow. Someone has to look at each line fit,
+        decide whether it is good, and fix it when it is not, and on a survey of a few hundred thousand
+        stars nobody can. Language models are now good enough to make some of those calls. I build agents
+        and tools that do this inside real analyses, and I try to be strict about which decisions they should
+        and should not be making.
+      </p>
+
+      <h2 class="section-label" style="margin-top:2.2rem;">Egent - equivalent widths without a human in the loop</h2>
+      <p>
+        <a href="https://arxiv.org/abs/2512.01270" target="_blank">Egent</a> (Ting, Saad, Liu &amp; Shen,
+        2025) measures equivalent widths of stellar absorption lines, one of the most labor-intensive steps
+        in detailed abundance work. It fits each line with multi-Voigt profiles, then a language model looks
+        at the fit, catches the failures and refits them, working directly on the raw flux spectra.
+        Compared with expert measurements for 84 stars and more than 18,000 lines, it matches the human
+        values and takes days instead of months. It runs from a web interface or offline on a laptop.
+      </p>
+
+      <h2 class="section-label" style="margin-top:2.2rem;">Survey analysis as tools an agent can call</h2>
+      <p>
+        In <a href="https://arxiv.org/abs/2608.10866" target="_blank">Saad &amp; Ting (2026)</a>, instead of
+        writing one fixed pipeline, I split a spectroscopic analysis into small tool servers that an agent can
+        call and combine, with the operating decisions written down in a single instruction file. The first
+        application is a search for double-lined binaries in APOGEE DR19, which returned 41,466 candidates
+        among 238,205 dwarfs (the science is on the <a href="wide-binaries.html">Binary Stars</a> page). The
+        agent drives the benchmark and the worked examples, and the full catalog run is the same deterministic
+        core under a driver script, so the result does not depend on the model behaving well 238,000 times.
+        Code on <a href="https://github.com/seratsaad/agent4binary" target="_blank">GitHub</a>.
+      </p>
+      <p>
+        <a href="https://github.com/seratsaad/agn-egent" target="_blank">AGN-Egent</a> applies the same idea
+        to quasars. It separates broad and narrow emission lines in SDSS and DESI spectra, estimates black hole
+        masses, sends the fits that fail its quality checks to an inspector that picks one fix from a fixed
+        menu, and ranks a whole survey by how unusual each object is. There is a
+        <a href="https://seratsaad.github.io/agn-egent" target="_blank">browser demo</a>.
+      </p>
+
+      <h2 class="section-label" style="margin-top:2.2rem;">Decisions at the telescope</h2>
+      <p>
+        Many decisions during an observing night have a short list of possible answers: is the focus good,
+        is the sky clear enough, which target next. <a href="https://github.com/seratsaad/SkyJev" target="_blank">SkyJev</a>
+        (Saad et al., in preparation) builds that list from the measurements and has a small open model assign a
+        probability to each option in a single pass, with no text generation. It acts only when it is
+        confident and passes the rest to a larger model with tools, or to the observer. Each choice takes about
+        0.1 s. On 300 archival focus sequences it had not seen, it acted on 69% of the focus decisions and
+        agreed with a fit to the full sequence in 97% of those. I am testing it on decisions from real nights
+        at the Large Binocular Telescope.
+      </p>
+
+      <h2 class="section-label" style="margin-top:2.2rem;">Open tools</h2>
+      <p>
+        <a href="https://github.com/seratsaad/astrodata-mcp" target="_blank">astrodata-mcp</a> is an MCP server
+        that lets any compatible AI client query public archives directly: the ESO Science Archive (including
+        HARPS, ESPRESSO and UVES), the Keck Observatory Archive, Gaia DR3, SIMBAD, VizieR and published
+        Magellan catalogs. All tools are read-only and need no credentials.
+      </p>
+
+      <h2 class="section-label" style="margin-top:2.2rem;">How much of astro-ph is written with a chatbot?</h2>
+      <p>
+        The same models are also changing how astronomy papers are written. With Yuan-Sen Ting, I counted the
+        vocabulary that language models favor in the full text of about 220,000 astro-ph papers from 2015 to
+        mid-2026, calibrated it on papers whose authors declared model use, and inferred the assisted fraction
+        each year with a hierarchical Bayesian model. Our estimate is that more than half of recent papers were
+        written with some model assistance. The model is built for the population, not for judging any single
+        paper, so we do not release per-paper scores. Code and derived data are on
+        <a href="https://github.com/seratsaad/llm-in-astro-ph" target="_blank">GitHub</a>.
+      </p>
+    </div>
+
+  </div>
+
+  <footer>
+    <div class="container">&copy; 2026 Serat Saad · Columbus, Ohio</div>
+  </footer>
+
+</body>
+</html>

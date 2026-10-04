@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Wide Binaries & Modified Gravity - Serat Saad</title>
+  <title>Binary Stars - Serat Saad</title>
   <meta name="theme-color" content="#ffffff">
   <link rel="stylesheet" href="../style.css">
   <script>
@@ -30,16 +30,26 @@
 
     <div class="detail-header">
       <a href="../research.html" class="back-link">← back to research</a>
-      <h1>Wide Binaries &amp; Modified Gravity</h1>
+      <h1>Binary Stars</h1>
       <div class="detail-meta">
         Saad &amp; Ting
         <a href="https://arxiv.org/abs/2512.19652" target="_blank">2025</a>
-        · <a href="https://arxiv.org/abs/2603.11015" target="_blank">2026</a>
+        · <a href="https://arxiv.org/abs/2603.11015" target="_blank">2026a</a>
+        · <a href="https://arxiv.org/abs/2608.10866" target="_blank">2026b</a>
         · The Ohio State University
       </div>
     </div>
 
     <div class="detail-body">
+      <p>
+        About half of the Sun-like stars in the Galaxy have a companion. I work on binaries at both ends of
+        the range in separation. The widest pairs, thousands of AU apart, are a clean place to test gravity
+        where it is weakest. The closest pairs are too tight to resolve at all, but they still leave two sets
+        of lines in a single spectrum, and large surveys contain tens of thousands of them.
+      </p>
+
+      <h2 class="section-label" style="margin-top:2.2rem;">Wide binaries as a test of gravity</h2>
+
       <p>
         Newton's law of gravity works beautifully until you look at systems where gravitational
         accelerations drop below about \(10^{-10}\ \mathrm{m\,s^{-2}}\). At that threshold, galaxies stop behaving the way
@@ -125,6 +135,27 @@
         de-projection of the observed separation, which pins the discrepancy on the orbit modeling rather
         than on new physics. The code is on
         <a href="https://github.com/seratsaad/wb3d-gamma" target="_blank">GitHub</a>.
+      </p>
+
+      <h2 class="section-label" style="margin-top:2.2rem;">Close binaries hiding in survey spectra</h2>
+
+      <p>
+        Many stars that look single in a survey are not. When a companion is too close to resolve but
+        bright enough to contribute light, the spectrum carries two sets of absorption lines, shifted
+        against each other by the orbital motion. These double-lined spectroscopic binaries (SB2s) are easy
+        to miss, and a survey pipeline that fits them as one star returns parameters that are quietly wrong.
+      </p>
+
+      <p>
+        In <strong><a href="https://arxiv.org/abs/2608.10866" target="_blank">Saad &amp; Ting (2026b)</a></strong>,
+        I fit every main-sequence dwarf in APOGEE DR19 twice, once as a single star and once as a pair with
+        a tied mass ratio, following El-Badry, Ting &amp; Rix (2018), and keep the binary model when it is
+        clearly preferred. Of 238,205 dwarfs, 41,466 (17.4%) are SB2 candidates, at a false-positive rate of
+        8.1% measured on held-out stars. The earlier search in DR13 found 2,645 in a sample twelve times
+        smaller. The classifier is trained only on public spectra and labels, and the catalog, model weights
+        and code are on <a href="https://github.com/seratsaad/agent4binary" target="_blank">GitHub</a>.
+        The analysis is also packaged as tools that a language-model agent can run, which I describe on the
+        <a href="ai-astronomy.html">AI in Astronomy</a> page.
       </p>
     </div>
 
