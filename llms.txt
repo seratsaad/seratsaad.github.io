@@ -16,9 +16,9 @@ He completed his undergraduate degree at Vanderbilt University, double-majoring 
 ## Beyond Research
 
 - [Writing](https://seratsaad.github.io/beyond/writing.html): Author and editor at Astrobites, summarizing new astrophysics research for a broad audience (planet engulfment, tidal disruption events, wormholes).
-- [AI for Education](https://seratsaad.github.io/beyond/ai.html): PorAI, an educational AI initiative.
+- [AI for Fun](https://seratsaad.github.io/beyond/ai.html): PorAI (por-ai.com), an AI tutor built on the Bangladeshi national curriculum, and PocketMoney (trypocketmoney.com), a money agent you text.
 - [Astronomy Olympiad](https://seratsaad.github.io/beyond/olympiad.html): Training the next generation of astronomers through competitive problem-solving; mentored students representing Bangladesh at IOAA.
-- [Quantum Mechanics Outreach](https://seratsaad.github.io/beyond/quantum.html): Communicating quantum physics to broader audiences.
+- [Others](https://seratsaad.github.io/beyond/others.html): Quantum computing education at The Wond'ry Quantum Studio, teaching and grading at Vanderbilt, mentoring with Project SHORT, and the Pixels and Persuasion exhibit for Vanderbilt University Libraries.
 
 ## Links
 

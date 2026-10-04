@@ -544,3 +544,5 @@ section:nth-of-type(4) { animation: fadeUp 0.7s 0.2s ease-out both; }
 .card-media-split { display: flex; }
 .card-media-split img { width: 50%; }
 .card-media-split img + img { border-left: 1px solid var(--border); }
+
+.detail-body ul { padding-left: 1.2rem; margin: 0 0 1.2rem; }
