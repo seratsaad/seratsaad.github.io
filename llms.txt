@@ -1,14 +1,14 @@
 # Serat Saad
 
-> Astronomy Ph.D. student at The Ohio State University researching super metal-rich stars, binary stars and modified gravity, and AI agents for astronomy.
+> Astronomy Ph.D. student at The Ohio State University researching metal-rich stars, binary stars and modified gravity, and AI agents for astronomy.
 
-Serat Mahmud Saad is a Ph.D. student in Astronomy at The Ohio State University (OSU). He studies stars and galaxies through their dynamics and chemistry. His research spans three areas: the chemical analysis of super metal-rich stars that migrated to the solar neighborhood from the inner Galaxy (the PANTERA program); binary stars, from testing Newtonian gravity with wide binaries in connection with Modified Newtonian Dynamics (MOND) to a catalog of 41,466 double-lined spectroscopic binaries in APOGEE DR19; and AI agents and open tools for astronomy. As an undergraduate he worked on young stellar objects in large spectroscopic surveys and on whether a flickering quasar is a supermassive black hole binary.
+Serat Mahmud Saad is a Ph.D. student in Astronomy at The Ohio State University (OSU). He studies stars and galaxies through their dynamics and chemistry. His research spans three areas: the chemical analysis of metal-rich stars that migrated to the solar neighborhood from the inner Galaxy (the PANTERA program); binary stars, from testing Newtonian gravity with wide binaries in connection with Modified Newtonian Dynamics (MOND) to a catalog of 41,466 double-lined spectroscopic binaries in APOGEE DR19; and AI agents and open tools for astronomy. As an undergraduate he worked on young stellar objects in large spectroscopic surveys and on whether a flickering quasar is a supermassive black hole binary.
 
 He completed his undergraduate degree at Vanderbilt University, double-majoring in Physics and Mathematics. He is originally from Bangladesh, where he was involved in training students for the International Olympiad on Astronomy and Astrophysics (IOAA).
 
 ## Research
 
-- [Super Metal-Rich Stars (PANTERA)](https://seratsaad.github.io/research/pantera.html): High-resolution chemical abundance analysis of super metal-rich stars in the solar neighborhood with APF and LBT/PEPSI, tracing radial migration from the inner Galaxy.
+- [Metal-Rich Stars (PANTERA)](https://seratsaad.github.io/research/pantera.html): High-resolution chemical abundance analysis of metal-rich stars in the solar neighborhood with APF and LBT/PEPSI, tracing radial migration from the inner Galaxy.
 - [Binary Stars](https://seratsaad.github.io/research/wide-binaries.html): Testing Newtonian gravity and MOND with wide binaries (Saad & Ting 2025, arXiv:2512.19652; 2026, arXiv:2603.11015), and 41,466 double-lined spectroscopic binaries in APOGEE DR19 (Saad & Ting 2026, arXiv:2608.10866).
 - [AI in Astronomy](https://seratsaad.github.io/research/ai-astronomy.html): Egent for stellar equivalent widths (Ting, Saad, Liu & Shen 2025, arXiv:2512.01270), agent-callable survey analysis tools, AGN-Egent, SkyJev for telescope observing decisions, astrodata-mcp, and a measurement of language-model use in astro-ph papers.
 - [Young Stars & AGN (Undergraduate Work)](https://seratsaad.github.io/research/undergraduate.html): Young stellar objects in SDSS-BOSS spectra (two AJ papers, 2024 and 2025) and the supermassive black hole binary candidate J1430+2303, done at Vanderbilt.
