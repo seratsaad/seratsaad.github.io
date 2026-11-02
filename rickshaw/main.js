@@ -1951,7 +1951,7 @@ for (const [li, lane] of LANES.entries()) {
     else v = { ...buildCar(), vmax: R(9, 12) };
     trimShadows(v.g);
     scene.add(v.g);
-    NPCS.push({ ...v, kind, li, lane, s: lane.min + (lane.max - lane.min) * ((i + R(0, 0.6)) / lane.n), dir: rand() < 0.5 ? 1 : -1, sp: v.vmax, spin: 0, honkT: 0, turn: -1, head: 0 });
+    NPCS.push({ ...v, kind, li, lane, s: lane.min + (lane.max - lane.min) * ((i + R(0, 0.6)) / lane.n), dir: rand() < 0.5 ? 1 : -1, sp: v.vmax, spin: 0, honkT: 0, turn: -1, head: 0, id: NPCS.length });
   }
 }
 function npcRect(n) {
@@ -1977,8 +1977,8 @@ const WALKERS = [];
   for (let i = 0; i < 200; i++) {
     let x = rand() * total, path = paths[0];
     for (const p of paths) { if (x < p.len) { path = p; break; } x -= p.len; }
-    const kid = i % 10 === 0;
-    const person = kid ? buildPerson(pick(['m', 'school', 'lungi']), R(0.58, 0.7)) : buildPerson();
+    const kid = !path.gali && i % 16 === 0;
+    const person = kid ? buildPerson(pick(['m', 'school', 'lungi']), R(0.76, 0.86)) : buildPerson();
     scene.add(person.g);
     WALKERS.push({ ...person, path, s: R(path.min, path.max), dir: rand() < 0.5 ? 1 : -1, off: R(-path.lat, path.lat), sp: kid ? R(1.8, 2.8) : R(0.9, 1.5), cur: 0, ph: R(0, 6), pause: 0, kid });
   }
@@ -2001,8 +2001,7 @@ const STANDERS = [];
 function stander(person, x, y, z, ry, collide = true) {
   person.g.position.set(x, y, z); person.g.rotation.y = ry;
   scene.add(person.g);
-  STANDERS.push({ ...person, ry, ph: R(0, 10), x, z });
-  if (collide) addCollider(rect(x, z, 0.5, 0.5, 1.8));
+  STANDERS.push({ ...person, ry, ph: R(0, 10), x, z, solid: collide });
 }
 function group(cx, cz, y, n) {
   for (let k = 0; k < n; k++) {
@@ -2045,6 +2044,40 @@ function group(cx, cz, y, n) {
   addCollider(rect(40, -7.1, 6, 0.4, 2.7));
   for (let i = 0; i < 7; i++) stander(buildPerson(), 37.5 + i * 0.75 + R(-0.1, 0.1), 0.2, -6.1 + R(-0.2, 0.2), R(-0.4, 0.4) + Math.PI * 0.08);
   for (let i = 0; i < 3; i++) stander(seat(buildPerson()), 38.6 + i * 1.1, -0.45, -6.85, 0, false);
+}
+const PEOPLE = [...WALKERS, ...CROSSERS, ...STANDERS.filter((p) => p.solid)];
+
+// someone the rickshaw runs into at speed falls back under the wheels and lies still
+function knockDown(p, sp) {
+  const x = p.g.position.x, z = p.g.position.z;
+  p.down = {
+    t: 0, x, y: p.g.position.y, z, ry: Math.atan2(P.x - x, P.z - z),
+    hx: Math.sin(P.th), hz: Math.cos(P.th), slide: Math.min(2, sp * 0.2),
+    arms: p.arms.map((a) => [a.rotation.x, a.rotation.z]), hips: p.hips.map((h) => h.rotation.x),
+  };
+  p.g.rotation.order = 'YXZ';
+  scream([x, 1.5, z]); thud(Math.min(1, sp / 8));
+  shake = Math.min(0.5, 0.15 + sp * 0.03);
+  for (const w of WALKERS) if (!w.down && Math.hypot(w.g.position.x - x, w.g.position.z - z) < 12) w.pause = R(3, 7);
+}
+// returns false once they are back on their feet: only after a while, and only far out of sight
+function lieDown(p, dt, dist) {
+  const d = p.down;
+  d.t += dt;
+  if (d.t > 25 && dist > 80) {
+    p.g.rotation.x = 0; p.g.position.y = d.y;
+    p.arms.forEach((a, i) => { a.rotation.x = d.arms[i][0]; a.rotation.z = d.arms[i][1]; });
+    p.hips.forEach((h, i) => { h.rotation.x = d.hips[i]; });
+    p.down = null;
+    return false;
+  }
+  const u = Math.min(1, d.t / 0.5), e = u * u, s = d.slide * (1 - (1 - u) * (1 - u));
+  p.g.position.set(d.x + d.hx * s, d.y + 0.14 * e, d.z + d.hz * s);
+  p.g.rotation.set((-Math.PI / 2) * e, d.ry, 0);
+  p.arms[0].rotation.z = -1.1 * e; p.arms[1].rotation.z = 1.1 * e;
+  for (const a of p.arms) a.rotation.x = -0.3 * e;
+  p.hips[0].rotation.x = 0.15 * e; p.hips[1].rotation.x = -0.1 * e;
+  return true;
 }
 
 /* ---------------- dust and floating motes ---------------- */
@@ -2255,6 +2288,22 @@ function farHonk() {
   const a = R(0, Math.PI * 2), r = R(70, 160);
   const n = { kind: pick(['cng', 'cng', 'car', 'bus', 'bike', 'rick', 'truck']), g: { position: { x: P.x + Math.cos(a) * r, z: P.z + Math.sin(a) * r } } };
   honk(n, R(0.8, 1.6));
+}
+// a short scream: a voice that jumps up, wavers and breaks off
+function scream(pos) {
+  if (!AC) return;
+  const t0 = AC.currentTime, len = R(0.55, 0.85), f = R(380, 600);
+  const bus = amp(0.6); out(bus, pos, 0.4);
+  const o = AC.createOscillator(), vib = AC.createOscillator(), g = amp(0);
+  o.type = 'sawtooth';
+  o.frequency.setValueAtTime(f * 0.8, t0); o.frequency.linearRampToValueAtTime(f * 1.15, t0 + 0.1); o.frequency.exponentialRampToValueAtTime(f * 0.6, t0 + len);
+  vib.frequency.value = R(6, 8); vib.connect(amp(f * 0.03)).connect(o.frequency);
+  g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(1, t0 + 0.04); g.gain.setValueAtTime(1, t0 + len * 0.6); g.gain.exponentialRampToValueAtTime(0.001, t0 + len);
+  o.connect(filt('bandpass', 900, 4)).connect(g);
+  o.connect(filt('bandpass', 1500, 6)).connect(amp(0.7)).connect(g);
+  o.connect(filt('bandpass', 2800, 8)).connect(amp(0.3)).connect(g);
+  g.connect(bus);
+  o.start(t0); vib.start(t0); o.stop(t0 + len + 0.05); vib.stop(t0 + len + 0.05);
 }
 // hitting something: a dull thump, a sheet-metal clang and loose parts rattling
 function thud(vol) {
@@ -2568,10 +2617,13 @@ function updatePlayer(dt) {
   P.z += Math.cos(P.th) * P.v * dt;
   for (const r of query(P.x - 2, P.x + 2, P.z - 2, P.z + 2)) { const n = pushOut(r); if (n) hit(n); }
   for (const n of NPCS) { const nn = pushOut(npcRect(n)); if (nn) { hit(nn); if (n.honkT <= 0) { honk(n, 1.3); n.honkT = 1.5; } } }
-  for (const w of [...WALKERS, ...CROSSERS]) {
-    if (!w.g.visible) continue;
+  // people cannot stop a moving rickshaw; only at a crawl do you nudge past them
+  for (const w of PEOPLE) {
+    if (!w.g.visible || w.down) continue;
     const dx = P.x - w.g.position.x, dz = P.z - w.g.position.z, d = Math.hypot(dx, dz), m = P.r + 0.35;
-    if (d < m && d > 1e-4) { P.x = w.g.position.x + (dx / d) * m; P.z = w.g.position.z + (dz / d) * m; hit([dx / d, dz / d], true); w.pause = 1.5; }
+    if (d >= m || d < 1e-4) continue;
+    if (Math.abs(P.v) > 0.8) { knockDown(w, Math.abs(P.v)); P.v *= 0.85; }
+    else { P.x = w.g.position.x + (dx / d) * m; P.z = w.g.position.z + (dz / d) * m; hit([dx / d, dz / d], true); w.pause = 1.5; }
   }
   for (const c of CIRCLES) {
     const dx = P.x - c.x, dz = P.z - c.z, d = Math.hypot(dx, dz), m = c.r + P.r;
@@ -2612,21 +2664,50 @@ function updatePlayer(dt) {
   }
 }
 
+// bumper gap from n to o when o sits in n's path within a few metres, else null
+function aheadGap(n, o) {
+  const qx = o.g.position.x - n.g.position.x, qz = o.g.position.z - n.g.position.z;
+  if (Math.abs(qx) + Math.abs(qz) > 24) return null;
+  const hx = Math.sin(n.head), hz = Math.cos(n.head);
+  const ca = qx * hx + qz * hz, cl = Math.abs(qx * hz - qz * hx);
+  const oa = Math.abs(Math.sin(o.head - n.head)), ob = Math.abs(Math.cos(o.head - n.head));
+  const oLen = (o.L * ob + o.W * oa) / 2, oWid = (o.L * oa + o.W * ob) / 2;
+  if (ca <= 0 || cl > n.W / 2 + oWid + 0.3) return null;
+  const gap = ca - n.L / 2 - oLen;
+  return gap < 6 ? gap : null;
+}
+// do the footprints of two vehicles overlap (separating axis test)
+function npcOverlap(a, b) {
+  const corners = (n) => {
+    const s = Math.sin(n.head), c = Math.cos(n.head), L = n.L / 2, W = n.W / 2, { x, z } = n.g.position;
+    return [[L, W], [L, -W], [-L, W], [-L, -W]].map(([l, w]) => [x + s * l + c * w, z + c * l - s * w]);
+  };
+  const A = corners(a), B = corners(b);
+  for (const n of [a, b]) for (const [ax, az] of [[Math.sin(n.head), Math.cos(n.head)], [Math.cos(n.head), -Math.sin(n.head)]]) {
+    const pa = A.map((p) => p[0] * ax + p[1] * az), pb = B.map((p) => p[0] * ax + p[1] * az);
+    if (Math.max(...pa) < Math.min(...pb) || Math.max(...pb) < Math.min(...pa)) return false;
+  }
+  return true;
+}
 function updateNPCs(dt) {
+  for (const n of NPCS) n.prev = [n.s, n.turn, n.dir, n.g.position.x, n.g.position.z, n.head];
   for (const n of NPCS) {
     const near = Math.hypot(P.x - n.g.position.x, P.z - n.g.position.z);
     const ax = n.lane.axis;
     const fwd = ax === 'z' ? [0, n.dir] : [n.dir, 0];
     const left = [fwd[1], -fwd[0]];
-    let target = n.vmax;
-    if (n.turn < 0) {
-      for (const o of NPCS) {
-        if (o === n || o.li !== n.li || o.dir !== n.dir || o.turn >= 0) continue;
-        const ahead = (o.s - n.s) * n.dir;
-        if (ahead > 0 && ahead < (n.L + o.L) / 2 + 3) target = Math.min(target, ahead < (n.L + o.L) / 2 + 1 ? 0 : o.sp);
-      }
-    }
+    let target = n.turn >= 0 ? Math.min(n.vmax, 4) : n.vmax;
     const hf = [Math.sin(n.head), Math.cos(n.head)], hl = [hf[1], -hf[0]];
+    // any vehicle in front, in any lane or mid U-turn: follow at its pace, stop short of it
+    for (const o of NPCS) {
+      if (o === n) continue;
+      const gap = aheadGap(n, o);
+      if (gap === null) continue;
+      // two vehicles nosing into each other: the older one goes first
+      if (n.id < o.id && aheadGap(o, n) !== null && gap > 0.3) continue;
+      const ov = o.sp * (Math.sin(o.head) * hf[0] + Math.cos(o.head) * hf[1]);
+      target = Math.min(target, gap < 1.2 ? 0 : Math.max(0, Math.min(ov, gap - 1.2)));
+    }
     const px = P.x - n.g.position.x, pz = P.z - n.g.position.z;
     const along = px * hf[0] + pz * hf[1], lat = px * hl[0] + pz * hl[1];
     if (along > 0 && along < n.L / 2 + 5 && Math.abs(lat) < n.W / 2 + 1.3) {
@@ -2647,7 +2728,7 @@ function updateNPCs(dt) {
     const LO = 2.5;
     if (n.turn >= 0) {
       // U-turn on a half circle across the road
-      n.turn += (Math.max(n.sp, 1.5) * dt) / (Math.PI * LO);
+      n.turn += (n.sp * dt) / (Math.PI * LO);
       const u = Math.min(1, n.turn);
       const al = n.s + n.dir * LO * Math.sin(Math.PI * u), la = LO * Math.cos(Math.PI * u);
       const dAl = n.dir * Math.cos(Math.PI * u), dLa = -Math.sin(Math.PI * u);
@@ -2671,6 +2752,14 @@ function updateNPCs(dt) {
     if (n.rick) pedal(n.rick, n.spin * 0.7);
     else n.g.rotation.z = Math.sin(n.spin * 0.3) * 0.006 * Math.min(1, n.sp);
   }
+  // a U-turn bends where the forward check cannot see: whoever drove into another vehicle goes back a step and waits
+  for (let i = 0; i < NPCS.length; i++) for (let j = i + 1; j < NPCS.length; j++) {
+    const a = NPCS[i], b = NPCS[j], dx = b.g.position.x - a.g.position.x, dz = b.g.position.z - a.g.position.z;
+    if (Math.abs(dx) + Math.abs(dz) > (a.L + b.L) * 0.75 || !npcOverlap(a, b)) continue;
+    const ta = Math.sin(a.head) * dx + Math.cos(a.head) * dz, tb = -(Math.sin(b.head) * dx + Math.cos(b.head) * dz);
+    const n = ta > tb ? a : b;
+    [n.s, n.turn, n.dir] = n.prev; n.g.position.set(n.prev[3], 0, n.prev[4]); n.head = n.prev[5]; n.g.rotation.y = n.head; n.sp = 0;
+  }
   // in Dhaka a horn means "I am here", so everyone uses it, all the time
   if (AC) for (const n of NPCS) {
     if (!n.g.visible || n.honkT > 0) continue;
@@ -2684,6 +2773,7 @@ function updateWalkers(dt, t) {
     const { path } = w;
     const dx = P.x - w.g.position.x, dz = P.z - w.g.position.z, d = Math.hypot(dx, dz);
     w.g.visible = d < 75;
+    if (w.down && lieDown(w, dt, d)) continue;
     if (!w.g.visible) continue;
     if (d < 25) crowd++;
     // stop when the rickshaw comes close, step aside, and sometimes pause to chat
@@ -2714,6 +2804,7 @@ function updateWalkers(dt, t) {
     const cx = alongX ? c.s : rd.x1 + c.lat, cz = alongX ? rd.z1 + c.lat : c.s;
     const d = Math.hypot(P.x - cx, P.z - cz);
     c.g.visible = d < 75;
+    if (c.down && lieDown(c, dt, d)) continue;
     let target = 0;
     if (c.state === 0) { c.wait -= dt; if (c.wait <= 0) c.state = 1; }
     if (c.state === 1) {
@@ -2737,6 +2828,7 @@ function updateWalkers(dt, t) {
   for (const p of STANDERS) {
     const d = Math.abs(P.x - p.x) + Math.abs(P.z - p.z);
     p.g.visible = d < 90;
+    if (p.down && lieDown(p, dt, d)) continue;
     if (!p.g.visible) continue;
     if (d < 30) crowd++;
     // shift weight, look around, talk with the hands
