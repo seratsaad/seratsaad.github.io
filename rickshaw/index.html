@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>Rickshaw ride through Dhaka · Serat Saad</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="intro">
+    <div class="intro-box">
+      <div class="intro-bn">ঢাকা</div>
+      <h1>Serat Saad</h1>
+      <p class="intro-sub">Hop on a rickshaw and ride through my work.</p>
+      <ul class="intro-keys">
+        <li><b>W A S D</b> or <b>arrows</b> to pedal and steer</li>
+        <li><b>Shift</b> to pedal harder · <b>Space</b> to ring the bell</li>
+        <li><b>C</b> to change camera · <b>R</b> to go back to the start · <b>Q</b> quality</li>
+      </ul>
+      <p class="intro-hint">North for research, east for beyond.<br>Not every road is on the map.</p>
+      <button id="start">Start riding</button>
+      <a class="intro-classic" href="../index.html">or visit the classic site</a>
+    </div>
+  </div>
+
+  <div id="hud">
+    <a href="../index.html" class="hud-title">Serat Saad</a>
+    <span class="hud-keys">WASD ride · Shift pedal hard · Space bell · C camera · R reset · Q quality</span>
+  </div>
+
+  <canvas id="minimap" width="200" height="184"></canvas>
+
+  <div id="card" class="hidden">
+    <div class="card-kicker"></div>
+    <h2 class="card-title"></h2>
+    <img class="card-img" alt="">
+    <p class="card-text"></p>
+    <div class="card-links"></div>
+  </div>
+
+  <div id="toast"></div>
+
+  <div id="touch">
+    <button data-k="left">◀</button>
+    <button data-k="up">▲</button>
+    <button data-k="down">▼</button>
+    <button data-k="right">▶</button>
+    <button data-k="bell">🔔</button>
+  </div>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>

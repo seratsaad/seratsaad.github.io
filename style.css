@@ -96,6 +96,19 @@ nav {
   color: #1b1c20;
 }
 
+.nav-links a.nav-fun {
+  color: #fff;
+  background: #e8364f;
+  padding: 0.28rem 0.75rem;
+  border-radius: 999px;
+  transition: background 0.2s, transform 0.2s;
+}
+.nav-links a.nav-fun:hover {
+  color: #fff;
+  background: #c92a42;
+  transform: translateY(-1px);
+}
+
 /* ===================== LAYOUT ===================== */
 .container {
   max-width: 640px;

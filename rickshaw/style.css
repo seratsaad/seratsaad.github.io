@@ -1,0 +1,90 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: #f3c89a; }
+body { font-family: system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif; color: #2a1d14; }
+canvas { display: block; }
+
+#intro {
+  position: fixed; inset: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(circle at 50% 40%, rgba(255, 236, 205, .55), rgba(60, 30, 20, .55));
+  transition: opacity .5s;
+}
+#intro.gone { opacity: 0; pointer-events: none; }
+.intro-box {
+  max-width: 440px; padding: 28px 30px 24px; text-align: center;
+  background: #fff8ec; border-radius: 18px;
+  border: 6px solid transparent;
+  background-clip: padding-box;
+  box-shadow: 0 0 0 6px #e8364f, 0 0 0 12px #f6c445, 0 0 0 18px #1f8a5b, 0 20px 50px rgba(0,0,0,.35);
+}
+.intro-bn { font-family: "Kohinoor Bangla", "Bangla Sangam MN", "Noto Sans Bengali", sans-serif; font-size: 22px; color: #e8364f; }
+.intro-box h1 { margin: 2px 0 4px; font-size: 34px; letter-spacing: .5px; }
+.intro-sub { margin: 0 0 14px; font-size: 16px; }
+.intro-keys { list-style: none; padding: 0; margin: 0 0 14px; font-size: 14px; line-height: 1.7; color: #5b4636; }
+.intro-hint { font-size: 14px; font-style: italic; color: #8a5a3c; margin: 0 0 18px; }
+#start {
+  font: inherit; font-size: 17px; font-weight: 600; cursor: pointer;
+  padding: 11px 28px; border: 0; border-radius: 999px;
+  background: #e8364f; color: #fff; box-shadow: 0 4px 0 #a51f33;
+}
+#start:active { transform: translateY(2px); box-shadow: 0 2px 0 #a51f33; }
+.intro-classic { display: block; margin-top: 12px; font-size: 13px; color: #8a5a3c; }
+
+#hud {
+  position: fixed; top: 12px; left: 14px; z-index: 5;
+  display: flex; gap: 14px; align-items: baseline;
+  font-size: 13px; color: #3b2a1e; text-shadow: 0 1px 0 rgba(255,255,255,.5);
+}
+.hud-title { font-weight: 700; font-size: 16px; color: #3b2a1e; text-decoration: none; }
+.hud-keys { opacity: .75; }
+
+#minimap {
+  position: fixed; top: 12px; right: 12px; z-index: 5;
+  border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,.25);
+}
+
+#card {
+  position: fixed; left: 16px; bottom: 16px; z-index: 6;
+  width: 360px; max-width: calc(100vw - 32px); max-height: calc(100vh - 90px); overflow: auto;
+  padding: 16px 18px 16px; border-radius: 14px;
+  background: rgba(255, 248, 236, .96);
+  border-top: 6px solid var(--accent, #e8364f);
+  box-shadow: 0 10px 30px rgba(0,0,0,.3);
+  transition: transform .35s cubic-bezier(.2,.9,.3,1.2), opacity .25s;
+}
+#card.hidden { transform: translateY(30px); opacity: 0; pointer-events: none; }
+.card-kicker { font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent, #e8364f); font-weight: 700; }
+.card-title { margin: 2px 0 10px; font-size: 22px; }
+.card-img { width: 100%; max-height: 190px; object-fit: cover; border-radius: 8px; display: block; }
+.card-img[src=""] { display: none; }
+.card-text { font-size: 14.5px; line-height: 1.55; margin: 10px 0 12px; }
+.card-links { display: flex; flex-wrap: wrap; gap: 8px; }
+.card-links a {
+  font-size: 13px; font-weight: 600; text-decoration: none; color: #fff;
+  background: var(--accent, #e8364f); padding: 6px 12px; border-radius: 999px;
+}
+
+#toast {
+  position: fixed; top: 64px; left: 50%; z-index: 7;
+  transform: translate(-50%, -20px); opacity: 0;
+  padding: 10px 18px; border-radius: 999px;
+  background: #2a1d14; color: #ffe9c2; font-size: 15px;
+  transition: opacity .4s, transform .4s; pointer-events: none;
+}
+#toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+#touch { display: none; }
+@media (hover: none) and (pointer: coarse) {
+  .hud-keys { display: none; }
+  #minimap { width: 130px; height: 120px; }
+  #card { bottom: 120px; }
+  #touch {
+    display: grid; position: fixed; bottom: 16px; right: 16px; z-index: 6;
+    grid-template-columns: repeat(5, 54px); gap: 8px;
+  }
+  #touch button {
+    height: 54px; border: 0; border-radius: 14px; font-size: 20px;
+    background: rgba(255, 248, 236, .85); box-shadow: 0 3px 0 rgba(0,0,0,.25);
+    user-select: none; -webkit-user-select: none; touch-action: none;
+  }
+}
