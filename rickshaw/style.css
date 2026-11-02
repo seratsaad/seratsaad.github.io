@@ -122,18 +122,26 @@ kbd {
 }
 #toast.show { opacity: 1; transform: translate(-50%, 0); }
 
-#touch { display: none; }
+#touch, .intro-touch { display: none; }
 @media (hover: none) and (pointer: coarse) {
-  .hud-keys { display: none; }
+  .hud-keys, .intro-keys { display: none; }
+  .intro-keys.intro-touch { display: block; }
   #minimap { width: 130px; height: 120px; }
-  #card { bottom: 120px; }
+  #card { bottom: 152px; max-height: calc(100vh - 290px); }
   .card-img { height: 150px; }
+  /* arrows laid out like a laptop keyboard: up on top, left, down and right below */
   #touch {
     display: grid; position: fixed; bottom: 16px; right: 16px; z-index: 6;
-    grid-template-columns: repeat(5, 54px); gap: 8px;
+    grid-template-columns: repeat(3, 58px); grid-template-rows: repeat(2, 58px); gap: 6px;
+    grid-template-areas: ". up ." "left down right";
   }
+  #touch [data-k="up"] { grid-area: up; }
+  #touch [data-k="left"] { grid-area: left; }
+  #touch [data-k="down"] { grid-area: down; }
+  #touch [data-k="right"] { grid-area: right; }
+  #touch [data-k="bell"] { position: fixed; left: 16px; bottom: 16px; width: 64px; height: 64px; border-radius: 50%; }
   #touch button {
-    height: 54px; border: 0; border-radius: 14px; font-size: 20px;
+    height: 100%; border: 0; border-radius: 14px; font-size: 20px;
     background: rgba(255, 250, 242, .85); box-shadow: 0 3px 0 rgba(0,0,0,.25);
     user-select: none; -webkit-user-select: none; touch-action: none;
   }
