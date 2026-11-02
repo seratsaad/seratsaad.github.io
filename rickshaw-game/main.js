@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 
-// A low-res rickshaw ride around Mirpur 10, built on OpenStreetMap data (mirpur.json, made by tools/build_map.py).
-// People, vehicles, sound and the station cards come from the made-up Dhaka ride in ../rickshaw.
+// A low-res rickshaw game around Mirpur-10 Circle, built on OpenStreetMap data (mirpur.json, made by tools/build_map.py).
+// Pick up passengers and take them to real places for a fare. People, vehicles and sound come from ../rickshaw.
 
 /* ---------------- helpers ---------------- */
 function mulberry32(a) {
@@ -97,87 +97,6 @@ function mesh(geo, mat, x = 0, y = 0, z = 0, parent) {
 
 // the map, loaded before anything is built
 const MAP = await fetch('mirpur.json').then((r) => r.json());
-
-/* ---------------- content ---------------- */
-const IMG = '../images/';
-const KIND = {
-  research: { color: '#22a7b8', label: 'Research' },
-  beyond: { color: '#f07a2a', label: 'Beyond' },
-  personal: { color: '#e8407f', label: 'Personal' },
-  links: { color: '#3fae5a', label: 'Links' },
-};
-const STATIONS = [
-  // Research Road, heading north
-  { id: 'pantera', kind: 'research', x: 62, z: -60, dir: [1, 0], plaza: 10, ring: 4.5,
-    sign: 'PANTERA', sub: 'Metal-rich stars', title: 'Metal-Rich Stars (PANTERA)', img: IMG + 'covers/pantera.jpg',
-    text: 'Chemical fingerprints of stars that migrated out from the inner Galaxy to the solar neighborhood.',
-    links: [['../research/pantera.html', 'Read more']] },
-  { id: 'binaries', kind: 'research', x: -62, z: -120, dir: [-1, 0], plaza: 10, ring: 4.5,
-    sign: 'Binary Stars', sub: 'Wide pairs and close pairs', title: 'Binary Stars', img: IMG + 'covers/wide-binaries.jpg',
-    text: 'From the widest pairs that test gravity to the closest ones hiding in a single spectrum.',
-    links: [['../research/wide-binaries.html', 'Read more']] },
-  { id: 'ai', kind: 'research', x: 62, z: -180, dir: [1, 0], plaza: 10, ring: 4.5,
-    sign: 'AI in Astronomy', sub: 'Agents and open tools', title: 'AI in Astronomy', img: IMG + 'covers/ai.jpg',
-    text: 'Agents and open tools that measure spectra, query archives and help run a night at the telescope.',
-    links: [['../research/ai-astronomy.html', 'Read more']] },
-  { id: 'young', kind: 'research', x: -62, z: -240, dir: [-1, 0], plaza: 10, ring: 4.5,
-    sign: 'Young Stars & AGN', sub: 'Undergraduate work', title: 'Young Stars & AGN', img: IMG + 'covers/young-stars.jpg',
-    text: 'Young stellar objects in spectroscopic surveys and a supermassive black hole binary candidate, from my years at Vanderbilt.',
-    links: [['../research/undergraduate.html', 'Read more']] },
-  { id: 'lbt', kind: 'research', x: 0, z: -268, dir: [0, -1], plaza: 12, ring: 5, size: [18, 12, 14],
-    sign: 'LBT', sub: 'Mount Graham, Arizona', title: 'At the Telescope', img: '../pantera-spectra.png',
-    text: 'Spectra for PANTERA come from PEPSI on the Large Binocular Telescope, two 8.4 m mirrors on one mount.',
-    links: [['../research/pantera.html', 'PANTERA']] },
-
-  // Beyond Avenue, heading east
-  { id: 'writing', kind: 'beyond', x: 90, z: -62, dir: [0, -1], plaza: 10, ring: 4.5,
-    sign: 'Writing', sub: 'Astrobites', title: 'Writing', img: IMG + 'covers/writing.jpg',
-    text: 'Explaining new astrophysics research for a broad audience as an author and editor at Astrobites.',
-    links: [['../beyond/writing.html', 'Read more']] },
-  { id: 'aifun', kind: 'beyond', x: 150, z: 62, dir: [0, 1], plaza: 10, ring: 4.5,
-    sign: 'AI for Fun', sub: 'PorAI · PocketMoney', title: 'AI for Fun', img: IMG + 'covers/ai-fun.jpg',
-    text: 'PorAI, a tutor for students in Bangladesh, and PocketMoney, a money agent you text.',
-    links: [['../beyond/ai.html', 'Read more']] },
-  { id: 'olympiad', kind: 'beyond', x: 210, z: -62, dir: [0, -1], plaza: 10, ring: 4.5,
-    sign: 'Olympiad', sub: 'IOAA', title: 'Astronomy Olympiad', img: IMG + 'covers/olympiad.jpg',
-    text: 'Training the next generation of astronomers through competitive problem-solving.',
-    links: [['../beyond/olympiad.html', 'Read more']] },
-  { id: 'others', kind: 'beyond', x: 270, z: 62, dir: [0, 1], plaza: 10, ring: 4.5,
-    sign: 'Others', sub: 'Teaching · mentoring · quantum', title: 'Others', img: IMG + 'covers/quantum.jpg',
-    text: 'Quantum computing education, teaching and grading, mentoring, and a library exhibit on tech advertising.',
-    links: [['../beyond/others.html', 'Read more']] },
-
-  // Links Lane, heading west
-  { id: 'links', kind: 'links', x: -132, z: 0, dir: [-1, 0], plaza: 10, ring: 4.5,
-    sign: 'Say Hello', sub: 'CV · GitHub · Scholar', title: 'Say hello', img: '../dp.jpg',
-    text: 'Astronomy Ph.D. student at Ohio State, from Mirpur, Dhaka.',
-    links: [['../Serat_Mahmud_Saad_CV.pdf', 'CV'], ['https://github.com/seratsaad', 'GitHub'],
-      ['https://scholar.google.com/citations?user=8LJQ8mkAAAAJ&hl=en', 'Scholar'], ['../index.html', 'Classic site']] },
-
-  // the hidden gali
-  { id: 'mirpur', kind: 'personal', x: -70, z: 35, dir: [1, 0], ring: 3.2,
-    sign: 'মিরপুর', sub: 'Home', title: 'Mirpur, Dhaka', img: IMG + 'mirpur.jpg',
-    text: 'I grew up in Mirpur, a dense, loud, wonderfully chaotic neighborhood in the heart of Dhaka.' },
-  { id: 'cadet', kind: 'personal', x: -95, z: 60, dir: [0, -1], ring: 3.2,
-    sign: 'Cadet College', sub: 'Mirzapur · 2014-2020', title: 'Cadet college', img: IMG + 'cadet-college.jpg',
-    text: 'Six years at a military boarding school. The sky over Mirzapur was darker than Dhaka, and I started looking up.' },
-  { id: 'olympiad-years', kind: 'personal', x: -122, z: 60, dir: [0, 1], ring: 3.2,
-    sign: 'Olympiad Years', sub: 'IOAA 2019 · Hungary', title: 'The Olympiad years', img: IMG + 'olympiad.jpg',
-    text: 'The Astronomy Olympiad gave me purpose, mentors, lifelong friends, and the confidence to aim for something bigger.' },
-  { id: 'nashville', kind: 'personal', x: -140, z: 92, dir: [-1, 0], ring: 3.2,
-    sign: 'Nashville', sub: 'Vanderbilt', title: 'Nashville', img: IMG + 'vanderbilt.jpg',
-    text: 'When the acceptance from Vanderbilt came, it felt unreal. The culture shock was spectacular.' },
-  { id: 'subha', kind: 'personal', x: -118, z: 130, dir: [0, -1], ring: 3.2,
-    sign: 'Subha', sub: 'The best discovery', title: 'Subha', img: IMG + 'with-subha.jpg',
-    text: 'I met Subha at Vanderbilt. In the long run, the most important discovery I have made.' },
-  { id: 'family', kind: 'personal', x: -92, z: 130, dir: [0, 1], ring: 3.2,
-    sign: 'Family', sub: '8,000 miles away', title: 'Family', img: IMG + 'family.jpg',
-    text: 'My parents and my sister, with me even when home is 8,000 miles away.' },
-  { id: 'now', kind: 'personal', x: -63, z: 130, dir: [1, 0], ring: 3.2, off: 8.2,
-    sign: 'Now', sub: 'Columbus, Ohio', title: 'Now', img: IMG + 'family2.jpg',
-    text: 'A Ph.D. in Astronomy at Ohio State. The 5:30 AM wake-ups are optional now.',
-    links: [['../personal.html', 'The longer version']] },
-];
 
 /* ---------------- renderer, sky and light ---------------- */
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -324,54 +243,9 @@ function windowTile(style) {
   return t;
 }
 const WINDOW_TEX = [0, 1, 2].map(windowTile);
-function stationSignTex(st, kc) {
-  const personal = st.kind === 'personal';
-  const w = 1024, h = personal ? 300 : 320;
-  return canvasTex(w, h, (g) => {
-    g.fillStyle = '#2a1d14'; g.fillRect(0, 0, w, h);
-    const r = 26, b = 12;
-    g.fillStyle = '#fbf3e4'; g.beginPath(); g.roundRect(b, b, w - 2 * b, h - 2 * b, r); g.fill();
-    g.fillStyle = kc; g.beginPath(); g.roundRect(b, b, h - 2 * b, h - 2 * b, [r, 0, 0, r]); g.fill();
-    // icon
-    const cx = h / 2, cy = h / 2, s = h * 0.26;
-    g.fillStyle = '#fff'; g.strokeStyle = '#fff'; g.lineCap = 'round'; g.lineJoin = 'round';
-    if (st.kind === 'research') { // a ringed planet
-      g.lineWidth = s * 0.13;
-      g.beginPath(); g.ellipse(cx, cy, s * 1.15, s * 0.34, -0.38, Math.PI, Math.PI * 2); g.stroke();
-      g.beginPath(); g.arc(cx, cy, s * 0.62, 0, 7); g.fill();
-      g.fillStyle = kc; g.beginPath(); g.arc(cx - s * 0.2, cy - s * 0.2, s * 0.14, 0, 7); g.fill();
-      g.beginPath(); g.ellipse(cx, cy, s * 1.15, s * 0.34, -0.38, 0, Math.PI); g.stroke();
-    } else if (st.kind === 'beyond') { // a sparkle
-      const star = (x, y, q) => { g.beginPath(); g.moveTo(x, y - q); g.quadraticCurveTo(x, y, x + q, y); g.quadraticCurveTo(x, y, x, y + q); g.quadraticCurveTo(x, y, x - q, y); g.quadraticCurveTo(x, y, x, y - q); g.fill(); };
-      star(cx - s * 0.15, cy + s * 0.1, s * 0.95); star(cx + s * 0.62, cy - s * 0.62, s * 0.38);
-    } else if (st.kind === 'links') { // a speech bubble
-      g.beginPath(); g.roundRect(cx - s, cy - s * 0.75, s * 2, s * 1.3, s * 0.35); g.fill();
-      g.beginPath(); g.moveTo(cx - s * 0.45, cy + s * 0.5); g.lineTo(cx - s * 0.7, cy + s * 1.05); g.lineTo(cx - s * 0.05, cy + s * 0.5); g.fill();
-      g.fillStyle = kc; for (const dx of [-0.5, 0, 0.5]) { g.beginPath(); g.arc(cx + dx * s, cy - s * 0.1, s * 0.13, 0, 7); g.fill(); }
-    } else { // a heart
-      g.beginPath(); g.moveTo(cx, cy + s * 0.85);
-      g.bezierCurveTo(cx - s * 1.3, cy - s * 0.05, cx - s * 0.7, cy - s * 1.05, cx, cy - s * 0.4);
-      g.bezierCurveTo(cx + s * 0.7, cy - s * 1.05, cx + s * 1.3, cy - s * 0.05, cx, cy + s * 0.85); g.fill();
-    }
-    // just the title, set in DM Sans like the main site
-    const x0 = h + 40, maxW = w - x0 - 50;
-    const isBN = /[ঀ-৿]/.test(st.sign);
-    let size = h * 0.4;
-    const font = (q) => (isBN ? `600 ${q}px ${BN}` : `600 ${q}px ${EN}`);
-    g.font = font(size);
-    while (g.measureText(st.sign).width > maxW) { size -= 3; g.font = font(size); }
-    g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillStyle = '#26272b';
-    g.fillText(st.sign, x0, h * (isBN ? 0.5 : 0.47));
-    // rickshaw-art stripe along the bottom edge
-    const cols = ['#e8364f', '#f6c445', '#1f8a5b', '#1d6fb8'];
-    for (let x = h - b, i = 0; x < w - b - r; x += 22, i++) { g.fillStyle = cols[i % 4]; g.fillRect(x, h - b - 12, 22, 12); }
-    grain(g, w, h, w * 2, 0.06, true);
-  });
-}
-
 /* ---------------- the map: Mirpur 10 from OpenStreetMap ---------------- */
 // metres around Mirpur-10 Circle, x east and z south; the ride stays inside EDGE
-const EDGE = 780;
+const EDGE = 560;
 const dm = (a) => { const p = []; for (let i = 0; i < a.length; i += 2) p.push([a[i] / 10, a[i + 1] / 10]); return p; };
 const CELL = 16, EMPTY = [];
 const gk = (cx, cz) => cx * 100003 + cz;
@@ -451,15 +325,14 @@ function nearRoad(x, z, classes = null) {
 
 // buildings: outlines turned clockwise so (-dz, dx) along each wall points outward
 const BUILDINGS = [], WALLS = new Map(), BGRID = new Map();
-for (const [lv, kind, ...c] of MAP.b) {
-  const pts = dm(c);
+function addBuilding(pts, lv, kind) {
   let A = 0, minX = 1e9, maxX = -1e9, minZ = 1e9, maxZ = -1e9;
   for (let i = 0; i < pts.length; i++) {
     const [x0, z0] = pts[i], [x1, z1] = pts[(i + 1) % pts.length];
     A += x0 * z1 - x1 * z0;
     minX = Math.min(minX, x0); maxX = Math.max(maxX, x0); minZ = Math.min(minZ, z0); maxZ = Math.max(maxZ, z0);
   }
-  if (maxX < -EDGE - 120 || minX > EDGE + 120 || maxZ < -EDGE - 120 || minZ > EDGE + 120) continue;
+  if (maxX < -EDGE - 120 || minX > EDGE + 120 || maxZ < -EDGE - 120 || minZ > EDGE + 120) return null;
   if (A > 0) pts.reverse();
   const b = { lv, kind, h: kind === 1 ? 3 : lv * 3.2, y0: 0, pts, minX, maxX, minZ, maxZ, cx: (minX + maxX) / 2, cz: (minZ + maxZ) / 2 };
   // a main road running through an outline means it is built over the road (the metro station) or mis-mapped
@@ -480,10 +353,28 @@ for (const [lv, kind, ...c] of MAP.b) {
     const [ax, az] = pts[i], [bx, bz] = pts[(i + 1) % pts.length];
     gridAdd(WALLS, Math.min(ax, bx) - 2, Math.max(ax, bx) + 2, Math.min(az, bz) - 2, Math.max(az, bz) + 2, [ax, az, bx, bz, b]);
   }
+  return b;
 }
+for (const [lv, kind, ...c] of MAP.b) addBuilding(dm(c), lv, kind);
 function buildingAt(x, z) {
   for (const b of gridAt(BGRID, x, z)) if (!b.elevated && x > b.minX && x < b.maxX && z > b.minZ && z < b.maxZ && inPoly(x, z, b.pts)) return b;
   return null;
+}
+// the map leaves gaps where nobody traced the buildings; fill open land with typical blocks facing the nearest road
+{
+  const parks = [...MAP.green.map(([, ...c]) => dm(c)), ...MAP.water.map((c) => dm(c))];
+  const free = (x, z) => !buildingAt(x, z) && nearRoad(x, z)[0] > 1.8 && !parks.some((q) => inPoly(x, z, q));
+  for (let gx = -EDGE - 40; gx <= EDGE + 40; gx += 14) for (let gz = -EDGE - 40; gz <= EDGE + 40; gz += 14) {
+    const x = gx + R(-2, 2), z = gz + R(-2, 2);
+    if (!free(x, z)) continue;
+    const [, r] = nearRoad(x, z);
+    let a = 0;
+    if (r) { let bd = 1e9; for (let i = 1; i < r.pts.length; i++) { const [px, pz] = segNear(x, z, ...r.pts[i - 1], ...r.pts[i]), d = Math.hypot(px - x, pz - z); if (d < bd) { bd = d; a = Math.atan2(r.pts[i][1] - r.pts[i - 1][1], r.pts[i][0] - r.pts[i - 1][0]); } } }
+    const w = R(9, 12.5) / 2, d = R(10, 13) / 2, ca = Math.cos(a), sa = Math.sin(a);
+    const pts = [[-w, -d], [w, -d], [w, d], [-w, d]].map(([u, v]) => [x + u * ca - v * sa, z + u * sa + v * ca]);
+    if (!pts.every(([px, pz]) => free(px, pz))) continue;
+    addBuilding(pts, pick([4, 5, 5, 6, 6, 7]), 0);
+  }
 }
 const CIRCLES = []; // posts and pillars the rickshaw bumps into
 
@@ -550,7 +441,7 @@ function flatMesh(B, mat, shadow = true) {
   return m;
 }
 {
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(2600, 2600), new THREE.MeshLambertMaterial({ map: groundTex }));
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(2600, 2600), new THREE.MeshLambertMaterial({ map: groundTex, color: '#c9c1b4' })); // dusty, half-paved
   groundTex.repeat.set(150, 150);
   ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true;
   scene.add(ground);
@@ -660,16 +551,24 @@ const TANKS = [], DOMES = [];
 }
 
 /* ---------------- shop signs with the real names from the map ---------------- */
-const SIGN_SPOTS = [];
+const SIGN_SPOTS = [], SIGNS = []; // where people gather, and every sign placed (for debugging)
 {
   const GENERIC = [['চা', '#1f8a5b'], ['মিষ্টি', '#e8364f'], ['ফার্মেসী', '#1d6fb8'], ['হোটেল', '#b8321d'], ['মোবাইল', '#7b3fb0'], ['টেইলার্স', '#d18a1b'],
     ['বিরিয়ানি', '#a0242f'], ['লাইব্রেরি', '#0f7a78'], ['স্টোর', '#3d5a99'], ['ফটোকপি', '#c25b16'], ['সেলুন', '#6b3fa0'], ['টেলিকম', '#d4145a'],
     ['হার্ডওয়্যার', '#5a6470'], ['কনফেকশনারি', '#b3261e'], ['ক্লিনিক', '#1d6fb8'], ['বস্ত্র বিতান', '#a0522d']];
   const COLS = ['#1f8a5b', '#e8364f', '#1d6fb8', '#b8321d', '#7b3fb0', '#d18a1b', '#0f7a78', '#3d5a99', '#c25b16', '#d4145a', '#2e7d4f', '#a0242f'];
+  // landmarks get big signs in their own colours: fire service red, police blue, hospitals teal...
+  const LM_COL = { fire: '#c62828', police: '#1d4f91', hospital: '#0f7a78', school: '#5a3fa0', mosque: '#1f7a3f', market: '#d18a1b', fuel: '#e07a3a', bus: '#2f6fa3', office: '#5a6470' };
+  const inside = (p) => Math.abs(p.x) < EDGE && Math.abs(p.z) < EDGE;
+  const seen = new Set();
+  // (the police box in the middle of the circle has its own painted sign)
+  const lms = MAP.lm.map(([x, z, name, cat]) => ({ x: x / 10, z: z / 10, name, cat, big: true }))
+    .filter((p) => inside(p) && Math.hypot(p.x, p.z) > 25 && !seen.has(p.name) && seen.add(p.name));
   const pois = MAP.poi.map(([x, z, name, en, kind]) => ({ x: x / 10, z: z / 10, name, en, kind }))
-    .filter((p) => Math.abs(p.x) < EDGE && Math.abs(p.z) < EDGE)
-    .sort((a, b) => Math.hypot(a.x, a.z) - Math.hypot(b.x, b.z)).slice(0, 4 * 64 - GENERIC.length);
-  const entries = GENERIC.map(([t, bg]) => ({ text: t, bg })).concat(pois.map((p, i) => ({ text: p.name, bg: COLS[i % COLS.length], poi: p })));
+    .filter(inside).sort((a, b) => Math.hypot(a.x, a.z) - Math.hypot(b.x, b.z)).slice(0, Math.max(0, 4 * 64 - GENERIC.length - lms.length));
+  const entries = GENERIC.map(([t, bg]) => ({ text: t, bg }))
+    .concat(lms.map((p) => ({ text: p.name, bg: LM_COL[p.cat] || '#3d5a99', poi: p })))
+    .concat(pois.map((p, i) => ({ text: p.name, bg: COLS[i % COLS.length], poi: p })));
   // 2048 x 2048 atlases holding 64 signs of 512 x 128 each
   const atlases = [];
   for (let a = 0; a * 64 < entries.length; a++) {
@@ -690,32 +589,41 @@ const SIGN_SPOTS = [];
     }));
   }
   const bufs = atlases.map(() => ({ p: [], n: [], uv: [] }));
-  function place(entryIndex, ax, az, bx, bz, cx, cz) {
+  function place(entryIndex, ax, az, bx, bz, cx, cz, big = false) {
     const L = Math.hypot(bx - ax, bz - az), dx = (bx - ax) / L, dz = (bz - az) / L, nx = -dz, nz = dx;
-    const w = Math.min(L * 0.85, 4.6), h = w / 4, y = 3.25 + h / 2 + 0.1;
+    const w = Math.min(L * 0.9, big ? 8 : 4.6), h = w / 4, y = (big ? 3.6 : 3.25) + h / 2 + 0.1;
     const x = cx + nx * 0.14, z = cz + nz * 0.14;
     const a = Math.floor(entryIndex / 64), k = entryIndex % 64, u0 = (k % 4) / 4, u1 = u0 + 0.25, v1 = 1 - Math.floor(k / 4) / 16, v0 = v1 - 1 / 16;
     const B = bufs[a];
     const c = [[x - dx * w / 2, y - h / 2, z - dz * w / 2, u0, v0], [x + dx * w / 2, y - h / 2, z + dz * w / 2, u1, v0], [x + dx * w / 2, y + h / 2, z + dz * w / 2, u1, v1], [x - dx * w / 2, y + h / 2, z - dz * w / 2, u0, v1]];
     for (const q of [c[0], c[1], c[2], c[0], c[2], c[3]]) { B.p.push(q[0], q[1], q[2]); B.n.push(nx, 0, nz); B.uv.push(q[3], q[4]); }
     SIGN_SPOTS.push([x + nx * 1.6, z + nz * 1.6]);
+    SIGNS.push([entries[entryIndex].text, Math.round(x), Math.round(z), +w.toFixed(1), +nx.toFixed(2), +nz.toFixed(2)]);
   }
   const used = new Set();
   // named shops go on the wall nearest to where the map puts them
   entries.forEach((e, i) => {
     if (!e.poi) return;
-    let best = null, bd = 12;
-    for (const dx of [-CELL, 0, CELL]) for (const dz of [-CELL, 0, CELL]) for (const wseg of gridAt(WALLS, e.poi.x + dx, e.poi.z + dz)) {
+    let best = null, bd = e.poi.big ? 45 : 12, fallback = null, fd = 45;
+    const reach = e.poi.big ? [-3, -2, -1, 0, 1, 2, 3] : [-1, 0, 1];
+    for (const dx of reach) for (const dz of reach) for (const wseg of gridAt(WALLS, e.poi.x + dx * CELL, e.poi.z + dz * CELL)) {
       const [ax, az, bx, bz, b] = wseg;
-      if (b.h < 4 || Math.hypot(bx - ax, bz - az) < 2.5 || used.has(wseg)) continue;
+      if (b.h < (e.poi.big ? 3 : 4) || Math.hypot(bx - ax, bz - az) < 2.5 || used.has(wseg)) continue;
       const [px, pz] = segNear(e.poi.x, e.poi.z, ax, az, bx, bz), d = Math.hypot(px - e.poi.x, pz - e.poi.z);
+      // big signs go on a wall that faces a road, or failing that the nearest wall
+      if (e.poi.big) {
+        const L = Math.hypot(bx - ax, bz - az), mx = (ax + bx) / 2, mz = (az + bz) / 2;
+        if (d < fd) { fd = d; fallback = [wseg, px, pz]; }
+        if (nearRoad(mx - ((bz - az) / L) * 5, mz + ((bx - ax) / L) * 5)[0] > 3) continue;
+      }
       if (d < bd) { bd = d; best = [wseg, px, pz]; }
     }
+    best ??= fallback;
     if (!best) return;
     const [wseg, px, pz] = best, [ax, az, bx, bz] = wseg;
     used.add(wseg);
     const L = Math.hypot(bx - ax, bz - az), t = clamp(((px - ax) * (bx - ax) + (pz - az) * (bz - az)) / (L * L), 0.3, 0.7);
-    place(i, ax, az, bx, bz, ax + (bx - ax) * t, az + (bz - az) * t);
+    place(i, ax, az, bx, bz, ax + (bx - ax) * t, az + (bz - az) * t, e.poi.big);
   });
   // and generic shop signs on walls that face a big road
   for (const b of BUILDINGS) {
@@ -1452,7 +1360,7 @@ function buildBike() {
   return { g, wheels, L: 2.0, W: 0.9 };
 }
 
-/* ---------------- station pins ---------------- */
+/* ---------------- map pins ---------------- */
 // a map pin: a rounded head tapering to a point
 function makePin(r) {
   const pts = [new THREE.Vector2(0.001, -r * 1.9)];
@@ -1572,7 +1480,7 @@ function leafPuff(n) {
   scene.add(trunk, crown);
 }
 
-/* ---------------- where the stations stand ---------------- */
+/* ---------------- Mirpur-10 Circle: the island and the police box ---------------- */
 // the nearest point on a road of the given classes: [road, x, z, dirX, dirZ]
 function snap(x, z, classes) {
   let best = null, bd = 1e9;
@@ -1585,71 +1493,149 @@ function snap(x, z, classes) {
   }
   return best;
 }
+const CIRCLE = (() => {
+  const loop = ROADS.filter((r) => /Mirpur-10 Circle/.test(r.name)).flatMap((r) => r.pts);
+  if (loop.length < 6) return { x: 0, z: 0, r: 9 };
+  const x = loop.reduce((a, p) => a + p[0], 0) / loop.length, z = loop.reduce((a, p) => a + p[1], 0) / loop.length;
+  const rad = loop.reduce((a, p) => a + Math.hypot(p[0] - x, p[1] - z), 0) / loop.length;
+  return { x, z, r: Math.max(5, rad - 4.2) };
+})();
+let POLICE = null;
 {
-  // research south along Begum Rokeya Sarani, beyond west along Main Road toward the stadium,
-  // hello at the circle, and the personal stops scattered through the lanes to the north-east
-  const ANCHOR = {
-    pantera: [0.368 * 110, 0.93 * 110], binaries: [0.368 * 210, 0.93 * 210], ai: [0.368 * 310, 0.93 * 310], young: [0.368 * 410, 0.93 * 410], lbt: [0.368 * 520, 0.93 * 520],
-    writing: [-0.917 * 110, 0.398 * 110], aifun: [-0.917 * 210, 0.398 * 210], olympiad: [-0.917 * 310, 0.398 * 310], others: [-0.917 * 410, 0.398 * 410],
-    links: [-24, -30],
-  };
-  const personal = STATIONS.filter((s) => s.kind === 'personal');
-  personal.forEach((s, i) => { const a = (i / personal.length) * Math.PI * 2; ANCHOR[s.id] = [230 + Math.cos(a) * 75, -170 + Math.sin(a) * 75]; });
-  for (const st of STATIONS) {
-    const [ax, az] = ANCHOR[st.id];
-    const [r, x, z, dx, dz] = snap(ax, az, st.kind === 'personal' ? ['r', 'g'] : st.id === 'links' ? ['p', 't'] : ['p']);
-    // stand on whichever side of the road has room: away from buildings and the other carriageway
-    let side = 1;
-    const room = (sd) => { const tx = x + dz * sd * (r.w / 2 + 3), tz = z - dx * sd * (r.w / 2 + 3); return (buildingAt(tx, tz) ? 0 : 1) + (nearRoad(tx, tz, ['p', 't'])[0] > 0.5 ? 1 : 0); };
-    if (room(-1) > room(1)) side = -1;
-    const lx = dz * side, lz = -dx * side;
-    st.ring = st.kind === 'personal' ? 2.6 : 3.2;
-    st.x = x + lx * Math.max(0, r.w / 2 - st.ring + 0.4); st.z = z + lz * Math.max(0, r.w / 2 - st.ring + 0.4);
-    st.board = [x + lx * (r.w / 2 + 1.6), z + lz * (r.w / 2 + 1.6), Math.atan2(-lx, -lz)];
+  const { x, z, r } = CIRCLE;
+  const stripe = canvasTex(256, 16, (g) => { for (let i = 0; i < 8; i++) { g.fillStyle = i % 2 ? '#26262a' : '#e7c53a'; g.fillRect(i * 32, 0, 32, 16); } });
+  stripe.wrapS = THREE.RepeatWrapping; stripe.repeat.set(Math.round(r * 0.8), 1);
+  const curbRing = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 0.35, 48, 1, true), new THREE.MeshLambertMaterial({ map: stripe }));
+  curbRing.position.set(x, 0.17, z); scene.add(curbRing);
+  const grass = new THREE.Mesh(new THREE.CircleGeometry(r, 48), new THREE.MeshLambertMaterial({ color: '#7fa35a' }));
+  grass.rotation.x = -Math.PI / 2; grass.position.set(x, 0.34, z); grass.receiveShadow = true; scene.add(grass);
+  const bed = new THREE.Mesh(new THREE.CircleGeometry(r * 0.3, 24), new THREE.MeshLambertMaterial({ color: '#4f7f3a' }));
+  bed.rotation.x = -Math.PI / 2; bed.position.set(x, 0.35, z + r * 0.2); scene.add(bed);
+  CIRCLES.push({ x, z, r: r + 0.1 });
+  // the traffic police box, with its painted sign, and an officer waving traffic through
+  const box = new THREE.Group(); box.position.set(x - r * 0.35, 0.34, z - r * 0.25); scene.add(box);
+  mesh(new THREE.BoxGeometry(1.9, 2.4, 1.9), M('#f4f4f0'), 0, 1.2, 0, box);
+  mesh(new THREE.BoxGeometry(1.94, 0.45, 1.94), M('#1d4f91'), 0, 1.75, 0, box);
+  mesh(new THREE.BoxGeometry(2.4, 0.15, 2.4), M('#c62828'), 0, 2.48, 0, box);
+  const signT = canvasTex(512, 128, (g) => { g.fillStyle = '#1d4f91'; g.fillRect(0, 0, 512, 128); g.fillStyle = '#fff'; g.font = `700 64px ${BN}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('পুলিশ বক্স', 256, 68); });
+  for (const a of [0, Math.PI / 2, Math.PI, -Math.PI / 2]) {
+    const s = mesh(new THREE.PlaneGeometry(1.8, 0.45), new THREE.MeshLambertMaterial({ map: signT }), Math.sin(a) * 0.98, 1.75, Math.cos(a) * 0.98, box);
+    s.rotation.y = a;
   }
+  POLICE = buildPerson('m');
+  POLICE.g.position.set(x + r * 0.35, 0.34, z + r * 0.1); POLICE.g.rotation.y = Math.PI / 2;
+  scene.add(POLICE.g);
 }
 
-/* ---------------- stations: a painted board, a photo, a ring on the road ---------------- */
-const loader = new THREE.TextureLoader();
-const STATION_OBJS = [];
-const pinGeo = [];
-for (const st of STATIONS) {
-  const kc = KIND[st.kind].color, personal = st.kind === 'personal';
-  const g = new THREE.Group();
-  const [bx, bz, ry] = st.board;
-  g.position.set(bx, 0, bz); g.rotation.y = ry;
-  scene.add(g);
-  const post = M('#2a2a2c', { metalness: 0.4 });
-  for (const px of [-1.7, 1.7]) { mesh(new THREE.BoxGeometry(0.16, 6.6, 0.16), post, px, 3.3, -0.08, g); }
-  const tex = stationSignTex(st, kc), asp = tex.image.width / tex.image.height, sw = 3.8, sh = sw / asp;
-  mesh(new THREE.BoxGeometry(sw + 0.24, sh + 0.24, 0.12), M('#2a1d14'), 0, 2.2, -0.06, g);
-  mesh(new THREE.PlaneGeometry(sw, sh), new THREE.MeshLambertMaterial({ map: tex }), 0, 2.2, 0.01, g);
-  const frame = mesh(new THREE.PlaneGeometry(1, 1), M('#2a1d14'), 0, 4.75, -0.02, g);
-  const photo = mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ color: '#d8cbb8' }), 0, 4.75, 0.0, g);
-  loader.load(st.img, (t) => {
-    t.colorSpace = THREE.SRGBColorSpace;
-    const a = t.image.width / t.image.height;
-    let pw = 2.6 * a, ph = 2.6;
-    if (pw > 3.6) { pw = 3.6; ph = 3.6 / a; }
-    photo.material = new THREE.MeshBasicMaterial({ map: t, toneMapped: false });
-    photo.scale.set(pw, ph, 1); frame.scale.set(pw + 0.3, ph + 0.3, 1);
-  });
-  for (const px of [-1.7, 1.7]) CIRCLES.push({ x: bx + Math.cos(ry) * px, z: bz - Math.sin(ry) * px, r: 0.25 });
-  const ring = new THREE.Mesh(new THREE.RingGeometry(st.ring - 0.35, st.ring, 48), new THREE.MeshBasicMaterial({ color: kc, transparent: true, opacity: 0.85 }));
-  ring.rotation.x = -Math.PI / 2; ring.position.set(st.x, 0.14, st.z);
-  scene.add(ring);
-  const disc = new THREE.Mesh(new THREE.CircleGeometry(st.ring - 0.35, 40), new THREE.MeshBasicMaterial({ color: kc, transparent: true, opacity: 0.12 }));
-  disc.rotation.x = -Math.PI / 2; disc.position.set(st.x, 0.13, st.z);
-  scene.add(disc);
-  const pin = pinGeo[personal ? 0 : 1] ??= makePin(personal ? 0.42 : 0.62);
-  const marker = new THREE.Mesh(pin, new THREE.MeshStandardMaterial({ color: kc, emissive: kc, emissiveIntensity: 0.45, roughness: 0.35 }));
-  marker.position.set(st.x, 3, st.z);
-  scene.add(marker);
-  STATION_OBJS.push({ st, ring, disc, marker, inside: false });
+/* ---------------- the job: passengers and fares ---------------- */
+// a stop at the curb: the road edge on the side nearest (x, z)
+function curb([r, px, pz, dx, dz], x, z, inset = 1.5) {
+  const side = Math.sign((x - px) * dz - (z - pz) * dx) || 1;
+  const o = Math.max(0, r.w / 2 - inset);
+  return [px + dz * side * o, pz - dx * side * o, side];
+}
+const PLACES = [];
+{
+  const seen = new Set();
+  for (const [x10, z10, name, cat] of MAP.lm) {
+    const x = x10 / 10, z = z10 / 10;
+    if (Math.abs(x) > EDGE - 30 || Math.abs(z) > EDGE - 30 || seen.has(name)) continue;
+    const s = snap(x, z, ['p', 't', 'r', 'g']);
+    if (!s || Math.hypot(s[1] - x, s[2] - z) > 60) continue;
+    seen.add(name);
+    PLACES.push({ name, cat, x, z, stop: curb(s, x, z) });
+  }
+}
+const JOB = { state: 'wait', next: 1.5, total: 0, trips: 0, fare: 0, to: null, spot: null, waiting: null, rider: null, slowHint: false };
+const jobRing = new THREE.Mesh(new THREE.RingGeometry(2.65, 3, 48), new THREE.MeshBasicMaterial({ color: '#f6c445', transparent: true, opacity: 0.9 }));
+jobRing.rotation.x = -Math.PI / 2; scene.add(jobRing);
+const jobDisc = new THREE.Mesh(new THREE.CircleGeometry(2.65, 40), new THREE.MeshBasicMaterial({ color: '#f6c445', transparent: true, opacity: 0.15 }));
+jobDisc.rotation.x = -Math.PI / 2; scene.add(jobDisc);
+const jobPin = new THREE.Mesh(makePin(0.6), new THREE.MeshStandardMaterial({ color: '#f6c445', emissive: '#f6c445', emissiveIntensity: 0.45, roughness: 0.35 }));
+scene.add(jobPin);
+function jobColor(c) { for (const m of [jobRing, jobDisc, jobPin]) { m.material.color.set(c); if (m.material.emissive) m.material.emissive.set(c); } }
+// someone at the roadside a little way off, waving you down
+function newFare() {
+  const near = PLACES.filter((p) => { const d = Math.hypot(p.stop[0] - P.x, p.stop[1] - P.z); return d > 60 && d < 220; });
+  let spot = null;
+  if (near.length && rand() < 0.4) spot = pick(near).stop;
+  for (let k = 0; !spot && k < 200; k++) {
+    const r = pick(WALK_ROADS);
+    if (r.cls === 'f') continue;
+    const [x, z] = along(r.pts, r.cum, R(0, r.len)), d = Math.hypot(x - P.x, z - P.z);
+    if (d < 50 || d > 200 || Math.abs(x) > EDGE - 20 || Math.abs(z) > EDGE - 20) continue;
+    spot = curb(snap(x, z, [r.cls]), x + R(-1, 1), z + R(-1, 1));
+  }
+  if (!spot) spot = PLACES.length ? pick(PLACES).stop : [P.x + 40, P.z, 1];
+  const person = buildPerson();
+  const [x, z] = spot, [, , dx, dz] = (snap(x, z, ['p', 't', 'r', 'g']) || [0, 0, 0, 1, 0]).slice(0);
+  person.g.position.set(x + dz * spot[2] * 2.2, 0.05, z - dx * spot[2] * 2.2);
+  person.g.rotation.y = Math.atan2(x - person.g.position.x, z - person.g.position.z);
+  scene.add(person.g);
+  Object.assign(JOB, { state: 'pickup', spot, waiting: person, slowHint: false });
+  jobColor('#f6c445');
+}
+function updateJob(dt, t) {
+  if (POLICE) { POLICE.arms[0].rotation.x = -1.6 + Math.sin(t * 2.2) * 0.5; POLICE.arms[0].rotation.z = -0.4; POLICE.g.rotation.y = Math.PI / 2 + Math.sin(t * 0.4) * 0.8; }
+  if (JOB.state === 'wait') {
+    jobRing.visible = jobDisc.visible = jobPin.visible = false;
+    if ((JOB.next -= dt) <= 0 && started) newFare();
+    return updateJobHud();
+  }
+  const [tx, tz] = JOB.state === 'pickup' ? JOB.spot : JOB.to.stop;
+  jobRing.visible = jobDisc.visible = jobPin.visible = true;
+  jobRing.position.set(tx, 0.15, tz); jobDisc.position.set(tx, 0.14, tz);
+  jobPin.position.set(tx, 3.4 + Math.sin(t * 2) * 0.25, tz); jobPin.rotation.y = t * 1.5;
+  if (JOB.waiting) { const a = JOB.waiting.arms[1]; a.rotation.x = -2.6 + Math.sin(t * 6) * 0.35; }
+  const d = Math.hypot(P.x - tx, P.z - tz);
+  jobPin.visible = d > 3;
+  if (d < 3) {
+    if (Math.abs(P.v) > 2.5) { if (!JOB.slowHint) { JOB.slowHint = true; toast('Slow down to stop'); } }
+    else if (JOB.state === 'pickup') {
+      scene.remove(JOB.waiting.g); JOB.waiting = null;
+      JOB.rider = seat(buildPerson(), 1.5); JOB.rider.g.position.set(0, 0.27, -0.62); player.body.add(JOB.rider.g);
+      const far = PLACES.filter((p) => { const dd = Math.hypot(p.stop[0] - tx, p.stop[1] - tz); return dd > 140 && dd < 650; });
+      JOB.to = pick(far.length ? far : PLACES);
+      const dist = Math.hypot(JOB.to.stop[0] - tx, JOB.to.stop[1] - tz);
+      JOB.fare = Math.round((25 + dist * 0.09) / 5) * 5;
+      Object.assign(JOB, { state: 'ride', slowHint: false });
+      jobColor('#3fae5a'); bell(); toast(`To ${JOB.to.name} · ৳${JOB.fare}`);
+    } else {
+      player.body.remove(JOB.rider.g); JOB.rider = null;
+      JOB.total += JOB.fare; JOB.trips++;
+      toast(`+৳${JOB.fare} · ${JOB.to.name}`); bell();
+      Object.assign(JOB, { state: 'wait', next: 2.5, to: null });
+    }
+  }
+  updateJobHud();
+}
+const hudJob = $('#job'), hudArrow = $('#job .job-arrow'), hudTo = $('#job .job-to'), hudMeta = $('#job .job-meta'), hudWallet = $('#wallet');
+function updateJobHud() {
+  hudWallet.textContent = `৳${JOB.total} · ${JOB.trips} ${JOB.trips === 1 ? 'trip' : 'trips'}`;
+  if (JOB.state === 'wait') { hudJob.classList.add('hidden'); return; }
+  hudJob.classList.remove('hidden');
+  const [tx, tz] = JOB.state === 'pickup' ? JOB.spot : JOB.to.stop, d = Math.hypot(tx - P.x, tz - P.z);
+  hudTo.textContent = JOB.state === 'pickup' ? 'A passenger is waving' : `To ${JOB.to.name}`;
+  hudMeta.textContent = JOB.state === 'pickup' ? `${Math.round(d)} m away` : `৳${JOB.fare} · ${Math.round(d)} m`;
+  const rel = Math.atan2(tx - P.x, tz - P.z) - camYaw;
+  hudArrow.style.transform = `rotate(${(-rel * 180) / Math.PI}deg)`;
 }
 
 /* ---------------- player ---------------- */
-const START = (() => { const [, x, z, dx, dz] = snap(0.368 * 45, 0.93 * 45, ['p']); return { x: x + dz * 2, z: z - dx * 2, th: Math.atan2(dx, dz) }; })();
+// start by the Mirpur 10 bus stand, on a lane that runs toward the circle
+const START = (() => {
+  let best = null, bd = 1e9;
+  for (const r of ROADS) {
+    if (r.cls !== 'p') continue;
+    for (let i = 1; i < r.pts.length; i++) {
+      const [ax, az] = r.pts[i - 1], [bx, bz] = r.pts[i], L = Math.hypot(bx - ax, bz - az) || 1, dx = (bx - ax) / L, dz = (bz - az) / L;
+      const [px, pz] = segNear(CIRCLE.x - 34, CIRCLE.z - 26, ax, az, bx, bz), cx = CIRCLE.x - px, cz = CIRCLE.z - pz, cl = Math.hypot(cx, cz) || 1;
+      const d = Math.hypot(px - CIRCLE.x + 34, pz - CIRCLE.z + 26);
+      if ((dx * cx + dz * cz) / cl > 0.6 && cl > 30 && d < bd) { bd = d; best = { x: px + dz * 2, z: pz - dx * 2, th: Math.atan2(dx, dz) }; }
+    }
+  }
+  return best || { x: CIRCLE.x - 30, z: CIRCLE.z, th: Math.PI / 2 };
+})();
 const P = { x: START.x, z: START.z, y: 0, th: START.th, v: 0, steer: 0, wheel: 0, r: 1.05, prevV: 0 };
 const player = buildRickshaw();
 player.g.rotation.order = 'YXZ';
@@ -1723,7 +1709,7 @@ function nextEdge(n) {
   for (let i = 0; i < out.length; i++) { u -= wts[i]; if (u <= 0) return out[i]; }
   return out[out.length - 1];
 }
-for (let i = 0; i < 48; i++) {
+for (let i = 0; i < 64; i++) {
   const kind = pick(['cng', 'cng', 'cng', 'bus', 'bus', 'rick', 'rick', 'rick', 'rick', 'rick', 'car', 'car', 'truck', 'bike', 'bike']);
   let v;
   if (kind === 'rick') {
@@ -1739,7 +1725,7 @@ for (let i = 0; i < 48; i++) {
   scene.add(v.g);
   const n = { ...v, kind, sp: 0, spin: 0, honkT: 0, id: i, laneU: kind === 'rick' ? R(0.7, 1) : kind === 'bus' || kind === 'truck' ? R(0.3, 0.8) : R(0, 0.7), off: null };
   NPCS.push(n);
-  spawnNPC(n, 12, 260) || spawnNPC(n, 0, 2000);
+  spawnNPC(n, 8, 160) || spawnNPC(n, 0, 2000);
 }
 function npcRect(n) {
   const L = n.L / 2, W = n.W / 2, s = Math.abs(Math.sin(n.head)), c = Math.abs(Math.cos(n.head));
@@ -1769,8 +1755,10 @@ for (let i = 0; i < 150; i++) {
   WALKERS.push(w);
 }
 // people chatting outside the shops
-for (let i = 0; i < 45 && SIGN_SPOTS.length; i++) {
-  const [cx, cz] = SIGN_SPOTS[Math.floor(rand() * SIGN_SPOTS.length)];
+const CIRCLE_SPOTS = SIGN_SPOTS.filter(([x, z]) => Math.hypot(x - CIRCLE.x, z - CIRCLE.z) < 150);
+for (let i = 0; i < 55 && SIGN_SPOTS.length; i++) {
+  const list = CIRCLE_SPOTS.length && rand() < 0.6 ? CIRCLE_SPOTS : SIGN_SPOTS;
+  const [cx, cz] = list[Math.floor(rand() * list.length)];
   if (Math.abs(cx) > EDGE || Math.abs(cz) > EDGE || buildingAt(cx, cz)) continue;
   const n = rand() < 0.5 ? 2 : 3;
   for (let k = 0; k < n; k++) {
@@ -1779,6 +1767,20 @@ for (let i = 0; i < 45 && SIGN_SPOTS.length; i++) {
     person.g.position.set(x, 0.05, z); person.g.rotation.y = ry;
     scene.add(person.g);
     STANDERS.push({ ...person, ry, ph: R(0, 10), x, z, solid: true });
+  }
+}
+// a queue at the Mirpur 10 bus stand
+{
+  const bus = PLACES.find((p) => p.cat === 'bus');
+  if (bus) {
+    const [x, z, side] = bus.stop, [, , dx, dz] = snap(x, z, ['p', 't']);
+    for (let k = 0; k < 8; k++) {
+      const px = x + dx * (k * 0.8 - 3) + dz * side * 2.6, pz = z + dz * (k * 0.8 - 3) - dx * side * 2.6;
+      if (buildingAt(px, pz)) continue;
+      const person = buildPerson(), ry = Math.atan2(dx, dz);
+      person.g.position.set(px, 0.05, pz); person.g.rotation.y = ry; scene.add(person.g);
+      STANDERS.push({ ...person, ry, ph: R(0, 10), x: px, z: pz, solid: true });
+    }
   }
 }
 const PEOPLE = [...WALKERS, ...STANDERS];
@@ -1794,6 +1796,7 @@ function knockDown(p, sp) {
   p.g.rotation.order = 'YXZ';
   scream([x, 1.5, z]); thud(Math.min(1, sp / 8));
   shake = Math.min(0.5, 0.15 + sp * 0.03);
+  if (JOB.state === 'ride') { JOB.fare = Math.max(10, JOB.fare - 20); toast('"আস্তে চালান, মামা!" · -৳20'); }
   for (const w of WALKERS) if (!w.down && Math.hypot(w.g.position.x - x, w.g.position.z - z) < 12) w.pause = R(3, 7);
 }
 // returns false once they are back on their feet: only after a while, and only far out of sight
@@ -2217,7 +2220,6 @@ addEventListener('keydown', (e) => {
   if (e.code === 'Space') { e.preventDefault(); if (!e.repeat) bell(); }
   if (e.code === 'KeyC' && !e.repeat) camMode = (camMode + 1) % 2;
   if (e.code === 'KeyR' && !e.repeat) Object.assign(P, { x: START.x, z: START.z, th: START.th, v: 0 });
-  if (e.code === 'Escape') closeCard();
 });
 addEventListener('keyup', (e) => { if (KEYMAP[e.code]) K[KEYMAP[e.code]] = false; });
 for (const b of document.querySelectorAll('#touch button')) {
@@ -2235,32 +2237,11 @@ const wakeAudio = () => { if (AC && AC.state !== 'running') AC.resume(); };
 for (const ev of ['pointerdown', 'keydown', 'touchend']) addEventListener(ev, wakeAudio, true);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) wakeAudio(); });
 
-/* ---------------- UI: card and toast ---------------- */
-let activeCard = null;
-function openCard(st) {
-  const card = $('#card');
-  card.style.setProperty('--accent', KIND[st.kind].color);
-  card.querySelector('.card-kicker').textContent = KIND[st.kind].label;
-  card.querySelector('.card-title').textContent = st.title;
-  const img = card.querySelector('.card-img');
-  img.classList.remove('broken'); img.onerror = () => img.classList.add('broken');
-  img.src = st.img || ''; img.alt = st.title;
-  card.querySelector('.card-text').textContent = st.text;
-  const links = card.querySelector('.card-links');
-  links.innerHTML = '';
-  for (const [href, label] of st.links || []) {
-    const a = document.createElement('a'); a.href = href; a.textContent = label + ' →'; a.target = '_blank'; a.rel = 'noopener';
-    links.appendChild(a);
-  }
-  card.classList.remove('hidden');
-  activeCard = st;
-}
-function closeCard() { $('#card').classList.add('hidden'); activeCard = null; }
-$('.card-close').addEventListener('click', closeCard);
+/* ---------------- UI: toast ---------------- */
 let toastT = null;
 function toast(msg) {
   const t = $('#toast'); t.textContent = msg; t.classList.add('show');
-  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 4200);
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 3800);
 }
 
 /* ---------------- simulation ---------------- */
@@ -2375,7 +2356,7 @@ function updateNPCs(dt) {
   for (const n of NPCS) {
     const near = Math.hypot(P.x - n.g.position.x, P.z - n.g.position.z);
     // traffic follows you around: vehicles far behind reappear down the road, out of sight
-    if (near > 320) { spawnNPC(n, 210, 300); continue; }
+    if (near > 240) { spawnNPC(n, 150, 220); continue; }
     let target = Math.min(n.vmax, CAP[n.e.r.cls] ?? 6);
     const hf = [Math.sin(n.head), Math.cos(n.head)], hl = [hf[1], -hf[0]];
     if (n.e.len - n.s < 6 && target > 6) target = 6; // ease off into junctions
@@ -2399,7 +2380,7 @@ function updateNPCs(dt) {
     let gone = false;
     while (n.s > n.e.len) {
       const nx = nextEdge(n);
-      if (!nx) { gone = !spawnNPC(n, 210, 300); break; }
+      if (!nx) { gone = !spawnNPC(n, 150, 220); break; }
       n.s -= n.e.len; n.e = nx;
     }
     if (!gone) placeNPC(n, dt);
@@ -2467,27 +2448,6 @@ function updateWalkers(dt, t) {
   if (murmurGain) murmurGain.gain.value = 0.06 + Math.min(0.16, crowd * 0.005);
 }
 
-function updateStations(t) {
-  for (const s of STATION_OBJS) {
-    const { st } = s;
-    const d = Math.hypot(P.x - st.x, P.z - st.z);
-    const inside = d < st.ring;
-    s.marker.rotation.y = t * 1.5;
-    s.marker.position.y = 3.2 + Math.sin(t * 2 + st.x) * 0.25;
-    // the personal stops only show once you are close, or once you have found one
-    s.marker.visible = !inside && (st.kind !== 'personal' || galiFound || d < 60);
-    s.ring.material.opacity = inside ? 1 : 0.6 + Math.sin(t * 3) * 0.2;
-    s.disc.material.opacity = inside ? 0.35 : 0.12;
-    if (inside && !s.inside) {
-      openCard(st);
-      if (!visited.has(st.id)) { visited.add(st.id); bell(); }
-      if (st.kind === 'personal' && !galiFound) { galiFound = true; toast('You found the hidden gali'); }
-    }
-    if (!inside && s.inside && activeCard === st) closeCard();
-    s.inside = inside;
-  }
-}
-
 // walls and posts push the rickshaw back; the map has an edge
 function collideWorld() {
   for (const [ax, az, bx, bz] of gridAt(WALLS, P.x, P.z)) {
@@ -2544,27 +2504,21 @@ mapCanvas.width = mapCanvas.height = MAPW;
   g.strokeStyle = 'rgba(30,110,70,.75)'; g.lineWidth = 2.2; g.setLineDash([6, 4]);
   for (const l of RAIL) { g.beginPath(); l.pts.forEach(([x, z], i) => (i ? g.lineTo(X(x), X(z)) : g.moveTo(X(x), X(z)))); g.stroke(); }
 }
-let galiFound = false;
-const visited = new Set();
 function drawMinimap() {
   const view = 340 * MS, sx = (P.x + EDGE + 100) * MS - view / 2, sz = (P.z + EDGE + 100) * MS - view / 2;
   const k = mm.width / view;
   mg.drawImage(mapCanvas, sx, sz, view, view * (mm.height / mm.width), 0, 0, mm.width, mm.height);
   const mx = (x) => ((x + EDGE + 100) * MS - sx) * k, mz = (z) => ((z + EDGE + 100) * MS - sz) * k;
-  for (const st of STATIONS) {
-    if (st.kind === 'personal' && !galiFound) continue;
-    const x = clamp(mx(st.x), 6, mm.width - 6), y = clamp(mz(st.z), 6, mm.height - 16);
-    mg.fillStyle = KIND[st.kind].color;
-    mg.beginPath(); mg.arc(x, y, visited.has(st.id) ? 2.5 : 3.6, 0, 7); mg.fill();
-    if (visited.has(st.id)) { mg.strokeStyle = KIND[st.kind].color; mg.beginPath(); mg.arc(x, y, 4.5, 0, 7); mg.stroke(); }
+  if (JOB.state !== 'wait') {
+    const [tx, tz] = JOB.state === 'pickup' ? JOB.spot : JOB.to.stop;
+    const x = clamp(mx(tx), 6, mm.width - 6), y = clamp(mz(tz), 6, mm.height - 6);
+    mg.fillStyle = JOB.state === 'pickup' ? '#f6c445' : '#3fae5a'; mg.strokeStyle = '#3b2a1e'; mg.lineWidth = 1.5;
+    mg.beginPath(); mg.arc(x, y, 5, 0, 7); mg.fill(); mg.stroke();
   }
   mg.save(); mg.translate(mx(P.x), mz(P.z)); mg.rotate(-P.th + Math.PI);
   mg.fillStyle = '#e8364f'; mg.strokeStyle = '#fff'; mg.lineWidth = 1.5;
   mg.beginPath(); mg.moveTo(0, -7); mg.lineTo(5, 5); mg.lineTo(0, 2.5); mg.lineTo(-5, 5); mg.closePath(); mg.fill(); mg.stroke();
   mg.restore();
-  mg.fillStyle = '#3b2a1e'; mg.font = `600 10px ${EN}`;
-  const shown = STATIONS.filter((s) => s.kind !== 'personal' || galiFound).length;
-  mg.fillText(`${visited.size} / ${shown}${galiFound ? '' : ' + ?'}`, 6, mm.height - 6);
 }
 
 function updateParticles(dt) {
@@ -2624,7 +2578,7 @@ function update(dt, t) {
   updateWalkers(dt, t);
   updateTrains(dt);
   updateParticles(dt);
-  updateStations(t);
+  updateJob(dt, t);
   updateCamera(dt);
   updateAudio(dt, started ? (K.up ? 1 : 0) - (K.down ? 1 : 0) : 0);
   WIND.value = t;
@@ -2645,13 +2599,13 @@ frame();
 // debug hook: advance the simulation without relying on requestAnimationFrame
 let simT = 0;
 window.__game = {
-  P, K, STATIONS, NPCS, WALKERS, STANDERS, BUILDINGS, ROADS, EDGES, renderer, scene, camera,
+  P, K, JOB, PLACES, CIRCLE, SIGNS, NPCS, WALKERS, STANDERS, BUILDINGS, ROADS, EDGES, renderer, scene, camera,
   step(frames = 60, keys = {}) {
     Object.assign(K, keys);
     for (let i = 0; i < frames; i++) { simT += 1 / 60; update(1 / 60, simT); }
     for (const k in keys) K[k] = false;
     drawMinimap(); renderer.render(scene, camera);
-    return { x: +P.x.toFixed(1), z: +P.z.toFixed(1), v: +P.v.toFixed(1), card: activeCard?.id ?? null, galiFound, surface };
+    return { x: +P.x.toFixed(1), z: +P.z.toFixed(1), v: +P.v.toFixed(1), job: JOB.state, to: JOB.to?.name ?? null, total: JOB.total, surface };
   },
   look(from, to) { camOverride = from ? [from, to] : null; return this.step(1); },
   audio: () => ({ state: AC?.state, engines: ENGINES.map((e) => e.n?.kind ?? null), chatter: CHATTER.map((c) => !!c.spot) }),

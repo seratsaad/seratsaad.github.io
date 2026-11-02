@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <title>Rickshaw ride around Mirpur 10 · Serat Saad</title>
+  <title>Mirpur 10 · a rickshaw game</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+Da+2:wght@600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=Hind+Siliguri:wght@500;600;700&display=swap">
@@ -11,7 +11,18 @@
   <style>
     .osm { position: fixed; left: 12px; bottom: 8px; z-index: 5; font-size: 11px; color: #5a4636; text-decoration: none;
       background: rgba(255, 250, 242, .75); padding: 2px 8px; border-radius: 999px; }
-    @media (hover: none) and (pointer: coarse) { .osm { left: auto; right: 12px; top: 140px; bottom: auto; } }
+    #wallet { padding: 6px 14px; border-radius: 999px; background: rgba(38, 39, 43, .88); color: #fff; font-weight: 600; font-size: 14px; }
+    #job { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 6; display: flex; align-items: center; gap: 12px;
+      padding: 10px 18px 10px 12px; border-radius: 16px; background: var(--paper); box-shadow: 0 10px 30px rgba(30, 15, 5, .35); max-width: calc(100vw - 32px); }
+    #job.hidden { display: none; }
+    .job-arrow { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0;
+      background: #e8364f; color: #fff; font-size: 16px; transition: transform .15s linear; }
+    .job-to { font-weight: 600; font-size: 15.5px; color: var(--ink); line-height: 1.25; }
+    .job-meta { font-size: 13px; font-weight: 400; color: var(--ink-soft); }
+    @media (hover: none) and (pointer: coarse) {
+      .osm { left: auto; right: 12px; top: 140px; bottom: auto; }
+      #job { bottom: 152px; }
+    }
   </style>
   <script type="importmap">
     {
@@ -26,32 +37,27 @@
   <div id="intro">
     <div class="intro-box">
       <div class="intro-bn">মিরপুর ১০</div>
-      <h1>Serat Saad</h1>
-      <p class="intro-sub">A rickshaw ride through my work, on the real streets of Mirpur.</p>
+      <h1>Rickshaw Wala</h1>
+      <p class="intro-sub">Pick up passengers around Mirpur-10 Circle and get them where they are going.</p>
       <p class="intro-keys"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> to ride &nbsp;·&nbsp; <kbd>Space</kbd> for the bell</p>
       <p class="intro-keys intro-touch">Arrows to ride &nbsp;·&nbsp; 🔔 for the bell</p>
       <button id="start">Start riding</button>
-      <p class="intro-hint">Some stops only show up once you find them.</p>
+      <p class="intro-hint">Slow down to pick up and drop off. Mind the people.</p>
       <a class="intro-classic" href="../index.html">classic site →</a>
     </div>
   </div>
 
   <div id="hud">
-    <a href="../index.html" class="hud-title">Serat Saad</a>
+    <a href="../index.html" class="hud-title">মিরপুর ১০</a>
+    <span id="wallet">৳0 · 0 trips</span>
     <span class="hud-keys"><kbd>Shift</kbd> faster <kbd>C</kbd> camera <kbd>R</kbd> reset</span>
   </div>
 
   <canvas id="minimap" width="200" height="184"></canvas>
 
-  <div id="card" class="hidden">
-    <button class="card-close" aria-label="Close">×</button>
-    <div class="card-media"><img class="card-img" alt=""></div>
-    <div class="card-body">
-      <div class="card-kicker"></div>
-      <h2 class="card-title"></h2>
-      <p class="card-text"></p>
-      <div class="card-links"></div>
-    </div>
+  <div id="job" class="hidden">
+    <div class="job-arrow">▲</div>
+    <div><div class="job-to"></div><div class="job-meta"></div></div>
   </div>
 
   <div id="toast"></div>

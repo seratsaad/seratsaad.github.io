@@ -1,5 +1,5 @@
-"""Turn an OpenStreetMap download (Overpass JSON, "out geom") of Mirpur 10 into
-the compact local map the game loads.
+"""Turn an OpenStreetMap download (Overpass JSON, "out geom") around Mirpur-10 Circle
+into the compact local map the game loads.
 
     python3 build_map.py raw.json ../mirpur.json
 
@@ -7,7 +7,7 @@ Coordinates become metres around Mirpur-10 Circle (x east, z south), stored as
 whole decimetres. Building heights are estimated where OSM has no floor count.
 Map data (c) OpenStreetMap contributors, ODbL.
 """
-import json, math, sys, random, collections
+import json, math, re, sys, random, collections
 
 LAT0, LON0 = 23.80709, 90.36861          # centre of Mirpur-10 Circle
 KX = math.cos(math.radians(LAT0)) * 111320.0
@@ -57,11 +57,15 @@ ROAD = {  # class, default lanes, metres per lane
     'service': ('s', 0, 0), 'footway': ('f', 0, 0), 'path': ('f', 0, 0), 'steps': ('f', 0, 0), 'pedestrian': ('f', 0, 0),
 }
 FIXED_W = {'r': 6.0, 'g': 4.5, 's': 4.0, 'f': 2.6}
+# named places worth a big sign and a trip: [category, what the game calls it]
+LANDMARK = {'fire_station': 'fire', 'training': 'school', 'police': 'police', 'hospital': 'hospital', 'clinic': 'hospital',
+            'bus_station': 'bus', 'marketplace': 'market', 'school': 'school', 'college': 'school', 'university': 'school',
+            'fuel': 'fuel', 'place_of_worship': 'mosque', 'government': 'office', 'post_office': 'office', 'townhall': 'office'}
 GREEN = {'stadium', 'pitch', 'park', 'playground', 'meadow', 'grass', 'cemetery', 'recreation_ground', 'garden'}
 
 def main(src, dst):
     els = json.load(open(src))['elements']
-    roads, buildings, rail, station, green, water, pois = [], [], [], [], [], [], []
+    roads, buildings, rail, station, green, water, pois, landmarks = [], [], [], [], [], [], [], []
     uses = collections.Counter(n for e in els if e['type'] == 'way' and e.get('tags', {}).get('highway') in ROAD for n in set(e.get('nodes', [])))
     for e in els:
         t = e.get('tags', {})
@@ -106,6 +110,18 @@ def main(src, dst):
             pts = [xz(p) for p in e['geometry']]
             if pts[0] == pts[-1]:
                 water.append(flat(pts[:-1]))
+        kind = LANDMARK.get(t.get('amenity')) or LANDMARK.get(t.get('office')) or ('market' if t.get('building') in ('commercial', 'retail') and t.get('name') else None)
+        if t.get('name') and kind and (e['type'] == 'node' or 'geometry' in e):
+            if e['type'] == 'node':
+                x, z = xz(e)
+            else:
+                g = [xz(p) for p in e['geometry']]
+                x, z = sum(p[0] for p in g) / len(g), sum(p[1] for p in g) / len(g)
+            name = (t.get('name:en') or t['name']).split(',')[0].strip()[:44]
+            if kind == 'school' and t.get('amenity') == 'training' and re.search(r'\bfire\b', name, re.I):  # the fire service HQ is mapped as a training site
+                kind = 'fire'
+            landmarks.append([round(x * 10), round(z * 10), name, kind])
+            continue
         if e['type'] == 'node' and t.get('name') and (t.get('shop') or t.get('amenity')):
             x, z = xz(e)
             pois.append([round(x * 10), round(z * 10), t['name'][:40], (t.get('name:en') or '')[:40], t.get('shop') or t.get('amenity')])
@@ -168,10 +184,10 @@ def main(src, dst):
     data = {
         'note': 'Map data (c) OpenStreetMap contributors, ODbL. Units: decimetres around Mirpur-10 Circle.',
         'origin': [LAT0, LON0], 'bounds': [min(allx), min(allz), max(allx), max(allz)],
-        'b': out_b, 'r': roads, 'rail': rail, 'station': station, 'green': green, 'water': water, 'poi': pois,
+        'b': out_b, 'r': roads, 'rail': rail, 'station': station, 'green': green, 'water': water, 'poi': pois, 'lm': landmarks,
     }
     json.dump(data, open(dst, 'w'), separators=(',', ':'), ensure_ascii=False)
-    print(f'{len(out_b)} buildings, {len(roads)} roads, {len(rail)} rail, {len(station)} station, {len(green)} green, {len(water)} water, {len(pois)} pois')
+    print(f'{len(out_b)} buildings, {len(roads)} roads, {len(rail)} rail, {len(station)} station, {len(green)} green, {len(water)} water, {len(pois)} pois, {len(landmarks)} landmarks')
 
 if __name__ == '__main__':
     main(sys.argv[1], sys.argv[2])
