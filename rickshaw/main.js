@@ -2218,7 +2218,10 @@ function env(g, t, a, peak, hold, rel) {
 
 function initAudio() {
   if (AC) return;
+  // iPhones mute web audio with the silent switch unless the page asks to play like media
+  if (navigator.audioSession) navigator.audioSession.type = 'playback';
   AC = new (window.AudioContext || window.webkitAudioContext)();
+  if (AC.state !== 'running') AC.resume();
   const comp = AC.createDynamicsCompressor(); comp.threshold.value = -28; comp.ratio.value = 8; comp.attack.value = 0.004;
   // makeup gain, then a hard limiter so the louder mix never clips
   const lim = AC.createDynamicsCompressor(); lim.threshold.value = -2; lim.knee.value = 0; lim.ratio.value = 20; lim.attack.value = 0.001; lim.release.value = 0.1;
@@ -2574,6 +2577,10 @@ $('#start').addEventListener('click', () => {
   $('#intro').classList.add('gone');
   setTimeout(bell, 300);
 });
+// Safari and phones can start or leave the audio paused; any tap or key wakes it again
+const wakeAudio = () => { if (AC && AC.state !== 'running') AC.resume(); };
+for (const ev of ['pointerdown', 'keydown', 'touchend']) addEventListener(ev, wakeAudio, true);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) wakeAudio(); });
 
 /* ---------------- UI: card, toast, minimap ---------------- */
 let activeCard = null;
