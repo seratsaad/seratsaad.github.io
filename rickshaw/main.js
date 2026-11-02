@@ -2080,7 +2080,7 @@ let AC = null, master = null, wetIn = null, noiseBuf = null, brownBuf = null, DI
 let murmurGain = null, rumbleGain = null;
 const SFX = {}; // the player's own rickshaw: rolling, bricks, wind, freewheel, brakes
 const ENGINES = [], CHATTER = [], CHAT_SPOTS = [];
-const HONK_RATE = { cng: 0.45, bike: 0.5, bus: 0.35, truck: 0.3, car: 0.3, rick: 0.3 }; // honks per second, each
+const HONK_RATE = { cng: 1.1, bike: 1.2, bus: 0.9, truck: 0.8, car: 0.8, rick: 0.7 }; // honks per second, each
 const HORN = { // [partials in Hz, filter centre, typical length, repeats]
   bus: [[185, 233, 277], 900, [0.5, 1.1], [1, 2]], truck: [[165, 208], 800, [0.6, 1.2], [1, 2]],
   car: [[415, 500], 2200, [0.12, 0.3], [1, 3]], cng: [[540, 660], 1800, [0.07, 0.14], [2, 4]],
@@ -2119,8 +2119,10 @@ function env(g, t, a, peak, hold, rel) {
 function initAudio() {
   if (AC) return;
   AC = new (window.AudioContext || window.webkitAudioContext)();
-  const comp = AC.createDynamicsCompressor(); comp.threshold.value = -20; comp.ratio.value = 6; comp.attack.value = 0.005;
-  master = amp(0.9); master.connect(comp).connect(AC.destination);
+  const comp = AC.createDynamicsCompressor(); comp.threshold.value = -28; comp.ratio.value = 8; comp.attack.value = 0.004;
+  // makeup gain, then a hard limiter so the louder mix never clips
+  const lim = AC.createDynamicsCompressor(); lim.threshold.value = -2; lim.knee.value = 0; lim.ratio.value = 20; lim.attack.value = 0.001; lim.release.value = 0.1;
+  master = amp(1.3); master.connect(comp).connect(amp(2.2)).connect(lim).connect(AC.destination);
   const len = AC.sampleRate * 2;
   noiseBuf = AC.createBuffer(1, len, AC.sampleRate);
   const d = noiseBuf.getChannelData(0);
@@ -2142,10 +2144,10 @@ function initAudio() {
   wetIn = amp(0.5); wetIn.connect(conv).connect(filt('lowpass', 3200)).connect(master);
 
   // the city all around: a low roar that swells slowly, and a thin hiss of far traffic
-  const roar = amp(0.26); loopSrc(brownBuf).connect(filt('lowpass', 380)).connect(roar).connect(master);
-  const swell = AC.createOscillator(); swell.frequency.value = 0.045; swell.connect(amp(0.07)).connect(roar.gain); swell.start();
-  loopSrc().connect(filt('bandpass', 1100, 0.5)).connect(amp(0.022)).connect(master);
-  murmurGain = amp(0.03); loopSrc().connect(filt('bandpass', 600, 0.9)).connect(filt('lowpass', 1400)).connect(murmurGain).connect(master);
+  const roar = amp(0.42); loopSrc(brownBuf).connect(filt('lowpass', 380)).connect(roar).connect(master);
+  const swell = AC.createOscillator(); swell.frequency.value = 0.045; swell.connect(amp(0.12)).connect(roar.gain); swell.start();
+  loopSrc().connect(filt('bandpass', 1100, 0.5)).connect(amp(0.04)).connect(master);
+  murmurGain = amp(0.06); loopSrc().connect(filt('bandpass', 600, 0.9)).connect(filt('lowpass', 1400)).connect(murmurGain).connect(master);
 
   // the player's rickshaw
   SFX.roll = amp(0); SFX.rollF = filt('bandpass', 300, 0.9);
@@ -2166,7 +2168,7 @@ function initAudio() {
   SFX.squeal = amp(0); SFX.squealO.connect(filt('bandpass', 3150, 8)).connect(SFX.squeal).connect(master); SFX.squealO.start();
 
   // engine voices that follow the nearest motor vehicles
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 14; i++) {
     const v = { n: null, eg: amp(0), tg: amp(0) };
     v.osc = AC.createOscillator(); v.osc.type = 'sawtooth';
     v.sub = AC.createOscillator(); v.sub.type = 'square';
@@ -2187,7 +2189,7 @@ function initAudio() {
   }
   // voices of chatter that settle on the nearest groups of people
   const VOWELS = [[800, 1250], [420, 2000], [320, 2300], [520, 900], [350, 800], [650, 1700]];
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 10; i++) {
     const c = { spot: null, next: 0, VOWELS };
     c.o = AC.createOscillator(); c.o.type = 'sawtooth'; c.o.frequency.value = 140;
     c.f1 = filt('bandpass', 700, 5); c.f2 = filt('bandpass', 1300, 7);
@@ -2252,7 +2254,7 @@ function honk(n, vol = 1) {
 function farHonk() {
   const a = R(0, Math.PI * 2), r = R(70, 160);
   const n = { kind: pick(['cng', 'cng', 'car', 'bus', 'bike', 'rick', 'truck']), g: { position: { x: P.x + Math.cos(a) * r, z: P.z + Math.sin(a) * r } } };
-  honk(n, R(0.6, 1.2));
+  honk(n, R(0.8, 1.6));
 }
 // hitting something: a dull thump, a sheet-metal clang and loose parts rattling
 function thud(vol) {
@@ -2323,7 +2325,7 @@ function chirp(pos) {
 }
 
 const _lp = new THREE.Vector3(), _fw = new THREE.Vector3(), _up = new THREE.Vector3();
-let audioT = 0, nextFar = 2, nextChirp = 3, nextClink = 1, lastPhase = 0;
+let audioT = 0, nextBell = 1, nextFar = 0.5, nextChirp = 3, nextClink = 1, lastPhase = 0;
 function updateAudio(dt, thr) {
   if (!AC) return;
   const t = AC.currentTime, L = AC.listener;
@@ -2354,7 +2356,7 @@ function updateAudio(dt, thr) {
   // engines: give the voices to the nearest motor vehicles
   const near = NPCS.filter((n) => n.kind !== 'rick' && n.g.visible)
     .map((n) => [n, Math.hypot(n.g.position.x - camera.position.x, n.g.position.z - camera.position.z)])
-    .filter(([, d]) => d < 110).sort((a, b) => a[1] - b[1]).slice(0, ENGINES.length).map(([n]) => n);
+    .filter(([, d]) => d < 150).sort((a, b) => a[1] - b[1]).slice(0, ENGINES.length).map(([n]) => n);
   for (const e of ENGINES) if (e.n && !near.includes(e.n)) { e.n = null; e.eg.gain.setTargetAtTime(0, t, 0.08); e.tg.gain.setTargetAtTime(0, t, 0.08); }
   for (const n of near) {
     if (ENGINES.some((e) => e.n === n)) continue;
@@ -2380,7 +2382,7 @@ function updateAudio(dt, thr) {
     const load = n.sp / n.vmax;
     const f = (c.f0 + n.sp * c.fk) * doppler * (1 + 0.04 * Math.sin(t * 7 + x));
     e.osc.frequency.setTargetAtTime(f, t, 0.05); e.sub.frequency.setTargetAtTime(f / 2, t, 0.05);
-    e.eg.gain.setTargetAtTime(1.5 * c.vol * (0.55 + 0.45 * load), t, 0.1);
+    e.eg.gain.setTargetAtTime(2.2 * c.vol * (0.55 + 0.45 * load), t, 0.1);
     e.tg.gain.setTargetAtTime(Math.min(0.25, n.sp * 0.02) * (n.kind === 'bus' || n.kind === 'truck' ? 1.5 : 1), t, 0.1);
     e.tf.frequency.setTargetAtTime((300 + n.sp * 30) * doppler, t, 0.1);
     setPos(e.pan, x, 1, z, 0.03);
@@ -2392,11 +2394,11 @@ function updateAudio(dt, thr) {
   if (audioT > 0.5) {
     audioT = 0;
     const passing = WALKERS.filter((w) => w.g.visible).map((w) => [w.g.position.x, 1.6, w.g.position.z]);
-    const spots = CHAT_SPOTS.concat(passing).map((p) => [p, Math.hypot(p[0] - P.x, p[2] - P.z)]).filter(([, d]) => d < 40).sort((a, b) => a[1] - b[1]).slice(0, CHATTER.length);
+    const spots = CHAT_SPOTS.concat(passing).map((p) => [p, Math.hypot(p[0] - P.x, p[2] - P.z)]).filter(([, d]) => d < 55).sort((a, b) => a[1] - b[1]).slice(0, CHATTER.length);
     CHATTER.forEach((c, i) => {
       const s = spots[i]?.[0] ?? null;
       if (s !== c.spot && !(s && c.spot && Math.hypot(s[0] - c.spot[0], s[2] - c.spot[2]) < 2)) { c.spot = s; if (s) { setPos(c.pan, s[0] + R(-0.5, 0.5), s[1], s[2] + R(-0.5, 0.5)); c.pitch = rand() < 0.5 ? R(105, 145) : R(185, 240); } }
-      c.vol.gain.setTargetAtTime(s ? 0.17 : 0, t, 0.3);
+      c.vol.gain.setTargetAtTime(s ? 0.28 : 0, t, 0.3);
     });
   }
   for (const c of CHATTER) {
@@ -2412,14 +2414,16 @@ function updateAudio(dt, thr) {
       s += d;
     }
     c.g.gain.setTargetAtTime(0, s, 0.03);
-    c.next = s + R(0.15, 0.9);
+    c.next = s + R(0.08, 0.45);
   }
 
   // the river, birds, tea glasses, and horns from streets you cannot see
   SFX.river.gain.setTargetAtTime(P.x > 220 ? 0.12 : 0, t, 0.5);
   setPos(SFX.riverPan, RIVER_X + 4, 0, P.z, 0.2);
   nextFar -= dt; nextChirp -= dt; nextClink -= dt;
-  if (nextFar < 0) { nextFar = R(0.12, 0.7); farHonk(); if (rand() < 0.25) setTimeout(farHonk, R(80, 300)); }
+  if (nextFar < 0) { nextFar = R(0.05, 0.35); farHonk(); if (rand() < 0.45) setTimeout(farHonk, R(60, 250)); if (rand() < 0.2) setTimeout(farHonk, R(300, 600)); }
+  nextBell -= dt;
+  if (nextBell < 0) { nextBell = R(0.3, 1.2); const a = R(0, Math.PI * 2), r = R(12, 50); bell([P.x + Math.cos(a) * r, 1.2, P.z + Math.sin(a) * r], R(0.4, 0.9)); }
   if (nextChirp < 0) { nextChirp = R(1.5, 5); const a = R(0, Math.PI * 2), r = R(8, 30); chirp([P.x + Math.cos(a) * r, R(4, 7), P.z + Math.sin(a) * r]); }
   if (nextClink < 0) {
     nextClink = R(1.2, 3.5);
@@ -2670,7 +2674,7 @@ function updateNPCs(dt) {
   // in Dhaka a horn means "I am here", so everyone uses it, all the time
   if (AC) for (const n of NPCS) {
     if (!n.g.visible || n.honkT > 0) continue;
-    if (rand() < dt * HONK_RATE[n.kind]) { honk(n, R(0.6, 1.1)); n.honkT = R(0.4, 1.5); }
+    if (rand() < dt * HONK_RATE[n.kind]) { honk(n, R(0.8, 1.4)); n.honkT = R(0.25, 0.9); }
   }
 }
 
@@ -2744,7 +2748,7 @@ function updateWalkers(dt, t) {
     }
   }
   for (const p of IDLERS) { p.g.rotation.z = Math.sin(t * 0.8 + p.g.id) * 0.02; }
-  if (murmurGain) murmurGain.gain.value = 0.025 + Math.min(0.09, crowd * 0.003);
+  if (murmurGain) murmurGain.gain.value = 0.06 + Math.min(0.16, crowd * 0.005);
 }
 
 function updateCrows(dt, t) {
