@@ -740,7 +740,8 @@ function addBuilding(r, h, color, face, mainRoad = false) {
   for (let k = 1; k < floors; k++) {
     // sunshade slabs over every row of windows
     if (style === 1) { const [x, z] = at(0, 0.25); pushBox(x, k * 3.2 + 2.75, z, fx ? 0.5 : wAlong - 0.2, 0.1, fx ? wAlong - 0.2 : 0.5, lighter); }
-    for (let b = 0; b < bays; b++) {
+    // balconies start on the second floor: the first is left clear for the shop sign
+    for (let b = 0; k > 1 && b < bays; b++) {
       const along = -wAlong / 2 + 1.6 + b * 3.2;
       if ((b + k) % 2 && rand() < 0.55) {
         if (rand() < 0.3) { const [x, z] = at(along + 1.1, 0.25); pushBox(x, k * 3.2 + 2.3, z, fx ? 0.5 : 0.9, 0.55, fx ? 0.9 : 0.5, '#e9e6df'); } // AC unit
@@ -1725,7 +1726,7 @@ SHOP_SIGNS.forEach((tex, ti) => {
   if (!list.length) return;
   const im = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1.25), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.6 }), list.length);
   const o = new THREE.Object3D();
-  list.forEach((s, i) => { o.position.set(s.x, 3.75, s.z); o.rotation.set(0, s.ry, 0); o.scale.set(s.w, 1, 1); o.updateMatrix(); im.setMatrixAt(i, o.matrix); });
+  list.forEach((s, i) => { o.position.set(s.x, 3.85, s.z); o.rotation.set(0, s.ry, 0); o.scale.set(s.w, 1, 1); o.updateMatrix(); im.setMatrixAt(i, o.matrix); });
   scene.add(im);
 });
 SHOP_IN.forEach((tex, ti) => {
@@ -2525,7 +2526,7 @@ function updateAudio(dt, thr) {
       c.f1.frequency.setTargetAtTime(f1, s, 0.02); c.f2.frequency.setTargetAtTime(f2, s, 0.02);
       c.o.frequency.setTargetAtTime(p, s, 0.03);
       c.g.gain.setTargetAtTime(R(0.6, 1), s, 0.015); c.g.gain.setTargetAtTime(0.05, s + d * 0.8, 0.02);
-      if (rand() < 0.4) { c.breath.gain.setTargetAtTime(0.25, s - 0.03, 0.005); c.breath.gain.setTargetAtTime(0, s, 0.01); }
+      if (rand() < 0.4) { c.breath.gain.setTargetAtTime(0.25, Math.max(t, s - 0.03), 0.005); c.breath.gain.setTargetAtTime(0, s, 0.01); }
       s += d;
     }
     c.g.gain.setTargetAtTime(0, s, 0.03);
