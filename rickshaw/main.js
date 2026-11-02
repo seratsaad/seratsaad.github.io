@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { mergeGeometries, mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
@@ -1855,7 +1855,72 @@ const CROWS = [];
   scene.add(im);
 }
 
-/* ---------------- krishnachura and rain trees ---------------- */
+/* ---------------- rain trees and other street trees ---------------- */
+// a small bunch of leaves on a transparent card
+const leafTex = canvasTex(128, 128, (g) => {
+  for (let i = 0; i < 11; i++) {
+    const a = (i / 11) * Math.PI * 2 + R(-0.25, 0.25), d = R(14, 30), len = R(26, 40), w = R(9, 14);
+    g.save(); g.translate(64 + Math.cos(a) * d, 64 + Math.sin(a) * d); g.rotate(a + R(-0.5, 0.5));
+    const v = Math.round(R(205, 255));
+    g.fillStyle = `rgb(${v},${v},${v})`;
+    g.beginPath(); g.moveTo(-len / 2, 0); g.quadraticCurveTo(0, -w, len / 2, 0); g.quadraticCurveTo(0, w, -len / 2, 0); g.fill();
+    g.strokeStyle = 'rgba(0,0,0,0.18)'; g.lineWidth = 1.2; g.beginPath(); g.moveTo(-len / 2, 0); g.lineTo(len / 2.4, 0); g.stroke();
+    g.restore();
+  }
+});
+const WIND = { value: 0 }, NO_AO = [];
+const LEAF_MAT = new THREE.MeshStandardMaterial({ map: leafTex, alphaTest: 0.45, side: THREE.DoubleSide, vertexColors: true, roughness: 0.9 });
+// the whole crown sways slowly and every leaf flutters a little
+const WIND_GLSL = `#include <begin_vertex>
+    vec3 root = instanceMatrix[3].xyz;
+    float lift = position.y + 1.2;
+    transformed.x += (sin(uWind * 1.3 + root.x * 0.15 + root.z * 0.1) * 0.06 + sin(uWind * 5.0 + dot(position, vec3(6.0, 4.0, 5.0))) * 0.025) * lift;
+    transformed.z += (cos(uWind * 1.1 + root.z * 0.15) * 0.05 + cos(uWind * 4.3 + dot(position, vec3(3.0, 7.0, 4.0))) * 0.02) * lift;`;
+// keep the soft-ball normals on both sides of each card
+const BALL_NORMALS = THREE.ShaderChunk.normal_fragment_begin.replace('gl_FrontFacing ? 1.0 : - 1.0', '1.0');
+LEAF_MAT.onBeforeCompile = (sh) => {
+  sh.uniforms.uWind = WIND;
+  sh.vertexShader = 'uniform float uWind;\n' + sh.vertexShader.replace('#include <begin_vertex>', WIND_GLSL);
+  sh.fragmentShader = sh.fragmentShader.replace('#include <normal_fragment_begin>', BALL_NORMALS);
+};
+// the same leaves for the ambient occlusion pass, cut out by the texture so it sees leaves and not squares
+const LEAF_NORMAL_MAT = new THREE.MeshNormalMaterial({ side: THREE.DoubleSide, blending: THREE.NoBlending });
+LEAF_NORMAL_MAT.onBeforeCompile = (sh) => {
+  sh.uniforms.uWind = WIND; sh.uniforms.leafMap = { value: leafTex };
+  sh.vertexShader = 'uniform float uWind;\nvarying vec2 vLeafUv;\n' + sh.vertexShader.replace('#include <begin_vertex>', WIND_GLSL + '\n    vLeafUv = uv;');
+  sh.fragmentShader = 'uniform sampler2D leafMap;\nvarying vec2 vLeafUv;\n' + sh.fragmentShader
+    .replace('void main() {', 'void main() {\n  if (texture2D(leafMap, vLeafUv).a < 0.45) discard;')
+    .replace('#include <normal_fragment_begin>', BALL_NORMALS);
+};
+// n leaf cards scattered through a unit ball, crowded toward its surface, darker underneath
+function leafPuff(n) {
+  const pos = [], nor = [], uv = [], col = [], idx = [];
+  const q = new THREE.Quaternion(), e = new THREE.Euler(), ctr = new THREE.Vector3(), p = new THREE.Vector3();
+  for (let i = 0; i < n; i++) {
+    do ctr.set(R(-1, 1), R(-1, 1), R(-1, 1)); while (ctr.lengthSq() > 1 || ctr.lengthSq() < 1e-4);
+    ctr.normalize().multiplyScalar(Math.pow(rand(), 0.35));
+    q.setFromEuler(e.set(R(0, 6.3), R(0, 6.3), R(0, 6.3)));
+    const s = R(0.3, 0.42), jit = R(-0.06, 0.06), base = pos.length / 3;
+    for (const [u, v] of [[0, 0], [1, 0], [1, 1], [0, 1]]) {
+      p.set((u - 0.5) * s * 2, (v - 0.5) * s * 2, 0).applyQuaternion(q).add(ctr);
+      pos.push(p.x, p.y, p.z);
+      const nn = p.clone().normalize();
+      nor.push(nn.x, nn.y, nn.z);
+      uv.push(u, v);
+      const sh = 0.5 + 0.4 * (p.y * 0.5 + 0.5) + 0.22 * ctr.length() + jit; // inner cards sit in shade
+      col.push(sh, sh, sh);
+    }
+    idx.push(base, base + 1, base + 2, base, base + 2, base + 3);
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+  g.setIndex(idx);
+  g.computeBoundingSphere();
+  return g;
+}
 {
   const spots = [];
   for (let i = 0; i < 600 && spots.length < 80; i++) {
@@ -1867,35 +1932,36 @@ const CROWS = [];
     const r = rect(x, z, 1.4, 1.4);
     if (isFree(r, 0.4) && Math.abs(x) + Math.abs(z) > 14) { spots.push([x, z, rand() < 0.6]); addCollider(rect(x, z, 0.7, 0.7, 3.5)); }
   }
-  const trunk = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.22, 0.38, 4.4, 8), M('#5b4636', { roughness: 1 }), spots.length * 2);
-  // lumpy, smooth-shaded leaf clusters instead of faceted balls
-  const leaf = mergeVertices(new THREE.IcosahedronGeometry(1, 3));
-  const lp = leaf.attributes.position, v = new THREE.Vector3();
-  for (let i = 0; i < lp.count; i++) {
-    v.fromBufferAttribute(lp, i);
-    v.multiplyScalar(1 + 0.13 * Math.sin(v.x * 5.1 + v.y * 2.3) * Math.cos(v.z * 4.7 - v.y * 3.1) + 0.06 * Math.sin(v.x * 11 + v.z * 9));
-    lp.setXYZ(i, v.x, v.y * 0.85, v.z);
-  }
-  leaf.computeVertexNormals();
-  const CROWNS = 9;
-  const crown = new THREE.InstancedMesh(leaf, M('#ffffff', { roughness: 0.85 }), spots.length * CROWNS);
-  const o = new THREE.Object3D(), c = new THREE.Color();
-  spots.forEach(([x, z, flame], i) => {
-    const lean = R(-0.15, 0.15), lean2 = R(-0.15, 0.15);
-    o.position.set(x, 2.1, z); o.rotation.set(lean, 0, lean2); o.scale.set(1, 1, 1); o.updateMatrix(); trunk.setMatrixAt(i * 2, o.matrix);
-    o.position.set(x + R(-0.6, 0.6), 4.2, z + R(-0.6, 0.6)); o.rotation.set(R(-0.8, 0.8), 0, R(-0.8, 0.8)); o.scale.set(0.6, 0.6, 0.6); o.updateMatrix(); trunk.setMatrixAt(i * 2 + 1, o.matrix);
-    for (let k = 0; k < CROWNS; k++) {
-      const a = (k / CROWNS) * Math.PI * 2 + R(-0.3, 0.3);
-      const rr = k === 0 ? 0 : R(1, 1.8);
-      o.position.set(x + Math.cos(a) * rr, 5 + R(-0.4, 0.9) + (k === 0 ? 0.6 : 0), z + Math.sin(a) * rr);
-      o.rotation.set(R(0, 3), R(0, 3), 0);
-      o.scale.set(R(1.2, 1.8), R(0.9, 1.3), R(1.2, 1.8)); o.updateMatrix();
-      crown.setMatrixAt(i * CROWNS + k, o.matrix);
-      const col = flame ? pick(['#d9381e', '#e8502a', '#c92e1a', '#f06a2c', '#4a7d36']) : pick(['#3f7d3a', '#4f8f3f', '#356b30', '#5c9a45']);
-      crown.setColorAt(i * CROWNS + k, c.set(col).offsetHSL(0, 0, R(-0.04, 0.04)));
+  const PUFFS = 6, BRANCHES = 3;
+  const trunk = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.22, 0.38, 4.4, 8), M('#5b4636', { roughness: 1 }), spots.length * (1 + BRANCHES));
+  // each crown is a few puffs of small leaf cards with cut-out edges, shaded as if each puff were one soft ball
+  const crown = new THREE.InstancedMesh(leafPuff(150), LEAF_MAT, spots.length * PUFFS);
+  const o = new THREE.Object3D(), c = new THREE.Color(), up = new THREE.Vector3(0, 1, 0), dir = new THREE.Vector3();
+  spots.forEach(([x, z, deep], i) => {
+    const lean = R(-0.12, 0.12), lean2 = R(-0.12, 0.12);
+    o.position.set(x, 2.1, z); o.rotation.set(lean, 0, lean2); o.scale.set(1, 1, 1); o.updateMatrix(); trunk.setMatrixAt(i * (1 + BRANCHES), o.matrix);
+    const top = [x + lean2 * -2, 4.1, z + lean * 2], spin = R(0, 6.3);
+    for (let k = 0; k < PUFFS; k++) {
+      // one puff on top, the rest spread out wide like a rain tree's umbrella
+      const a = spin + (k / (PUFFS - 1)) * Math.PI * 2 + R(-0.35, 0.35), rr = k === 0 ? 0 : R(1.5, 2.2);
+      const px = top[0] + Math.cos(a) * rr, py = k === 0 ? R(6.2, 6.6) : R(5, 5.8), pz = top[2] + Math.sin(a) * rr;
+      const sc = k === 0 ? R(1.7, 2) : R(1.3, 1.7);
+      o.position.set(px, py, pz); o.rotation.set(0, R(0, 6.3), 0); o.scale.set(sc, sc * R(0.72, 0.85), sc); o.updateMatrix();
+      crown.setMatrixAt(i * PUFFS + k, o.matrix);
+      crown.setColorAt(i * PUFFS + k, c.set(deep ? '#4f8f3f' : '#6fae4a').offsetHSL(R(-0.02, 0.02), R(-0.05, 0.05), R(-0.05, 0.05)));
+      // branches reach from the top of the trunk into the outer puffs
+      if (k >= 1 && k <= BRANCHES) {
+        dir.set(px - top[0], py - 0.8 - top[1], pz - top[2]);
+        const len = dir.length(); dir.normalize();
+        o.position.set(top[0] + dir.x * len / 2, top[1] + dir.y * len / 2, top[2] + dir.z * len / 2);
+        o.quaternion.setFromUnitVectors(up, dir); o.scale.set(0.42, len / 4.4, 0.42); o.updateMatrix();
+        trunk.setMatrixAt(i * (1 + BRANCHES) + k, o.matrix);
+        o.rotation.set(0, 0, 0);
+      }
     }
   });
   trunk.castShadow = crown.castShadow = true; crown.receiveShadow = true;
+  NO_AO.push(crown);
   scene.add(trunk, crown);
 }
 
@@ -2964,6 +3030,7 @@ function update(dt, t) {
   updateStations(t);
   updateCamera(dt);
   updateAudio(dt, started ? (K.up ? 1 : 0) - (K.down ? 1 : 0) : 0);
+  WIND.value = t;
 }
 /* ---------------- post-processing: ambient occlusion, bloom, smoggy colour grade ---------------- */
 const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(innerWidth, innerHeight, { type: THREE.HalfFloatType, samples: 4 }));
@@ -2973,6 +3040,19 @@ const gtao = new GTAOPass(scene, camera, innerWidth, innerHeight);
 gtao.blendIntensity = 1.0;
 gtao.updateGtaoMaterial({ radius: 0.9, distanceExponent: 1.6, thickness: 2.5, scale: 1.3, samples: 12 });
 gtao.updatePdMaterial({ lumaPhi: 10, depthPhi: 2, normalPhi: 3, radius: 6, rings: 2, samples: 12 });
+// the occlusion pass draws everything as solid shapes, so the leaf cards get their own cut-out pass
+{
+  const hide = gtao.overrideVisibility.bind(gtao), draw = gtao.renderOverride.bind(gtao);
+  gtao.overrideVisibility = () => { hide(); for (const m of NO_AO) m.visible = false; };
+  gtao.renderOverride = (r, mat, target, ...rest) => {
+    draw(r, mat, target, ...rest);
+    if (mat !== gtao.normalMaterial) return;
+    const prev = r.getRenderTarget(), ac = r.autoClear;
+    r.setRenderTarget(target); r.autoClear = false;
+    for (const m of NO_AO) { const own = m.material; m.material = LEAF_NORMAL_MAT; m.visible = true; r.render(m, camera); m.material = own; m.visible = false; }
+    r.autoClear = ac; r.setRenderTarget(prev);
+  };
+}
 composer.addPass(gtao);
 composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.22, 0.5, 0.9));
 composer.addPass(new OutputPass());
@@ -2994,8 +3074,10 @@ const grade = new ShaderPass({
     }`,
 });
 composer.addPass(grade);
-let fxOn = true, fpsT = 0, fpsN = 0, fpsChecked = false;
+// starts in low quality so it runs smoothly everywhere; Q turns on ambient occlusion
+let fxOn = false;
 function setFx(on, msg) { fxOn = on; gtao.enabled = on; if (msg) toast(msg); }
+setFx(false);
 addEventListener('keydown', (e) => { if (e.code === 'KeyQ' && started && !e.repeat) setFx(!fxOn, fxOn ? 'Low quality' : 'High quality'); });
 function render(t) {
   grade.uniforms.time.value = t;
@@ -3006,11 +3088,6 @@ function frame() {
   update(dt, clock.elapsedTime);
   drawMinimap();
   render(clock.elapsedTime);
-  // drop ambient occlusion on slow machines
-  if (started && !fpsChecked) {
-    fpsT += dt; fpsN++;
-    if (fpsT > 4) { fpsChecked = true; if (fpsN / fpsT < 28) setFx(false, 'Low quality, for smoother riding'); }
-  }
   requestAnimationFrame(frame);
 }
 addEventListener('resize', () => {
