@@ -343,7 +343,7 @@ groundTex.wrapS = groundTex.wrapT = THREE.RepeatWrapping;
 groundTex.repeat.set(90, 90);
 
 const asphaltTex = canvasTex(512, 512, (g, w, h) => {
-  g.fillStyle = '#6b6a70'; g.fillRect(0, 0, w, h);
+  g.fillStyle = '#8a8990'; g.fillRect(0, 0, w, h);
   grain(g, w, h, 30000, 0.16, true);
   for (let i = 0; i < 7; i++) { // patched repairs
     g.fillStyle = `rgba(${70 + Math.random() * 20},${70 + Math.random() * 20},${75 + Math.random() * 20},.35)`;
@@ -667,15 +667,17 @@ function flatMesh(B, mat, shadow = true) {
       gridAdd(SGRID, Math.min(cx0, cx1) - wd, Math.max(cx0, cx1) + wd, Math.min(cz0, cz1) - wd, Math.max(cz0, cz1) + wd, [cx0, cz0, cx1, cz1, wd]);
     }
   }
-  flatMesh(side, new THREE.MeshLambertMaterial({ map: tileTex, color: '#d8d0c4' }));
-  const kerbTex = canvasTex(64, 8, (g) => { g.fillStyle = '#e7c53a'; g.fillRect(0, 0, 32, 8); g.fillStyle = '#26262a'; g.fillRect(32, 0, 32, 8); grain(g, 64, 8, 120, 0.4); });
+  flatMesh(side, new THREE.MeshLambertMaterial({ map: tileTex, color: '#e3e1dc' }));
+  // plain concrete curbs, stained along the bottom
+  const kerbTex = canvasTex(64, 8, (g) => { g.fillStyle = '#b9b6ae'; g.fillRect(0, 0, 64, 8); g.fillStyle = 'rgba(60,50,40,.35)'; g.fillRect(0, 0, 64, 2); g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(31, 0, 2, 8); grain(g, 64, 8, 160, 0.3); });
   kerbTex.wrapS = THREE.RepeatWrapping;
   const kg = new THREE.BufferGeometry();
   kg.setAttribute('position', new THREE.Float32BufferAttribute(kerb.p, 3));
   kg.setAttribute('uv', new THREE.Float32BufferAttribute(kerb.uv, 2));
   kg.computeVertexNormals();
   scene.add(new THREE.Mesh(kg, new THREE.MeshLambertMaterial({ map: kerbTex, side: THREE.DoubleSide })));
-  const ROAD_LOOK = { f: ['#f2e6d4', 0.06], s: ['#e4dfd8', 0.065], g: ['#ecdccb', 0.07], r: ['#e2ded8', 0.075], t: ['#d8d6da', 0.085], p: ['#cfcdd3', 0.095] };
+  // light grey, sun-bleached roads as in the street photos
+  const ROAD_LOOK = { f: ['#f2e6d4', 0.06], s: ['#fbf8f2', 0.065], g: ['#f6ece0', 0.07], r: ['#fbf8f4', 0.075], t: ['#f6f5f6', 0.085], p: ['#efeef2', 0.095] };
   let k = 2;
   for (const cls of ['f', 's', 'g', 'r', 't', 'p']) {
     const B = flatBuf();
@@ -1050,20 +1052,79 @@ function updateTrains(dt) {
 }
 
 /* ---------------- Mirpur-10 foot overbridge and the distant skyline ---------------- */
-// an X of steel walkways over the circle, red railings, posts, and stairs down to the pavements
-const DECK_Y = 6.2, BRIDGE_SPOTS = [], BRIDGE_STAIRS = [];
+// an X of covered steel walkways over the circle, as in the street photos: maroon lattice trusses on both
+// sides, a pale translucent roof, potted plants along the sides, ad boards facing the roads, thick maroon
+// columns with crossbeams, roofed stairs down to the pavements, and brick kiosks at their feet
+const DECK_Y = 6.4, BRIDGE_SPOTS = [], BRIDGE_STAIRS = [];
 let BRIDGE_MID = null;
 {
-  const steel = new THREE.MeshLambertMaterial({ color: '#b3262b' }), slab = new THREE.MeshLambertMaterial({ color: '#9c968e' });
-  const sp = [], rp = [];
+  const MAROON = '#8a2f2a';
+  const steel = new THREE.MeshLambertMaterial({ color: MAROON }), slab = new THREE.MeshLambertMaterial({ color: '#a39d94' });
+  const trussTex = canvasTex(256, 64, (g) => {
+    g.strokeStyle = MAROON; g.lineCap = 'square';
+    g.lineWidth = 7; g.beginPath(); g.moveTo(0, 4); g.lineTo(256, 4); g.moveTo(0, 60); g.lineTo(256, 60); g.stroke();
+    g.lineWidth = 5; for (let x = 0; x <= 256; x += 64) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, 64); g.stroke(); }
+    g.lineWidth = 3; for (let x = 0; x < 256; x += 64) { g.beginPath(); g.moveTo(x, 60); g.lineTo(x + 32, 4); g.lineTo(x + 64, 60); g.stroke(); }
+    g.lineWidth = 1.5; for (let y = 16; y < 60; y += 11) { g.beginPath(); g.moveTo(0, y); g.lineTo(256, y); g.stroke(); }
+  });
+  trussTex.wrapS = THREE.RepeatWrapping;
+  const trussMat = new THREE.MeshLambertMaterial({ map: trussTex, transparent: true, alphaTest: 0.4, side: THREE.DoubleSide });
+  const roofMat = new THREE.MeshLambertMaterial({ color: '#efe5c8', transparent: true, opacity: 0.82, side: THREE.DoubleSide });
+  const ADS = [['বিজ্ঞাপনের জন্য', 'যোগাযোগ করুন', '#f6c445', '#26272b'], ['মোবাইল ব্যাংকিং', 'সহজ লেনদেন', '#d4145a', '#ffffff'], ['নতুন ফ্ল্যাট', 'বুকিং চলছে', '#1d4f91', '#ffffff'], ['কোচিং সেন্টার', 'ভর্তি চলছে', '#1f8a5b', '#ffffff']];
+  const adTex = canvasTex(1024, 512, (g) => {
+    ADS.forEach(([t, sub, bg, fg], i) => {
+      const x = (i % 2) * 512, y = Math.floor(i / 2) * 256;
+      g.fillStyle = bg; g.fillRect(x, y, 512, 256);
+      g.fillStyle = fg; g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.font = `700 70px ${BN}`; g.fillText(t, x + 256, y + 105);
+      g.font = `600 40px ${BN}`; g.fillText(sub, x + 256, y + 190);
+      grain(g, 1024, 512, 400, 0.08, true);
+    });
+  });
+  const brickTex = canvasTex(128, 64, (g) => {
+    g.fillStyle = '#7a3a2a'; g.fillRect(0, 0, 128, 64);
+    for (let r = 0; r < 8; r++) for (let c = -1; c < 5; c++) { g.fillStyle = pick(['#a2513a', '#954a34', '#ad5a42', '#8e4430']); g.fillRect(c * 32 + (r % 2) * 16 + 1, r * 8 + 1, 30, 6); }
+  });
+  brickTex.wrapS = brickTex.wrapT = THREE.RepeatWrapping;
+  const sp = [], rp = [], truss = { p: [], uv: [] }, roof = { p: [], uv: [] }, ads = { p: [], uv: [] }, pots = [];
   const beam = (ax, ay, az, bx, by, bz, w, h, list) => {
     const run = Math.hypot(bx - ax, bz - az), L = Math.hypot(run, by - ay), g = new THREE.BoxGeometry(L, h, w);
     g.rotateZ(Math.atan2(by - ay, run)); g.rotateY(-Math.atan2(bz - az, bx - ax)); g.translate((ax + bx) / 2, (ay + by) / 2, (az + bz) / 2);
     list.push(g);
   };
-  const post = (x, z, h) => { const g = new THREE.BoxGeometry(0.5, h, 0.5); g.translate(x, h / 2, z); rp.push(g); };
+  const column = (x, z, h, size = 0.9) => { const g = new THREE.BoxGeometry(size, h, size); g.translate(x, h / 2, z); rp.push(g); };
+  // a flat quad between two bottom corners and a height, into a plain position/uv buffer
+  const quad = (B, a, b, ya, yb, h, u0, u1, v0 = 0, v1 = 1) => {
+    for (const [q, y, u, v] of [[a, ya, u0, v0], [b, yb, u1, v0], [b, yb + h, u1, v1], [a, ya, u0, v0], [b, yb + h, u1, v1], [a, ya + h, u0, v1]]) { B.p.push(q[0], y, q[1]); B.uv.push(u, v); }
+  };
+  // one covered span between two points, given the floor height at each end (stairs slope)
+  function span(ax, ay, az, bx, by, bz, width, deck) {
+    const L = Math.hypot(bx - ax, bz - az), nx = -(bz - az) / L, nz = (bx - ax) / L, hw = width / 2;
+    if (deck) beam(ax, ay, az, bx, by, bz, width, 0.35, sp);
+    else beam(ax, ay, az, bx, by, bz, width, 0.3, sp);
+    for (const sg of [1, -1]) {
+      const A = [ax + nx * hw * sg, az + nz * hw * sg], B = [bx + nx * hw * sg, bz + nz * hw * sg];
+      quad(truss, A, B, ay + 0.15, by + 0.15, 1.9, 0, L / 3);
+      for (let u = 0; u <= L + 0.01; u += 3) { // roof posts
+        const t = Math.min(1, u / L), x = A[0] + (B[0] - A[0]) * t, z = A[1] + (B[1] - A[1]) * t, y = ay + (by - ay) * t;
+        beam(x, y, z, x, y + 2.9, z, 0.12, 0.12, rp);
+      }
+      if (deck) for (let u = 1; u < L; u += 2.2) { // potted plants on the outside of the truss
+        const t = u / L;
+        pots.push([A[0] + (B[0] - A[0]) * t + nx * 0.35 * sg, ay + 1.9, A[1] + (B[1] - A[1]) * t + nz * 0.35 * sg]);
+      }
+    }
+    // a shallow gable roof, a little wider than the walkway
+    const r = hw + 0.35, ridge = 3.25, eave = 2.85;
+    const Al = [ax + nx * r, az + nz * r], Bl = [bx + nx * r, bz + nz * r], Ar = [ax - nx * r, az - nz * r], Br = [bx - nx * r, bz - nz * r], Am = [ax, az], Bm = [bx, bz];
+    for (const [s0, s1] of [[Al, Bl], [Ar, Br]]) {
+      for (const [q, y] of [[s0, ay + eave], [s1, by + eave], [Bm, by + ridge], [s0, ay + eave], [Bm, by + ridge], [Am, ay + ridge]]) { roof.p.push(q[0], y, q[1]); roof.uv.push(0, 0); }
+    }
+    return { nx, nz, L };
+  }
   // the arms of the X run from the middle of the circle out past the (widened) roundabout road
   const ends = [], reach = CIRCLE.r + 12 + 3;
+  let adN = 0;
   for (const c of MAP.bridges || []) {
     const pts = dm(c);
     for (const which of [0, pts.length - 1]) {
@@ -1071,26 +1132,35 @@ let BRIDGE_MID = null;
       if (d > 8 && d < reach) pts[which] = [CIRCLE.x + ((x - CIRCLE.x) * reach) / d, CIRCLE.z + ((z - CIRCLE.z) * reach) / d];
     }
     for (let i = 1; i < pts.length; i++) {
-      const [ax, az] = pts[i - 1], [bx, bz] = pts[i], L = Math.hypot(bx - ax, bz - az), nx = (-(bz - az) / L) * 1.55, nz = ((bx - ax) / L) * 1.55;
-      beam(ax, DECK_Y, az, bx, DECK_Y, bz, 3.2, 0.35, sp);
-      for (const sg of [1, -1]) {
-        beam(ax + nx * sg, DECK_Y + 1.2, az + nz * sg, bx + nx * sg, DECK_Y + 1.2, bz + nz * sg, 0.08, 0.1, rp);
-        beam(ax + nx * sg, DECK_Y + 0.6, az + nz * sg, bx + nx * sg, DECK_Y + 0.6, bz + nz * sg, 0.06, 0.06, rp);
-        for (let u = 0; u <= L; u += 1.6) { const g = new THREE.BoxGeometry(0.08, 1.2, 0.08); g.translate(ax + ((bx - ax) * u) / L + nx * sg, DECK_Y + 0.6, az + ((bz - az) * u) / L + nz * sg); rp.push(g); }
-      }
+      const [ax, az] = pts[i - 1], [bx, bz] = pts[i];
+      const { nx, nz, L } = span(ax, DECK_Y, az, bx, DECK_Y, bz, 3.2, true);
       for (let u = 3; u < L - 3; u += 7) BRIDGE_SPOTS.push([ax + ((bx - ax) * u) / L, az + ((bz - az) * u) / L, Math.atan2(bx - ax, bz - az)]);
+      // an ad board on each side of the arm, facing the road below
+      if (L > 12) for (const sg of [1, -1]) {
+        const k = adN++ % ADS.length, u0 = (k % 2) / 2, u1 = u0 + 0.5, v1 = 1 - Math.floor(k / 2) / 2, v0 = v1 - 0.5;
+        const t0 = 0.5 - 3 / L, t1 = 0.5 + 3 / L, off = 1.75 * sg;
+        const A = [ax + (bx - ax) * t0 + nx * off, az + (bz - az) * t0 + nz * off], B = [ax + (bx - ax) * t1 + nx * off, az + (bz - az) * t1 + nz * off];
+        sg > 0 ? quad(ads, A, B, DECK_Y - 0.9, DECK_Y - 0.9, 3, u0, u1, v0, v1) : quad(ads, B, A, DECK_Y - 0.9, DECK_Y - 0.9, 3, u0, u1, v0, v1);
+      }
     }
     for (const which of [0, pts.length - 1]) {
       const [x, z] = pts[which];
       if (Math.hypot(x - CIRCLE.x, z - CIRCLE.z) > 8 && !ends.some((e) => Math.hypot(e[0] - x, e[1] - z) < 3)) ends.push([x, z]);
     }
-    for (const [x, z] of pts) { post(x, z, DECK_Y); CIRCLES.push({ x, z, r: 0.45 }); }
+    // thick columns at the corners of the walkway, joined by a crossbeam under the deck
+    for (let i = 0; i < pts.length; i++) {
+      const [x, z] = pts[i], [px, pz] = pts[Math.min(i + 1, pts.length - 1)], [qx, qz] = pts[Math.max(i - 1, 0)], L = Math.hypot(px - qx, pz - qz) || 1;
+      const nx = -(pz - qz) / L, nz = (px - qx) / L;
+      for (const sg of [1, -1]) { column(x + nx * 1.9 * sg, z + nz * 1.9 * sg, DECK_Y); CIRCLES.push({ x: x + nx * 1.9 * sg, z: z + nz * 1.9 * sg, r: 0.6 }); }
+      beam(x + nx * 2.3, DECK_Y - 0.45, z + nz * 2.3, x - nx * 2.3, DECK_Y - 0.45, z - nz * 2.3, 0.7, 0.6, rp);
+    }
     if (pts.length > 2 && !BRIDGE_MID) BRIDGE_MID = pts[Math.floor(pts.length / 2)];
   }
   BRIDGE_MID ??= [CIRCLE.x, CIRCLE.z];
-  // a stair down from the end of every arm: straight on outward if that lands clear of roads and
-  // buildings, otherwise swung round a little toward the corner
-  const RUN = 11;
+  // a roofed stair down from the end of every arm: straight on outward if that lands clear of roads and
+  // buildings, otherwise swung round a little toward the corner; a brick kiosk stands beside its foot
+  const RUN = 11.5;
+  const kiosks = [];
   for (const [x, z] of ends) {
     const a0 = Math.atan2(z - CIRCLE.z, x - CIRCLE.x);
     let a = a0;
@@ -1100,16 +1170,40 @@ let BRIDGE_MID = null;
       for (let s = 2; s <= RUN; s += 1.5) { const px = x + ux * s, pz = z + uz * s; if (nearRoad(px, pz)[0] < 0.3 || buildingAt(px, pz)) { clear = false; break; } }
       if (clear) { a = a0 + da; break; }
     }
-    const ux = Math.cos(a), uz = Math.sin(a), fx = x + ux * RUN, fz = z + uz * RUN, nx = -uz, nz = ux;
+    const ux = Math.cos(a), uz = Math.sin(a), fx = x + ux * RUN, fz = z + uz * RUN;
     BRIDGE_STAIRS.push({ top: [x, z], foot: [fx, fz] });
-    beam(x, DECK_Y, z, fx, 0, fz, 1.8, 0.3, sp);
-    for (const sg of [1, -1]) beam(x + nx * 0.9 * sg, DECK_Y + 1, z + nz * 0.9 * sg, fx + nx * 0.9 * sg, 1, fz + nz * 0.9 * sg, 0.08, 0.1, rp);
-    post(x + ux * RUN * 0.5, z + uz * RUN * 0.5, DECK_Y / 2);
-    // the low end of a stair is in the way
-    for (let s = RUN * 0.55; s <= RUN; s += 1.2) CIRCLES.push({ x: x + ux * s, z: z + uz * s, r: 0.9 });
+    const { nx, nz } = span(x, DECK_Y, z, fx, 0, fz, 2, false);
+    column(x + ux * RUN * 0.5, z + uz * RUN * 0.5, DECK_Y / 2, 0.6);
+    for (let s = RUN * 0.55; s <= RUN; s += 1.2) CIRCLES.push({ x: x + ux * s, z: z + uz * s, r: 1 });
+    for (const sg of [1, -1]) {
+      const kx = fx - ux * 2 + nx * 3.4 * sg, kz = fz - uz * 2 + nz * 3.4 * sg;
+      if (nearRoad(kx, kz)[0] > 1.8 && !buildingAt(kx, kz)) { kiosks.push([kx, kz, Math.atan2(ux, uz)]); CIRCLES.push({ x: kx, z: kz, r: 1.7 }); break; }
+    }
   }
-  if (sp.length) { const m = new THREE.Mesh(mergeGeometries(sp), slab); m.castShadow = m.receiveShadow = true; scene.add(m); }
-  if (rp.length) { const m = new THREE.Mesh(mergeGeometries(rp), steel); m.castShadow = true; scene.add(m); }
+  const add = (geo, mat, cast = true) => { const m = new THREE.Mesh(geo, mat); m.castShadow = cast; m.receiveShadow = true; scene.add(m); return m; };
+  const buf = (B) => { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(B.p, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(B.uv, 2)); g.computeVertexNormals(); return g; };
+  if (sp.length) add(mergeGeometries(sp), slab);
+  if (rp.length) add(mergeGeometries(rp), steel);
+  if (truss.p.length) add(buf(truss), trussMat);
+  if (roof.p.length) add(buf(roof), roofMat, true);
+  if (ads.p.length) add(buf(ads), new THREE.MeshLambertMaterial({ map: adTex, side: THREE.DoubleSide }), false);
+  if (pots.length) {
+    const pot = new THREE.InstancedMesh(new THREE.BoxGeometry(0.45, 0.32, 0.35), new THREE.MeshLambertMaterial({ color: '#6b4a32' }), pots.length);
+    const bush = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.42, 1), new THREE.MeshLambertMaterial({ color: '#4f8a3a' }), pots.length);
+    const o = new THREE.Object3D();
+    pots.forEach(([x, y, z], i) => {
+      o.position.set(x, y, z); o.scale.setScalar(1); o.updateMatrix(); pot.setMatrixAt(i, o.matrix);
+      o.position.y = y + 0.4; o.scale.set(R(0.8, 1.2), R(0.7, 1.1), R(0.8, 1.2)); o.updateMatrix(); bush.setMatrixAt(i, o.matrix);
+      bush.setColorAt(i, _c.set(pick(['#4f8a3a', '#5e9a40', '#3f7a34'])));
+    });
+    scene.add(pot, bush);
+  }
+  for (const [x, z, ry] of kiosks) {
+    const k = new THREE.Group(); k.position.set(x, 0, z); k.rotation.y = ry; scene.add(k);
+    mesh(new THREE.BoxGeometry(3, 2.4, 3), new THREE.MeshLambertMaterial({ map: brickTex }), 0, 1.2, 0, k);
+    mesh(new THREE.BoxGeometry(3.15, 0.7, 3.15), new THREE.MeshLambertMaterial({ color: '#8f9396' }), 0, 2.75, 0, k);
+    mesh(new THREE.BoxGeometry(0.9, 1.9, 0.05), new THREE.MeshLambertMaterial({ color: '#3a4a3f' }), 0.5, 0.95, 1.52, k);
+  }
 }
 // beyond the edge of the map: low, hazy blocks so a long view ends in city, not in blank sky
 {
