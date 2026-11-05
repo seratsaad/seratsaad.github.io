@@ -215,15 +215,14 @@ export function initLife(G) {
   const STALLS = [];
   const chaSign = () => G.canvasTex(256, 96, (c) => { c.fillStyle = '#1f8a5b'; c.fillRect(0, 0, 256, 96); c.fillStyle = '#fff'; c.font = `700 60px ${G.BN}`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('চা', 128, 52); });
   if (G.TEA_STALLS?.length) {
-    // the tea stalls already on the pavements: give each a চা board and a bench of customers, and stop beside one for a cup
+    // the tea stalls already on the pavements: give each a চা board and customers on its bench, and stop beside one for a cup
     const signMat = new THREE.MeshLambertMaterial({ map: chaSign(), side: THREE.DoubleSide });
     for (const t of G.TEA_STALLS) {
       const g = new THREE.Group();
       g.position.set(t.x, G.KERB, t.z); g.rotation.y = Math.atan2(t.fx, t.fz);
       scene.add(g);
       G.mesh(new THREE.PlaneGeometry(0.9, 0.34), signMat, 0, 2.5, 0.75, g).castShadow = false;
-      G.mesh(new THREE.BoxGeometry(1.3, 0.3, 0.3), G.M('#6b4a32'), 0, 0.15, 1.0, g);
-      for (let k = 0; k < (Math.random() < 0.6 ? 2 : 1); k++) { const p = G.seat(G.buildPerson(), 1.45); p.g.position.set(-0.32 + k * 0.64, 0.15, 1.0); p.g.rotation.y = Math.PI; g.add(p.g); }
+      for (let k = 0; k < (Math.random() < 0.6 ? 2 : 1); k++) { const p = G.seat(G.buildPerson(), 1.45); p.g.position.set(-0.32 + k * 0.64, 0.33, 0.95); p.g.rotation.y = Math.PI; g.add(p.g); }
       // where the rickshaw pulls up: on the road just off the stall
       STALLS.push({ x: t.x, z: t.z, sx: t.x + t.fx * 3, sz: t.z + t.fz * 3, g });
     }
