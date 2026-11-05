@@ -603,6 +603,8 @@ function buildingAt(x, z) {
   }
 }
 const CIRCLES = []; // posts and pillars the rickshaw bumps into
+const STALL_SPOTS = [], STALL_SELLERS = []; // tea stalls and fruit vans on the wider pavements
+const SHRUBS = [], SAPLINGS = []; // median planting and young street trees, grown with the other trees
 
 /* ---------------- textures for the map ---------------- */
 // four ground-floor shopfronts that repeat every 14.4 m: shutters, an open shop, a glass front
@@ -691,7 +693,7 @@ function flatMesh(B, mat, shadow = true) {
   // green pipe railing runs along the curb, with gaps to cross. A median between two carriageways is a
   // raised planted strip with shrubs and tall double-arm lamps, or, under the metro, a low concrete wall.
   const side = flatBuf(), mid = flatBuf(), kerb = { p: [], uv: [] }, rail = { p: [], uv: [] };
-  const shrubs = [], walls = [], lamps = [], seen = new Set();
+  const walls = [], lamps = [], seen = new Set();
   const metroLines = (MAP.rail || []).map((c) => dm(c));
   const underMetro = (x, z) => metroLines.some((l) => { for (let i = 1; i < l.length; i++) { const [px, pz] = segNear(x, z, ...l[i - 1], ...l[i]); if (Math.hypot(px - x, pz - z) < 9) return true; } return false; });
   for (const r of ROADS) {
@@ -722,10 +724,15 @@ function flatMesh(B, mat, shadow = true) {
         seen.add(key);
         if (underMetro(ex0, ez0)) walls.push([ex0, ez0, ex1, ez1]);
         else {
-          if (Math.floor(s / 2) % 2 === 0) shrubs.push([(ex0 + ex1) / 2, (ez0 + ez1) / 2]);
+          if (Math.floor(s / 2) % 2 === 0) SHRUBS.push([(ex0 + ex1) / 2, (ez0 + ez1) / 2, Math.floor(s / 2)]);
           if (Math.floor(s / 2) % 15 === 0) lamps.push([(ex0 + ex1) / 2, (ez0 + ez1) / 2, Math.atan2(dx0, dz0)]);
         }
-      } else if (railed && Math.floor(s / 2) % 10 !== 0) {
+      } else if (wd >= 2 && r.cls === 'p' && (Math.floor(s / 2) * 5 + (sg > 0 ? 2 : 0)) % 11 === 0 && Math.hypot(mx - CIRCLE.x, mz - CIRCLE.z) < 380) {
+        SAPLINGS.push([mx + nm[0] * (e + 0.6), mz + nm[1] * (e + 0.6)]);
+      } else if (wd >= 2 && r.cls === 'p' && (Math.floor(s / 2) * 7 + (sg > 0 ? 3 : 0)) % 19 === 0 && Math.hypot(mx - CIRCLE.x, mz - CIRCLE.z) < 450) {
+        STALL_SPOTS.push([mx + nm[0] * (e + wd - 0.85), mz + nm[1] * (e + wd - 0.85), -nm[0], -nm[1]]);
+      }
+      if (!median && railed && Math.floor(s / 2) % 10 !== 0) {
         // the pipe railing, just behind the curb
         const ri = [ai[0] + n0[0] * 0.15, ai[1] + n0[1] * 0.15], rb = [bi[0] + n1[0] * 0.15, bi[1] + n1[1] * 0.15];
         for (const [q, u, y] of [[ri, s / 2, KERB], [rb, s1 / 2, KERB], [rb, s1 / 2, KERB + 1], [ri, s / 2, KERB], [rb, s1 / 2, KERB + 1], [ri, s / 2, KERB + 1]]) { rail.p.push(q[0], y, q[1]); rail.uv.push(u, y - KERB); }
@@ -751,12 +758,7 @@ function flatMesh(B, mat, shadow = true) {
     const m = new THREE.Mesh(mergeGeometries(wg), new THREE.MeshLambertMaterial({ color: '#c4bfb6' })); m.castShadow = m.receiveShadow = true; scene.add(m);
     for (const [ax, az] of walls) CIRCLES.push({ x: ax, z: az, r: 0.3 });
   }
-  // elsewhere: clipped shrubs, and tall lamps with an arm over each carriageway
-  if (shrubs.length) {
-    const sh = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.6, 1), new THREE.MeshLambertMaterial({ color: '#4f7f3a' }), shrubs.length), o = new THREE.Object3D();
-    shrubs.forEach(([x, z], i) => { o.position.set(x, KERB + 0.4, z); o.scale.set(R(0.9, 1.3), R(0.7, 1.1), R(0.9, 1.3)); o.updateMatrix(); sh.setMatrixAt(i, o.matrix); sh.setColorAt(i, _c.set(pick(['#4f7f3a', '#5c8f42', '#3f6f33']))); });
-    sh.castShadow = true; scene.add(sh);
-  }
+  // elsewhere: tall lamps with an arm over each carriageway
   if (lamps.length) {
     const pole = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.1, 0.16, 9, 7), new THREE.MeshLambertMaterial({ color: '#9a9ea2' }), lamps.length);
     const arm = new THREE.InstancedMesh(new THREE.BoxGeometry(0.1, 0.1, 5), new THREE.MeshLambertMaterial({ color: '#9a9ea2' }), lamps.length);
@@ -1325,8 +1327,8 @@ let BRIDGE_MID = null;
   // one covered span between two points, given the floor height at each end (stairs slope)
   function span(ax, ay, az, bx, by, bz, width, deck) {
     const L = Math.hypot(bx - ax, bz - az), nx = -(bz - az) / L, nz = (bx - ax) / L, hw = width / 2;
-    if (deck) beam(ax, ay, az, bx, by, bz, width, 0.35, sp);
-    else beam(ax, ay, az, bx, by, bz, width, 0.3, sp);
+    if (deck === true) beam(ax, ay, az, bx, by, bz, width, 0.35, sp);
+    else if (!deck) beam(ax, ay, az, bx, by, bz, width, 0.3, sp);
     for (const sg of [1, -1]) {
       const A = [ax + nx * hw * sg, az + nz * hw * sg], B = [bx + nx * hw * sg, bz + nz * hw * sg];
       quad(truss, A, B, ay + 0.15, by + 0.15, 1.9, 0, L / 3);
@@ -1334,7 +1336,7 @@ let BRIDGE_MID = null;
         const t = Math.min(1, u / L), x = A[0] + (B[0] - A[0]) * t, z = A[1] + (B[1] - A[1]) * t, y = ay + (by - ay) * t;
         beam(x, y, z, x, y + 2.9, z, 0.12, 0.12, rp);
       }
-      if (deck) for (let u = 1; u < L; u += 2.2) { // potted plants on the outside of the truss
+      if (deck === true) for (let u = 1; u < L; u += 2.2) { // potted plants on the outside of the truss
         const t = u / L;
         pots.push([A[0] + (B[0] - A[0]) * t + nx * 0.35 * sg, ay + 1.9, A[1] + (B[1] - A[1]) * t + nz * 0.35 * sg]);
       }
@@ -1408,8 +1410,17 @@ let BRIDGE_MID = null;
   }
   BRIDGE_MID ??= [CIRCLE.x, CIRCLE.z];
   // a roofed stair down from the end of every arm: straight on outward if that lands clear of roads and
-  // buildings, otherwise swung round a little toward the corner; a brick kiosk stands beside its foot
-  const RUN = 9.5;
+  // buildings, otherwise swung round a little toward the corner; a brick kiosk stands beside its foot.
+  // As in the photos it is two straight flights of concrete steps on steel stringers with a landing halfway.
+  const TOP = DECK_Y + 0.175, STEPS = 16, RISE = TOP / (2 * STEPS), GO = 0.28, LAND = 1.4, FL = STEPS * GO, RUN = 2 * FL + LAND;
+  const flight = (x0, z0, y0, ux, uz, nx, nz) => {
+    for (let i = 0; i < STEPS; i++) {
+      const g = new THREE.BoxGeometry(GO + 0.02, 0.2, 1.9), u = (i + 0.5) * GO;
+      g.rotateY(-Math.atan2(uz, ux)); g.translate(x0 + ux * u, y0 - (i + 1) * RISE - 0.1, z0 + uz * u);
+      sp.push(g);
+    }
+    for (const sg of [1, -1]) beam(x0 + nx * 1.0 * sg, y0 - 0.25, z0 + nz * 1.0 * sg, x0 + ux * FL + nx * 1.0 * sg, y0 - TOP / 2 - 0.25, z0 + uz * FL + nz * 1.0 * sg, 0.1, 0.32, rp);
+  };
   const kiosks = [];
   for (const [x, z] of ends) {
     const a0 = Math.atan2(z - CIRCLE.z, x - CIRCLE.x);
@@ -1421,9 +1432,14 @@ let BRIDGE_MID = null;
       if (clear) { a = a0 + da; break; }
     }
     const ux = Math.cos(a), uz = Math.sin(a), fx = x + ux * RUN, fz = z + uz * RUN;
-    BRIDGE_STAIRS.push({ top: [x, z], foot: [fx, fz] });
-    const { nx, nz } = span(x, DECK_Y, z, fx, 0, fz, 2, false);
-    column(x + ux * RUN * 0.5, z + uz * RUN * 0.5, DECK_Y / 2, 0.6);
+    const l1 = [x + ux * FL, z + uz * FL], l2 = [x + ux * (FL + LAND), z + uz * (FL + LAND)];
+    BRIDGE_STAIRS.push({ top: [x, z], foot: [fx, fz], land: [l1, l2], landY: TOP / 2 });
+    const { nx, nz } = span(x, DECK_Y, z, l1[0], TOP / 2, l1[1], 2, 'stairs');
+    span(l1[0], TOP / 2, l1[1], l2[0], TOP / 2, l2[1], 2, 'stairs');
+    span(l2[0], TOP / 2, l2[1], fx, 0, fz, 2, 'stairs');
+    flight(x, z, TOP, ux, uz, nx, nz); flight(l2[0], l2[1], TOP / 2, ux, uz, nx, nz);
+    beam(l1[0], TOP / 2 - 0.12, l1[1], l2[0], TOP / 2 - 0.12, l2[1], 2, 0.24, sp);
+    column(x + ux * RUN * 0.5, z + uz * RUN * 0.5, TOP / 2 - 0.24, 0.5);
     for (let s = RUN * 0.55; s <= RUN; s += 1.2) CIRCLES.push({ x: x + ux * s, z: z + uz * s, r: 1 });
     for (const sg of [1, -1]) {
       const kx = fx - ux * 2 + nx * 3.4 * sg, kz = fz - uz * 2 + nz * 3.4 * sg;
@@ -1465,6 +1481,80 @@ let BRIDGE_MID = null;
     mesh(new THREE.BoxGeometry(3, 2.4, 3), new THREE.MeshLambertMaterial({ map: brickTex }), 0, 1.2, 0, k);
     mesh(new THREE.BoxGeometry(3.15, 0.7, 3.15), new THREE.MeshLambertMaterial({ color: '#8f9396' }), 0, 2.75, 0, k);
     mesh(new THREE.BoxGeometry(0.9, 1.9, 0.05), new THREE.MeshLambertMaterial({ color: '#3a4a3f' }), 0.5, 0.95, 1.52, k);
+  }
+}
+/* ---------------- on the pavements: tea stalls and fruit vans ---------------- */
+// A tea stall is a wooden box counter under a tarp on bamboo poles, glass jars of biscuits and a kettle
+// on top, strings of chips packets and a bunch of bananas hanging at the front, a bench for customers.
+// A fruit van is a flat wooden cart on a tricycle, heaped with oranges, apples, bananas and guavas.
+{
+  const cbox = (w, h, d, x, y, z, col, geo = new THREE.BoxGeometry(w, h, d)) => {
+    geo.translate(x, y, z);
+    const c = new THREE.Color(col), n = geo.attributes.position.count, a = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) c.toArray(a, i * 3);
+    geo.setAttribute('color', new THREE.BufferAttribute(a, 3));
+    return geo;
+  };
+  const wood = '#7a5a3a', dark = '#2b2b2b', bamboo = '#b89a62';
+  const stall = [
+    cbox(1.5, 0.95, 0.8, 0, 0.48, 0, wood), cbox(1.6, 0.05, 0.9, 0, 0.98, 0, '#5a4028'),
+    cbox(1.5, 0.35, 0.3, 0, 1.18, -0.28, '#6b4e33'), // the raised shelf at the back
+    cbox(0, 0, 0, 0.5, 1.13, 0.1, '#30302e', new THREE.CylinderGeometry(0.1, 0.12, 0.24, 10)), // kettle
+    ...[-0.6, -0.35, -0.1, 0.15].map((x) => cbox(0.18, 0.26, 0.18, x, 1.14, 0.22, '#d9e4e0')),
+    ...[-0.6, -0.35, -0.1, 0.15].map((x) => cbox(0.19, 0.04, 0.19, x, 1.29, 0.22, '#c62828')),
+    ...[[-0.85, -0.5], [0.85, -0.5], [-0.85, 0.55], [0.85, 0.55]].map(([x, z]) => cbox(0, 0, 0, x, 1.1, z, bamboo, new THREE.CylinderGeometry(0.03, 0.035, 2.2, 6))),
+    ...Array.from({ length: 10 }, (_, i) => cbox(0.11, 0.16, 0.02, -0.65 + i * 0.13, 1.82, 0.56, ['#f57c00', '#fdd835', '#d32f2f', '#43a047', '#1e88e5'][i % 5])),
+    cbox(1.6, 0.02, 0.02, 0, 1.92, 0.56, dark), // the string they hang from
+    cbox(0.22, 0.32, 0.16, -0.68, 1.62, 0.5, '#e8c547'), // bananas
+    cbox(1.4, 0.06, 0.3, 0, 0.45, 0.95, '#8a6a44'), ...[-0.6, 0.6].map((x) => cbox(0.06, 0.42, 0.24, x, 0.21, 0.95, '#5a4028')), // bench
+  ];
+  const van = [
+    cbox(1.9, 0.08, 1.1, 0.2, 0.74, 0, '#8a6a44'),
+    ...[-0.53, 0.53].map((z) => cbox(1.9, 0.14, 0.04, 0.2, 0.84, z, '#6b4e33')),
+    cbox(1.8, 0.07, 0.08, 0.1, 0.62, 0, dark),
+    ...[[0.55, -0.62], [0.55, 0.62], [-1.15, 0]].map(([x, z]) => cbox(0, 0, 0, x, 0.33, z, '#1d1d1d', new THREE.TorusGeometry(0.3, 0.035, 5, 14))),
+    cbox(0.05, 0.05, 1.3, 0.55, 0.33, 0, dark), // rear axle
+    cbox(0.05, 0.75, 0.05, -1.15, 0.7, 0, dark), cbox(0.05, 0.05, 0.55, -1.15, 1.08, 0, dark), // fork and handlebar
+    cbox(0.85, 0.05, 0.05, -0.75, 0.7, 0, dark), cbox(0.24, 0.07, 0.18, -0.72, 0.98, 0, '#2a2420'), cbox(0.04, 0.28, 0.04, -0.72, 0.84, 0, dark),
+  ];
+  const stalls = [], vans = [], tarps = [], fruit = [];
+  for (const [x, z, fx, fz] of STALL_SPOTS) {
+    if (buildingAt(x, z) || SAPLINGS.some(([sx, sz]) => Math.hypot(sx - x, sz - z) < 3) || CIRCLES.some((c) => Math.hypot(c.x - x, c.z - z) < c.r + 1.6) || stalls.concat(vans).some(([px, pz]) => Math.hypot(px - x, pz - z) < 8)) continue;
+    const ry = Math.atan2(fx, fz);
+    if (rand() < 0.65) {
+      stalls.push([x, z, ry]); tarps.push([x + fx * 0.1, z + fz * 0.1, ry, pick(['#1e5aa8', '#e2762b', '#2f7d4a', '#c9c3b5', '#a83232'])]);
+      STALL_SELLERS.push([x - fx * 0.6, z - fz * 0.6, ry]);
+      CIRCLES.push({ x, z, r: 0.9 });
+    } else {
+      // vans stand along the pavement, the vendor beside
+      const vx = x + fx * 0.3, vz = z + fz * 0.3, vr = ry;
+      vans.push([vx, vz, vr]);
+      const kinds = [['#f57c00', 0.1], ['#c62828', 0.09], ['#7cb342', 0.1], ['#e8c547', 0.12]], k = kinds[Math.floor(rand() * kinds.length)];
+      for (let i = 0; i < 26; i++) {
+        const lx = R(-0.6, 0.95), lz = R(-0.42, 0.42), ly = 0.86 + (0.4 - Math.abs(lz)) * 0.5 * (1 - Math.abs(lx - 0.17) / 0.9) + R(0, 0.06);
+        fruit.push([vx + Math.cos(vr) * lx + Math.sin(vr) * lz, ly, vz - Math.sin(vr) * lx + Math.cos(vr) * lz, k[1], rand() < 0.15 ? '#7cb342' : k[0]]);
+      }
+      STALL_SELLERS.push([vx + Math.cos(vr) * 1.6, vz - Math.sin(vr) * 1.6, ry + Math.PI / 2]);
+      CIRCLES.push({ x: vx, z: vz, r: 1.1 });
+    }
+  }
+  const o = new THREE.Object3D(), mat = new THREE.MeshLambertMaterial({ vertexColors: true });
+  const place = (geos, list) => {
+    if (!list.length) return;
+    const m = new THREE.InstancedMesh(mergeGeometries(geos), mat, list.length);
+    list.forEach(([x, z, ry], i) => { o.position.set(x, KERB, z); o.rotation.set(0, ry, 0); o.scale.setScalar(1); o.updateMatrix(); m.setMatrixAt(i, o.matrix); });
+    m.castShadow = m.receiveShadow = true; scene.add(m);
+  };
+  place(stall, stalls); place(van, vans);
+  if (tarps.length) {
+    const t = new THREE.InstancedMesh(new THREE.BoxGeometry(2.1, 0.03, 1.7), new THREE.MeshLambertMaterial({ color: '#ffffff' }), tarps.length);
+    tarps.forEach(([x, z, ry, col], i) => { o.position.set(x, KERB + 2.2, z); o.rotation.set(0, ry, 0); o.rotateX(0.12); o.updateMatrix(); t.setMatrixAt(i, o.matrix); t.setColorAt(i, _c.set(col)); });
+    t.castShadow = true; scene.add(t);
+  }
+  if (fruit.length) {
+    const f = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 1), new THREE.MeshLambertMaterial({ color: '#ffffff' }), fruit.length);
+    fruit.forEach(([x, y, z, r, col], i) => { o.position.set(x, KERB + y, z); o.rotation.set(0, 0, 0); o.scale.setScalar(r * R(0.85, 1.15)); o.updateMatrix(); f.setMatrixAt(i, o.matrix); f.setColorAt(i, _c.set(col)); });
+    scene.add(f);
   }
 }
 // beyond the edge of the map: low, hazy blocks so a long view ends in city, not in blank sky
@@ -2390,6 +2480,58 @@ function leafPuff(n) {
   scene.add(trunk, crown);
 }
 
+/* ---------------- small trees: the median planting and young street trees ---------------- */
+// The planted medians hold low leafy bushes, magenta bougainvillea and now and then a small areca palm.
+// Along the main-road pavements young trees stand in round green iron guards, as the city plants them.
+{
+  const o = new THREE.Object3D(), c = new THREE.Color();
+  const palms = SHRUBS.filter(([, , k]) => k % 9 === 4), bushes = SHRUBS.filter(([, , k]) => k % 9 !== 4);
+  const puffs = [];
+  for (const [x, z, k] of bushes) {
+    const bloom = k % 7 === 1 || k % 7 === 5;
+    for (let j = 0; j < 2; j++) puffs.push([x + R(-0.45, 0.45), KERB + R(0.5, 0.7), z + R(-0.45, 0.45), R(0.55, 0.75), bloom ? (j ? '#d0408a' : '#5f9a42') : pick(['#4f8f3f', '#5f9a42', '#447f38'])]);
+  }
+  for (const [x, z] of SAPLINGS) puffs.push([x, KERB + R(2.5, 2.8), z, R(0.8, 1), pick(['#5f9e44', '#6fae4a', '#4f8f3f'])], [x + R(-0.4, 0.4), KERB + R(2.0, 2.3), z + R(-0.4, 0.4), R(0.55, 0.7), '#5a9640']);
+  if (puffs.length) {
+    const m = new THREE.InstancedMesh(leafPuff(26), LEAF_MAT, puffs.length);
+    puffs.forEach(([x, y, z, sc, col], i) => {
+      o.position.set(x, y, z); o.rotation.set(0, R(0, 6.3), 0); o.scale.set(sc, sc * 0.8, sc); o.updateMatrix();
+      m.setMatrixAt(i, o.matrix); m.setColorAt(i, c.set(col).offsetHSL(R(-0.02, 0.02), 0, R(-0.04, 0.04)));
+    });
+    m.castShadow = true; scene.add(m);
+  }
+  // areca palms: a thin ringed stem and a fan of arching fronds
+  if (palms.length) {
+    const fronds = [];
+    for (let f = 0; f < 7; f++) {
+      const g = new THREE.BoxGeometry(0.16, 0.02, 1.3);
+      g.translate(0, 0, 0.65); g.rotateX(-0.55 - (f % 2) * 0.35); g.rotateY((f / 7) * Math.PI * 2);
+      fronds.push(g);
+    }
+    const stem = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.05, 0.07, 2.4, 6), new THREE.MeshLambertMaterial({ color: '#8d8a6a' }), palms.length);
+    const fan = new THREE.InstancedMesh(mergeGeometries(fronds), new THREE.MeshLambertMaterial({ color: '#4f8a3a', side: THREE.DoubleSide }), palms.length);
+    palms.forEach(([x, z], i) => {
+      o.position.set(x, KERB + 1.2, z); o.rotation.set(R(-0.06, 0.06), 0, R(-0.06, 0.06)); o.scale.setScalar(1); o.updateMatrix(); stem.setMatrixAt(i, o.matrix);
+      o.position.set(x, KERB + 2.4, z); o.rotation.set(0, R(0, 6.3), 0); o.updateMatrix(); fan.setMatrixAt(i, o.matrix);
+    });
+    stem.castShadow = fan.castShadow = true; scene.add(stem, fan);
+  }
+  // the young trees: a slim stem inside a round cage of green bars
+  if (SAPLINGS.length) {
+    const bars = canvasTex(64, 32, (g) => { g.fillStyle = '#2f5a3c'; for (let x = 0; x < 64; x += 8) g.fillRect(x, 0, 2, 32); g.fillRect(0, 0, 64, 3); g.fillRect(0, 29, 64, 3); g.fillRect(0, 14, 64, 2); });
+    bars.wrapS = THREE.RepeatWrapping; bars.repeat.set(3, 1);
+    const cageGeo = new THREE.CylinderGeometry(0.32, 0.32, 1.2, 12, 1, true);
+    const cage = new THREE.InstancedMesh(cageGeo, new THREE.MeshLambertMaterial({ map: bars, transparent: true, alphaTest: 0.4, side: THREE.DoubleSide }), SAPLINGS.length);
+    const stem = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.04, 0.07, 2.6, 6), new THREE.MeshLambertMaterial({ color: '#6b5844' }), SAPLINGS.length);
+    SAPLINGS.forEach(([x, z], i) => {
+      o.position.set(x, KERB + 0.6, z); o.rotation.set(0, R(0, 6.3), 0); o.scale.setScalar(1); o.updateMatrix(); cage.setMatrixAt(i, o.matrix);
+      o.position.set(x, KERB + 1.3, z); o.rotation.set(R(-0.05, 0.05), 0, R(-0.05, 0.05)); o.updateMatrix(); stem.setMatrixAt(i, o.matrix);
+      CIRCLES.push({ x, z, r: 0.4 });
+    });
+    stem.castShadow = true; scene.add(cage, stem);
+  }
+}
+
 /* ---------------- Mirpur-10 Circle: the island and the police box ---------------- */
 // the nearest point on a road of the given classes: [road, x, z, dirX, dirZ]
 function snap(x, z, classes) {
@@ -2776,6 +2918,12 @@ for (let i = 0; i < 55 && SIGN_SPOTS.length; i++) {
     }
   }
 }
+// the tea sellers behind their counters and the fruit sellers beside their vans
+for (const [x, z, ry] of STALL_SELLERS) {
+  const person = buildPerson(pick(['m', 'lungi', 'lungi'])), y = pavementAt(x, z) ? KERB + 0.02 : 0.05;
+  person.g.position.set(x, y, z); person.g.rotation.y = ry; scene.add(person.g);
+  STANDERS.push({ ...person, ry, ph: R(0, 10), x, z, solid: true });
+}
 // people crossing the main roads near the circle, wherever they like, and people using the overbridge
 const CROSSERS = [], CLIMBERS = [];
 // only the overbridge at the circle (the map has another one near Mirpur 2)
@@ -2808,7 +2956,8 @@ function climbRoute(c, from) {
   let to = Math.floor(rand() * (CIRCLE_STAIRS.length - 1));
   if (to >= from) to++;
   const A = CIRCLE_STAIRS[from], B = CIRCLE_STAIRS[to], side = R(-0.6, 0.6);
-  c.path = [[A.foot[0], 0, A.foot[1]], [A.top[0], DECK_Y + 0.18, A.top[1]], [BRIDGE_MID[0], DECK_Y + 0.18, BRIDGE_MID[1]], [B.top[0], DECK_Y + 0.18, B.top[1]], [B.foot[0], 0, B.foot[1]]]
+  const land = (S, i) => [S.land[i][0], S.landY + 0.02, S.land[i][1]];
+  c.path = [[A.foot[0], 0, A.foot[1]], land(A, 1), land(A, 0), [A.top[0], DECK_Y + 0.18, A.top[1]], [BRIDGE_MID[0], DECK_Y + 0.18, BRIDGE_MID[1]], [B.top[0], DECK_Y + 0.18, B.top[1]], land(B, 0), land(B, 1), [B.foot[0], 0, B.foot[1]]]
     .map(([x, y, z], i, all) => { const n = all[Math.min(i + 1, all.length - 1)], p = all[Math.max(i - 1, 0)], dx = n[0] - p[0], dz = n[2] - p[2], l = Math.hypot(dx, dz) || 1; return [x - (dz / l) * side, y, z + (dx / l) * side]; });
   c.cum = [0];
   for (let i = 1; i < c.path.length; i++) c.cum.push(c.cum[i - 1] + Math.hypot(c.path[i][0] - c.path[i - 1][0], c.path[i][1] - c.path[i - 1][1], c.path[i][2] - c.path[i - 1][2]));
