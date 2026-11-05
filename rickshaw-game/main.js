@@ -593,7 +593,7 @@ shopTex.wrapS = shopTex.wrapT = THREE.RepeatWrapping;
 
 /* ---------------- ground, roads, parks ---------------- */
 // pavements stand a curb's height above the road; SGRID holds their pieces for walking and riding
-const KERB = 0.18, SIDE_W = 2.6, SGRID = new Map();
+const KERB = 0.25, SIDE_W = 2.2, SGRID = new Map();
 function pavementAt(x, z) {
   for (const [ax, az, bx, bz, wd] of gridAt(SGRID, x, z)) {
     const [px, pz] = segNear(x, z, ax, az, bx, bz);
@@ -636,7 +636,7 @@ function flatMesh(B, mat, shadow = true) {
   return m;
 }
 {
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(2600, 2600), new THREE.MeshLambertMaterial({ map: groundTex, color: '#c9c1b4' })); // dusty, half-paved
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(2600, 2600), new THREE.MeshLambertMaterial({ map: groundTex, color: '#b8b5ae' })); // dusty grey, mostly hard standing as in the photos
   groundTex.repeat.set(150, 150);
   ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true;
   scene.add(ground);
@@ -646,36 +646,90 @@ function flatMesh(B, mat, shadow = true) {
   flatMesh(green, new THREE.MeshLambertMaterial({ color: '#7f9f58' }));
   flatMesh(pitch, new THREE.MeshLambertMaterial({ color: '#8dbb5c' }));
   flatMesh(water, new THREE.MeshLambertMaterial({ color: '#4f7f86' }));
-  // raised pavements with painted curbs along the big roads, in 2 m pieces: a side road crossing leaves a gap,
-  // and between the two carriageways of a main road the pavement fills the median
-  const side = flatBuf(), kerb = { p: [], uv: [] };
+  // Pavements and medians as in the street photos. Pavements are narrow (about 2.2 m, less where a
+  // building or side road is closer) behind a 25 cm concrete curb; on the main roads near the circle a
+  // green pipe railing runs along the curb, with gaps to cross. A median between two carriageways is a
+  // raised planted strip with shrubs and tall double-arm lamps, or, under the metro, a low concrete wall.
+  const side = flatBuf(), mid = flatBuf(), kerb = { p: [], uv: [] }, rail = { p: [], uv: [] };
+  const shrubs = [], walls = [], lamps = [], seen = new Set();
+  const metroLines = (MAP.rail || []).map((c) => dm(c));
+  const underMetro = (x, z) => metroLines.some((l) => { for (let i = 1; i < l.length; i++) { const [px, pz] = segNear(x, z, ...l[i - 1], ...l[i]); if (Math.hypot(px - x, pz - z) < 9) return true; } return false; });
   for (const r of ROADS) {
     if (r.cls !== 'p' && r.cls !== 't') continue;
-    const e = r.w / 2;
+    const e = r.w / 2, railed = r.cls === 'p' && r.pts.some(([x, z]) => Math.hypot(x - CIRCLE.x, z - CIRCLE.z) < 260);
     for (const sg of [1, -1]) for (let s = 0; s < r.len - 0.5; s += 2) {
       const s1 = Math.min(r.len, s + 2), [x0, z0, dx0, dz0] = along(r.pts, r.cum, s), [x1, z1, dx1, dz1] = along(r.pts, r.cum, s1);
       const n0 = [dz0 * sg, -dx0 * sg], n1 = [dz1 * sg, -dx1 * sg], mx = (x0 + x1) / 2, mz = (z0 + z1) / 2, nm = [(n0[0] + n1[0]) / 2, (n0[1] + n1[1]) / 2];
       if (nearRoad(mx + nm[0] * (e + 0.6), mz + nm[1] * (e + 0.6))[0] < 0) continue;
-      let wd = SIDE_W;
-      for (let t = 0.5; t <= 9; t += 0.5) if (nearRoad(mx + nm[0] * (e + t), mz + nm[1] * (e + t), ['p', 't'])[0] < 0.05) { wd = t / 2; break; }
+      let wd = SIDE_W, median = false;
+      for (let t = 0.5; t <= 9; t += 0.5) {
+        const qx = mx + nm[0] * (e + t), qz = mz + nm[1] * (e + t);
+        if (nearRoad(qx, qz, ['p', 't'])[0] < 0.05) { wd = t / 2; median = true; break; } // meet the other carriageway halfway
+        if (t <= SIDE_W && (nearRoad(qx, qz)[0] < 0 || buildingAt(qx, qz))) { wd = t; break; } // a side road or a shopfront
+      }
       if (wd < 0.3) continue;
       const ai = [x0 + n0[0] * e, z0 + n0[1] * e], bi = [x1 + n1[0] * e, z1 + n1[1] * e];
       const ao = [x0 + n0[0] * (e + wd), z0 + n0[1] * (e + wd)], bo = [x1 + n1[0] * (e + wd), z1 + n1[1] * (e + wd)];
-      flatTri(side, ai, bi, bo, KERB, 1 / 3); flatTri(side, ai, bo, ao, KERB, 1 / 3);
+      const top = median ? mid : side;
+      flatTri(top, ai, bi, bo, KERB, 1 / 3); flatTri(top, ai, bo, ao, KERB, 1 / 3);
       for (const [q, u, y] of [[ai, s, 0], [bi, s1, 0], [bi, s1, KERB], [ai, s, 0], [bi, s1, KERB], [ai, s, KERB]]) { kerb.p.push(q[0], y, q[1]); kerb.uv.push(u, y / KERB); }
       const cx0 = x0 + n0[0] * (e + wd / 2), cz0 = z0 + n0[1] * (e + wd / 2), cx1 = x1 + n1[0] * (e + wd / 2), cz1 = z1 + n1[1] * (e + wd / 2);
       gridAdd(SGRID, Math.min(cx0, cx1) - wd, Math.max(cx0, cx1) + wd, Math.min(cz0, cz1) - wd, Math.max(cz0, cz1) + wd, [cx0, cz0, cx1, cz1, wd]);
+      if (median) {
+        // the middle of the median, once (both carriageways reach it)
+        const ex0 = ao[0], ez0 = ao[1], ex1 = bo[0], ez1 = bo[1], key = Math.round((ex0 + ex1) / 4) + ',' + Math.round((ez0 + ez1) / 4);
+        if (seen.has(key)) continue;
+        seen.add(key);
+        if (underMetro(ex0, ez0)) walls.push([ex0, ez0, ex1, ez1]);
+        else {
+          if (Math.floor(s / 2) % 2 === 0) shrubs.push([(ex0 + ex1) / 2, (ez0 + ez1) / 2]);
+          if (Math.floor(s / 2) % 15 === 0) lamps.push([(ex0 + ex1) / 2, (ez0 + ez1) / 2, Math.atan2(dx0, dz0)]);
+        }
+      } else if (railed && Math.floor(s / 2) % 10 !== 0) {
+        // the pipe railing, just behind the curb
+        const ri = [ai[0] + n0[0] * 0.15, ai[1] + n0[1] * 0.15], rb = [bi[0] + n1[0] * 0.15, bi[1] + n1[1] * 0.15];
+        for (const [q, u, y] of [[ri, s / 2, KERB], [rb, s1 / 2, KERB], [rb, s1 / 2, KERB + 1], [ri, s / 2, KERB], [rb, s1 / 2, KERB + 1], [ri, s / 2, KERB + 1]]) { rail.p.push(q[0], y, q[1]); rail.uv.push(u, y - KERB); }
+      }
     }
   }
   flatMesh(side, new THREE.MeshLambertMaterial({ map: tileTex, color: '#e3e1dc' }));
+  flatMesh(mid, new THREE.MeshLambertMaterial({ map: groundTex, color: '#7d8a55' }));
+  const plain = (B, mat) => { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(B.p, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(B.uv, 2)); g.computeVertexNormals(); const m = new THREE.Mesh(g, mat); m.receiveShadow = true; scene.add(m); return m; };
   // plain concrete curbs, stained along the bottom
   const kerbTex = canvasTex(64, 8, (g) => { g.fillStyle = '#b9b6ae'; g.fillRect(0, 0, 64, 8); g.fillStyle = 'rgba(60,50,40,.35)'; g.fillRect(0, 0, 64, 2); g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(31, 0, 2, 8); grain(g, 64, 8, 160, 0.3); });
   kerbTex.wrapS = THREE.RepeatWrapping;
-  const kg = new THREE.BufferGeometry();
-  kg.setAttribute('position', new THREE.Float32BufferAttribute(kerb.p, 3));
-  kg.setAttribute('uv', new THREE.Float32BufferAttribute(kerb.uv, 2));
-  kg.computeVertexNormals();
-  scene.add(new THREE.Mesh(kg, new THREE.MeshLambertMaterial({ map: kerbTex, side: THREE.DoubleSide })));
+  plain(kerb, new THREE.MeshLambertMaterial({ map: kerbTex, side: THREE.DoubleSide }));
+  const railTex = canvasTex(64, 32, (g) => {
+    g.strokeStyle = '#2f5a3c'; g.lineWidth = 3;
+    g.beginPath(); g.moveTo(0, 2); g.lineTo(64, 2); g.moveTo(0, 16); g.lineTo(64, 16); g.moveTo(2, 0); g.lineTo(2, 32); g.stroke();
+  });
+  railTex.wrapS = THREE.RepeatWrapping;
+  plain(rail, new THREE.MeshLambertMaterial({ map: railTex, transparent: true, alphaTest: 0.4, side: THREE.DoubleSide })).castShadow = true;
+  // under the metro: a low concrete barrier along the middle of the median
+  if (walls.length) {
+    const wg = walls.map(([ax, az, bx, bz]) => { const L = Math.hypot(bx - ax, bz - az) || 0.01, g = new THREE.BoxGeometry(L + 0.05, 0.9, 0.35); g.rotateY(-Math.atan2(bz - az, bx - ax)); g.translate((ax + bx) / 2, KERB + 0.45, (az + bz) / 2); return g; });
+    const m = new THREE.Mesh(mergeGeometries(wg), new THREE.MeshLambertMaterial({ color: '#c4bfb6' })); m.castShadow = m.receiveShadow = true; scene.add(m);
+    for (const [ax, az] of walls) CIRCLES.push({ x: ax, z: az, r: 0.3 });
+  }
+  // elsewhere: clipped shrubs, and tall lamps with an arm over each carriageway
+  if (shrubs.length) {
+    const sh = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.6, 1), new THREE.MeshLambertMaterial({ color: '#4f7f3a' }), shrubs.length), o = new THREE.Object3D();
+    shrubs.forEach(([x, z], i) => { o.position.set(x, KERB + 0.4, z); o.scale.set(R(0.9, 1.3), R(0.7, 1.1), R(0.9, 1.3)); o.updateMatrix(); sh.setMatrixAt(i, o.matrix); sh.setColorAt(i, _c.set(pick(['#4f7f3a', '#5c8f42', '#3f6f33']))); });
+    sh.castShadow = true; scene.add(sh);
+  }
+  if (lamps.length) {
+    const pole = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.1, 0.16, 9, 7), new THREE.MeshLambertMaterial({ color: '#9a9ea2' }), lamps.length);
+    const arm = new THREE.InstancedMesh(new THREE.BoxGeometry(0.1, 0.1, 5), new THREE.MeshLambertMaterial({ color: '#9a9ea2' }), lamps.length);
+    const head = new THREE.InstancedMesh(new THREE.BoxGeometry(0.35, 0.12, 0.7), new THREE.MeshLambertMaterial({ color: '#d8d8d2' }), lamps.length * 2);
+    const o = new THREE.Object3D();
+    lamps.forEach(([x, z, h], i) => {
+      o.position.set(x, KERB + 4.5, z); o.rotation.set(0, 0, 0); o.updateMatrix(); pole.setMatrixAt(i, o.matrix);
+      o.position.set(x, KERB + 8.9, z); o.rotation.set(0, h + Math.PI / 2, 0); o.updateMatrix(); arm.setMatrixAt(i, o.matrix);
+      for (const k of [-1, 1]) { o.position.set(x + Math.cos(h) * 2.5 * k, KERB + 8.8, z - Math.sin(h) * 2.5 * k); o.rotation.set(0, h, 0); o.updateMatrix(); head.setMatrixAt(i * 2 + (k > 0 ? 1 : 0), o.matrix); }
+      CIRCLES.push({ x, z, r: 0.3 });
+    });
+    pole.castShadow = true; scene.add(pole, arm, head);
+  }
   // light grey, sun-bleached roads as in the street photos
   const ROAD_LOOK = { f: ['#f2e6d4', 0.06], s: ['#fbf8f2', 0.065], g: ['#f6ece0', 0.07], r: ['#fbf8f4', 0.075], t: ['#f6f5f6', 0.085], p: ['#efeef2', 0.095] };
   let k = 2;
