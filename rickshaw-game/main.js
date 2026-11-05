@@ -1294,7 +1294,7 @@ let BRIDGE_MID = null;
       // an ad board on each side of the arm, facing the road below
       if (L > 12) for (const sg of [1, -1]) {
         const k = adN++ % ADS.length, u0 = (k % 2) / 2, u1 = u0 + 0.5, v1 = 1 - Math.floor(k / 2) / 2, v0 = v1 - 0.5;
-        const t0 = 0.5 - 3 / L, t1 = 0.5 + 3 / L, off = 1.75 * sg;
+        const t0 = 0.5 - 3 / L, t1 = 0.5 + 3 / L, off = 1.95 * sg; // just in front of the banner strip
         const A = [ax + (bx - ax) * t0 + nx * off, az + (bz - az) * t0 + nz * off], B = [ax + (bx - ax) * t1 + nx * off, az + (bz - az) * t1 + nz * off];
         sg > 0 ? quad(ads, A, B, DECK_Y - 0.9, DECK_Y - 0.9, 3, u0, u1, v0, v1) : quad(ads, B, A, DECK_Y - 0.9, DECK_Y - 0.9, 3, u0, u1, v0, v1);
       }
@@ -2284,13 +2284,15 @@ let POLICE = null;
   mesh(new THREE.BoxGeometry(6, 0.3, 6), M('#a9a59c'), 0, 3.05, 0, g);
   mesh(new THREE.BoxGeometry(6.4, 2.1, 6.4), new THREE.MeshLambertMaterial({ map: cladding }), 0, 4.25, 0, g);
   mesh(new THREE.BoxGeometry(0.9, 0.55, 0.5), M('#eceae4'), 1.6, 2.3, 2.95, g); // the AC unit
-  const SCREENS = [['#120c1e', '#ff3d7f', '#40c4ff'], ['#0b1420', '#ffd54f', '#e53935'], ['#101a12', '#69f0ae', '#ffffff'], ['#1a0f0a', '#ff9100', '#7c4dff']];
-  SCREENS.forEach(([bg, a, b], i) => {
+  const SCREENS = [['#120c1e', '#ff3d7f', '#40c4ff', '৪জি', 'দ্রুত ইন্টারনেট'], ['#0b1420', '#ffd54f', '#ffd54f', 'ঈদ অফার', '৫০% ছাড়'], ['#101a12', '#69f0ae', '#ffffff', 'মোবাইল', 'ব্যাংকিং'], ['#1a0f0a', '#ff9100', '#ffcc80', 'নতুন', 'ফ্ল্যাট বিক্রয়']];
+  SCREENS.forEach(([bg, a, b, t1, t2], i) => {
     const tex = canvasTex(256, 144, (c) => {
       c.fillStyle = bg; c.fillRect(0, 0, 256, 144);
       const gr = c.createRadialGradient(80, 72, 4, 80, 72, 60); gr.addColorStop(0, a); gr.addColorStop(1, 'rgba(0,0,0,0)');
       c.fillStyle = gr; c.fillRect(0, 0, 256, 144);
-      c.fillStyle = b; c.beginPath(); c.moveTo(150, 20); c.lineTo(230, 40); c.lineTo(200, 130); c.lineTo(140, 110); c.fill();
+      c.fillStyle = b; c.textAlign = 'center'; c.textBaseline = 'middle';
+      c.font = `700 46px ${BN}`; c.fillText(t1, 128, 58);
+      c.fillStyle = '#ffffff'; c.font = `600 26px ${BN}`; c.fillText(t2, 128, 106);
       c.fillStyle = 'rgba(0,0,0,.3)'; for (let y = 0; y < 144; y += 3) c.fillRect(0, y, 256, 1);
     });
     const ang = (i * Math.PI) / 2, s = mesh(new THREE.PlaneGeometry(3.6, 1.9), new THREE.MeshBasicMaterial({ map: tex }), Math.sin(ang) * 3.22, 4.25, Math.cos(ang) * 3.22, g);
@@ -2517,7 +2519,7 @@ function spawnNPC(n, rmin, rmax) {
   for (let tries = 0; tries < 60; tries++) {
     const e = pick(ok), s = R(0, e.len), [x, z] = along(e.pts, e.cum, s), d = Math.hypot(x - P.x, z - P.z);
     if (d < rmin || d > rmax || Math.abs(x) > EDGE || Math.abs(z) > EDGE) continue;
-    if (NPCS.some((o) => o !== n && Math.hypot(o.g.position.x - x, o.g.position.z - z) < 8)) continue;
+    if (NPCS.some((o) => o !== n && Math.hypot(o.g.position.x - x, o.g.position.z - z) < 14)) continue;
     Object.assign(n, { e, s, sp: n.vmax * 0.5, off: null });
     placeNPC(n, 1);
     return true;
@@ -3231,7 +3233,9 @@ function npcOverlap(a, b) {
   }
   return true;
 }
+const VIEW = new THREE.Frustum(), _vm = new THREE.Matrix4();
 function updateNPCs(dt) {
+  VIEW.setFromProjectionMatrix(_vm.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
   for (const n of NPCS) n.prev = [n.e, n.s, n.g.position.x, n.g.position.z, n.head, n.off];
   for (const n of NPCS) {
     const near = Math.hypot(P.x - n.g.position.x, P.z - n.g.position.z);
@@ -3263,7 +3267,8 @@ function updateNPCs(dt) {
       if (n.honkT <= 0) { honk(n); n.honkT = R(1.2, 2.5); }
     }
     n.stuck = n.sp < 0.3 && target < 0.3 && !forYou ? (n.stuck || 0) + dt : 0;
-    if (n.stuck > 3) { n.stuck = 0; n.ghost = 2.5; if (n.honkT <= 0) { honk(n, 1.2); n.honkT = 1; } }
+    if (n.stuck > 3 && near > 45) { n.stuck = 0; n.ghost = 2.5; if (n.honkT <= 0) { honk(n, 1.2); n.honkT = 1; } }
+    else if (n.stuck > 10 && !VIEW.containsPoint(n.g.position)) { n.stuck = 0; spawnNPC(n, 150, 220); continue; }
     n.honkT -= dt;
     n.sp += (target - n.sp) * Math.min(1, 3 * dt);
     n.s += n.sp * dt;
@@ -3285,8 +3290,9 @@ function updateNPCs(dt) {
     const a = NPCS[i], b = NPCS[j], dx = b.g.position.x - a.g.position.x, dz = b.g.position.z - a.g.position.z;
     if (a.ghost > 0 || b.ghost > 0 || Math.abs(dx) + Math.abs(dz) > (a.L + b.L) * 0.75 || !npcOverlap(a, b)) continue;
     const ta = Math.sin(a.head) * dx + Math.cos(a.head) * dz, tb = -(Math.sin(b.head) * dx + Math.cos(b.head) * dz);
-    const n = ta > tb ? a : b;
-    [n.e, n.s] = n.prev; n.g.position.set(n.prev[2], 0, n.prev[3]); n.head = n.prev[4]; n.off = n.prev[5]; n.g.rotation.y = n.head; n.sp = 0;
+    const back = (n) => { [n.e, n.s] = n.prev; n.g.position.set(n.prev[2], 0, n.prev[3]); n.head = n.prev[4]; n.off = n.prev[5]; n.g.rotation.y = n.head; n.sp = 0; };
+    back(ta > tb ? a : b);
+    if (npcOverlap(a, b)) back(ta > tb ? b : a); // both moved into each other: both step back
   }
   // in Dhaka a horn means "I am here", so everyone uses it, all the time
   if (AC) for (const n of NPCS) {
