@@ -799,7 +799,7 @@ function flatMesh(B, mat, shadow = true) {
 /* ---------------- buildings, merged in chunks ---------------- */
 const FACADES = ['#e8dcc4', '#f2e1c2', '#d9c3a5', '#e7b9a6', '#c9d8c5', '#b8cfd9', '#efd38c', '#e2a68b', '#d7d1c9', '#f0e6d8', '#c4b19a', '#9fb8ad', '#e9c7c0', '#d6b3d1', '#e3e0d8', '#cbbba0'];
 const ROOFS = ['#a69e92', '#9a9186', '#b2aa9e', '#8f877c', '#b7aea2'];
-const TANKS = [], DOMES = [], CHUNK_MESHES = [];
+const TANKS = [], DOMES = [], CHUNK_MESHES = [], ROOFTOP = { stairs: [], antennas: [], boards: [] };
 // buildings with curtain-wall glass instead of plaster: the round blue tower beside the metro station
 const GLASS_SRC = new Set([4505]);
 {
@@ -915,8 +915,24 @@ const GLASS_SRC = new Set([4505]);
     const wall = new THREE.Color(b.kind === 2 ? '#f3f1ea' : b.kind === 1 ? pick(['#8d969c', '#9c6b4e', '#7f8a7a']) : b.elevated ? '#d9dcd8' : pick(FACADES)).offsetHSL(R(-0.02, 0.02), R(-0.05, 0.05), R(-0.05, 0.03));
     if (b.elevated) band(ch.wall[1], b, b.y0, b.h, 3.2, 3.2, wall);
     else if (b.kind === 1 || b.h <= 3.3) band(b.kind === 1 ? ch.wall[0] : ch.shop, b, 0, b.h, b.kind === 1 ? 0 : 14.4, b.kind === 1 ? 0 : 3.2, b.kind === 1 ? wall : white);
-    else { band(ch.shop, b, 0, 3.2, 14.4, 3.2, white); band(ch.wall[style], b, 3.2, b.h, 3.2, 3.2, wall); }
+    else {
+      band(ch.shop, b, 0, 3.2, 14.4, 3.2, white);
+      // tall commercial blocks on the main roads are often clad in tinted glass above the shops,
+      // dusty grey-green or teal rather than the bright blue of the round tower
+      const clad = b.lv >= 6 && nearRoad(b.cx, b.cz, ['p'])[0] < 30 && rand() < 0.25;
+      band(clad ? ch.glass : ch.wall[style], b, 3.2, b.h, 3.2, 3.2, clad ? _c.set(pick(['#9fb3ad', '#a7b2b8', '#b4bfae', '#8fa7a9'])).clone() : wall);
+    }
     roofCap(ch.roof, b, b.h, _c.set(pick(ROOFS)).offsetHSL(0, 0, R(-0.04, 0.04)));
+    // what stands on the roofs: the stair house, antennas, and on the main roads big billboards
+    if (b.lv >= 3 && !b.elevated && b.kind === 0) {
+      const w = b.maxX - b.minX, d = b.maxZ - b.minZ;
+      if (w > 6 && d > 6 && rand() < 0.6) ROOFTOP.stairs.push([b.cx + R(-w, w) * 0.15, b.h, b.cz + R(-d, d) * 0.15]);
+      if (rand() < 0.3) ROOFTOP.antennas.push([b.cx + R(-w, w) * 0.3, b.h, b.cz + R(-d, d) * 0.3]);
+      if (b.lv >= 5 && Math.hypot(b.cx - CIRCLE.x, b.cz - CIRCLE.z) < 260 && rand() < 0.25) {
+        const [dr] = nearRoad(b.cx, b.cz, ['p']);
+        if (dr < 25) ROOFTOP.boards.push(b);
+      }
+    }
     if (b.kind === 2) DOMES.push([b.cx, b.h, b.cz, Math.min(b.maxX - b.minX, b.maxZ - b.minZ) * 0.3]);
     else if (b.lv >= 3 && !b.elevated && rand() < 0.45) TANKS.push([b.cx + R(-1, 1), b.h + 0.75, b.cz + R(-1, 1)]);
   }
@@ -954,6 +970,51 @@ const GLASS_SRC = new Set([4505]);
   const dome = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshLambertMaterial({ color: '#2f8a5b' }), DOMES.length);
   DOMES.forEach(([x, y, z, r], i) => { o.position.set(x, y, z); o.scale.setScalar(Math.max(1.2, r)); o.updateMatrix(); dome.setMatrixAt(i, o.matrix); });
   scene.add(dome);
+}
+
+/* ---------------- on the roofs: stair houses, antennas, billboards ---------------- */
+{
+  const o = new THREE.Object3D();
+  const sh = new THREE.InstancedMesh(new THREE.BoxGeometry(2.6, 2.6, 2.6), new THREE.MeshLambertMaterial({ color: '#cfc8bb' }), ROOFTOP.stairs.length);
+  ROOFTOP.stairs.forEach(([x, y, z], i) => { o.position.set(x, y + 1.3, z); o.rotation.set(0, R(0, 1.5), 0); o.updateMatrix(); sh.setMatrixAt(i, o.matrix); });
+  sh.castShadow = true;
+  const an = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.03, 0.04, 4, 5), new THREE.MeshLambertMaterial({ color: '#6f7276' }), ROOFTOP.antennas.length);
+  ROOFTOP.antennas.forEach(([x, y, z], i) => { o.position.set(x, y + 2, z); o.rotation.set(0, 0, 0); o.updateMatrix(); an.setMatrixAt(i, o.matrix); });
+  scene.add(sh, an);
+  // billboards on steel frames, facing the main road below
+  const ADV = [['মোবাইল ব্যাংকিং', '#d4145a'], ['৪জি ইন্টারনেট', '#e53935'], ['নতুন ফ্ল্যাট', '#1d4f91'], ['সিমেন্ট', '#2e7d32'], ['বিস্কুট', '#f57c00'], ['টুথপেস্ট', '#0277bd']];
+  const atlas = canvasTex(1024, 768, (g) => {
+    ADV.forEach(([t, bg], i) => {
+      const x = (i % 2) * 512, y = Math.floor(i / 2) * 256;
+      g.fillStyle = bg; g.fillRect(x, y, 512, 256);
+      g.fillStyle = 'rgba(255,255,255,.18)'; g.beginPath(); g.arc(x + 420, y + 128, 110, 0, 7); g.fill();
+      g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `800 64px ${BN}`; g.fillText(t, x + 256, y + 128);
+    });
+    grain(g, 1024, 768, 8000, 0.08, true);
+  });
+  const B = { p: [], uv: [] }, legs = [];
+  for (const b of ROOFTOP.boards) {
+    // face the nearest main road
+    let best = null, bd = 1e9;
+    for (let i = 0; i < b.pts.length; i++) {
+      const [ax, az] = b.pts[i], [bx, bz] = b.pts[(i + 1) % b.pts.length], L = Math.hypot(bx - ax, bz - az);
+      if (L < 5) continue;
+      const nx = -(bz - az) / L, nz = (bx - ax) / L, d = nearRoad((ax + bx) / 2 + nx * 6, (az + bz) / 2 + nz * 6, ['p'])[0];
+      if (d < bd) { bd = d; best = [(ax + bx) / 2, (az + bz) / 2, (bx - ax) / L, (bz - az) / L, nx, nz]; }
+    }
+    if (!best) continue;
+    const [mx, mz, dx, dz, nx, nz] = best, w = 8, h = 3, y0 = b.h + 2.2, x = mx - nx * 1.2, z = mz - nz * 1.2;
+    const k = Math.floor(rand() * ADV.length), u0 = (k % 2) / 2, u1 = u0 + 0.5, v1 = 1 - Math.floor(k / 2) / 3, v0 = v1 - 1 / 3;
+    const c = [[x - dx * w / 2, y0, z - dz * w / 2, u0, v0], [x + dx * w / 2, y0, z + dz * w / 2, u1, v0], [x + dx * w / 2, y0 + h, z + dz * w / 2, u1, v1], [x - dx * w / 2, y0 + h, z - dz * w / 2, u0, v1]];
+    for (const q of [c[0], c[1], c[2], c[0], c[2], c[3]]) { B.p.push(q[0], q[1], q[2]); B.uv.push(q[3], q[4]); }
+    for (const t of [-0.4, 0, 0.4]) { const g = new THREE.BoxGeometry(0.15, 2.2 + h, 0.15); g.translate(x + dx * w * t - nx * 0.15, b.h + (2.2 + h) / 2, z + dz * w * t - nz * 0.15); legs.push(g); }
+  }
+  if (B.p.length) {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(B.p, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(B.uv, 2)); g.computeVertexNormals();
+    scene.add(new THREE.Mesh(g, new THREE.MeshLambertMaterial({ map: atlas, side: THREE.DoubleSide })));
+    const m = new THREE.Mesh(mergeGeometries(legs), new THREE.MeshLambertMaterial({ color: '#4a4c50' })); m.castShadow = true; scene.add(m);
+  }
 }
 
 /* ---------------- shop signs with the real names from the map ---------------- */
@@ -995,9 +1056,9 @@ const SIGN_SPOTS = [], SIGNS = []; // where people gather, and every sign placed
     }));
   }
   const bufs = atlases.map(() => ({ p: [], n: [], uv: [] }));
-  function place(entryIndex, ax, az, bx, bz, cx, cz, big = false) {
+  function place(entryIndex, ax, az, bx, bz, cx, cz, big = false, at = null) {
     const L = Math.hypot(bx - ax, bz - az), dx = (bx - ax) / L, dz = (bz - az) / L, nx = -dz, nz = dx;
-    const w = Math.min(L * 0.9, big ? 8 : 4.6), h = w / 4, y = (big ? 3.6 : 3.25) + h / 2 + 0.1;
+    const w = Math.min(L * 0.9, big ? 8 : 4.6), h = w / 4, y = (at ?? (big ? 3.6 : 3.25)) + h / 2 + 0.1;
     const x = cx + nx * 0.14, z = cz + nz * 0.14;
     const a = Math.floor(entryIndex / 64), k = entryIndex % 64, u0 = (k % 4) / 4, u1 = u0 + 0.25, v1 = 1 - Math.floor(k / 4) / 16, v0 = v1 - 1 / 16;
     const B = bufs[a];
@@ -1044,7 +1105,36 @@ const SIGN_SPOTS = [], SIGNS = []; // where people gather, and every sign placed
       const key = gridAt(WALLS, mx, mz).find((wseg) => wseg[0] === ax && wseg[1] === az && wseg[2] === bx);
       if (key && used.has(key)) continue;
       place(Math.floor(rand() * GENERIC.length), ax, az, bx, bz, mx, mz);
+      // on the main roads near the circle, signboards climb the facade floor after floor
+      if (b.lv >= 3 && Math.hypot(mx - CIRCLE.x, mz - CIRCLE.z) < 300 && nearRoad(mx + nx * 4, mz + nz * 4, ['p'])[0] < 2)
+        for (let f = 2; f <= Math.min(3, b.lv - 1); f++) if (rand() < 0.5) place(Math.floor(rand() * GENERIC.length), ax, az, bx, bz, mx + (bx - ax) * R(-0.15, 0.15), mz + (bz - az) * R(-0.15, 0.15), false, f * 3.2 + 0.3);
     }
+  }
+  // outdoor AC units hanging off the road-facing walls, a few per floor
+  {
+    const spots = [];
+    for (const b of BUILDINGS) {
+      if (b.lv < 3 || !b.solid || b.kind !== 0) continue;
+      for (let i = 0; i < b.pts.length && spots.length < 4000; i++) {
+        const [ax, az] = b.pts[i], [bx, bz] = b.pts[(i + 1) % b.pts.length], L = Math.hypot(bx - ax, bz - az);
+        if (L < 4) continue;
+        const nx = -(bz - az) / L, nz = (bx - ax) / L, mx = (ax + bx) / 2, mz = (az + bz) / 2;
+        if (nearRoad(mx + nx * 5, mz + nz * 5)[0] > 2) continue;
+        for (let f = 1; f < Math.min(b.lv, 7); f++) for (let k = 0; k < Math.floor(L / 4); k++) {
+          if (rand() > 0.3) continue;
+          const t = (k + R(0.2, 0.8)) / Math.floor(L / 4);
+          spots.push([ax + (bx - ax) * t + nx * 0.28, f * 3.2 + R(0.6, 1.2), az + (bz - az) * t + nz * 0.28, Math.atan2(nx, nz)]);
+        }
+      }
+    }
+    const ac = new THREE.InstancedMesh(new THREE.BoxGeometry(0.8, 0.55, 0.32), new THREE.MeshLambertMaterial({ color: '#e4e2dc' }), spots.length);
+    const fan = new THREE.InstancedMesh(new THREE.CircleGeometry(0.17, 12), new THREE.MeshLambertMaterial({ color: '#5a5c5e' }), spots.length);
+    const o = new THREE.Object3D();
+    spots.forEach(([x, y, z, ry], i) => {
+      o.position.set(x, y, z); o.rotation.set(0, ry, 0); o.updateMatrix(); ac.setMatrixAt(i, o.matrix);
+      o.position.set(x + Math.sin(ry) * 0.17, y, z + Math.cos(ry) * 0.17); o.updateMatrix(); fan.setMatrixAt(i, o.matrix);
+    });
+    scene.add(ac, fan);
   }
   bufs.forEach((B, a) => {
     if (!B.p.length) return;
