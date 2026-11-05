@@ -1570,19 +1570,35 @@ function headSpecs(skin, { hair = '#15110e', style = 'short', beard = false, cap
   if (cap) H.push([PG.cap, cap, 0, y + 0.1, -0.005]);
   return H;
 }
-function buildPerson(kind = pick(['m', 'm', 'f', 'f', 'lungi', 'lungi', 'school']), scale = 1) {
+// the long abaya worn with a hijab, and a panjabi (long tunic) for men; both fall from the shoulders
+PG.abaya = ell(new THREE.CylinderGeometry(0.17, 0.31, 1.32, 16), 1, 1, 0.74);
+PG.panjabi = ell(new THREE.CylinderGeometry(0.17, 0.24, 0.98, 16), 1, 1, 0.72);
+PG.veil = ell(new THREE.SphereGeometry(0.085, 10, 8), 1.05, 0.8, 0.55);
+// who is on the street around the circle, roughly as in the photos: more men than women, many women in a burqa
+const PEOPLE_MIX = ['m', 'm', 'm', 'm', 'm', 'f', 'f', 'burqa', 'burqa', 'lungi', 'lungi', 'school'];
+function buildPerson(kind = pick(PEOPLE_MIX), scale = 1) {
   const g = new THREE.Group();
   const skin = pick(SKIN), hair = pick(HAIR);
-  let top = pick(['#efe9dc', '#9cc3e0', '#e0b0a0', '#3a5f8a', '#c94c4c', '#f2d06b', '#5d8a5a', '#ffffff', '#8a5aa8', '#e07a3a', '#d6c9a8']);
+  const burqa = kind === 'burqa';
+  if (burqa) kind = 'f';
+  // men mostly wear plain light shirts; colour is in the women's kameez
+  let top = kind === 'f' ? pick(['#e8364f', '#f6c445', '#1f8a5b', '#ff7ab8', '#7b3fb0', '#e07a3a', '#2f6f9f', '#c94c4c', '#f2d06b', '#5d8a5a'])
+    : pick(['#f2efe8', '#ffffff', '#cfe0ee', '#9cc3e0', '#bfc4c8', '#3a5f8a', '#2b3a55', '#d6c9a8', '#e8e2d2', '#7a8a9a', '#c94c4c']);
+  if (burqa) top = pick(['#1b1b1f', '#1b1b1f', '#22222a', '#2b2233', '#1f2a3a', '#3a2f2a']);
   if (kind === 'school') top = '#f4f4f0';
   const lungiCol = pick(['#2b5c8a', '#6a2a4a', '#2f4f2f', '#3b3b6b', '#7a5a2a']);
-  const legCol = kind === 'f' ? pick(['#efe9dc', '#2b2f3a', '#c94c4c', '#e6c27a']) : kind === 'lungi' ? skin : kind === 'school' ? '#1f3a6b' : pick(['#2b2f3a', '#4a4038', '#1f2a44', '#6b6157']);
+  const legCol = burqa ? top : kind === 'f' ? pick(['#efe9dc', '#2b2f3a', '#c94c4c', '#e6c27a']) : kind === 'lungi' ? skin : kind === 'school' ? '#1f3a6b' : pick(['#2b2f3a', '#1f2a44', '#3a3d45', '#4a4038', '#6b6157']);
   const topDark = mixHex(top, '#000000', 0.12);
   const longSleeve = kind === 'f' || (kind === 'm' && rand() < 0.4);
   const HY = 1.665;
   const body = [[PG.neck, skin, 0, 1.55, 0], [PG.torso, top, 0, 1.25, 0], [PG.chest, top, 0, 1.51, 0]];
   for (const s of [-1, 1]) body.push([PG.shoulder, top, s * 0.19, 1.46, 0]);
-  if (kind === 'f') {
+  if (burqa) {
+    // a long dark abaya to the ankles, a hijab over the head and shoulders, now and then a face veil
+    body.push([PG.abaya, top, 0, 0.72, 0], [PG.drape, top, 0, 1.49, 0]);
+    body.push(...headSpecs(skin, { hair, style: 'long', wrap: top, y: HY }));
+    if (rand() < 0.25) body.push([PG.veil, top, 0, HY - 0.06, 0.075]);
+  } else if (kind === 'f') {
     const wrap = rand() < 0.45 ? pick(['#1b1b1f', '#e8364f', '#1d6fb8', '#f6c445', '#7b3fb0', '#efe9dc', '#2f6f5a']) : null;
     const orna = pick(['#e8364f', '#f6c445', '#1f8a5b', '#ff7ab8', '#ffffff', '#7b3fb0']);
     body.push([PG.kameez, top, 0, 0.98, 0], [PG.orna, orna, 0, 1.49, 0.1, -0.5], [PG.ornaTail, orna, -0.14, 1.24, -0.12, 0.12], [PG.ornaTail, orna, 0.14, 1.24, -0.12, 0.12]);
@@ -1598,6 +1614,7 @@ function buildPerson(kind = pick(['m', 'm', 'f', 'f', 'lungi', 'lungi', 'school'
     if (kind === 'school') body.push([PG.tie, '#1f3a6b', 0, 1.36, 0.108], [PG.pocket, topDark, -0.08, 1.38, 0.104]);
     else if (rand() < 0.5) body.push([PG.pocket, topDark, -0.08, 1.37, 0.104]);
     if (kind === 'lungi') body.push([PG.lungi, lungiCol, 0, 0.7, 0], [PG.knot, mixHex(lungiCol, '#000000', 0.2), 0.03, 1.02, 0.15]);
+    else if (kind === 'm' && cap && rand() < 0.7) body.push([PG.panjabi, pick(['#f6f4ee', '#efe9dc', '#e9e4d6']), 0, 0.98, 0]); // a panjabi with the tupi
     else body.push([PG.pelvis, legCol, 0, 0.96, 0], [PG.belt, '#2a1d14', 0, 1.04, 0]);
   }
   const extra = rand();
