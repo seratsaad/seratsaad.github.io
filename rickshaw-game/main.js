@@ -1230,7 +1230,7 @@ let BRIDGE_MID = null;
           grain(g, 1024, 256, 3000, 0.1, true);
         });
         const board = new THREE.Mesh(new THREE.PlaneGeometry(9, 2.3), new THREE.MeshLambertMaterial({ map: bill, side: THREE.DoubleSide }));
-        board.position.set(mx, DECK_Y + 4.8, mz); board.rotation.y = Math.atan2(uz, -ux) + Math.PI / 2; board.castShadow = true; scene.add(board);
+        board.position.set(mx, DECK_Y + 4.8, mz); board.rotation.y = -Math.atan2(uz, ux); // along the arm board.castShadow = true; scene.add(board);
         for (const sg of [-1, 1]) beam(mx + ux * 3.5 * sg, DECK_Y + 3.1, mz + uz * 3.5 * sg, mx + ux * 3.5 * sg, DECK_Y + 4.8, mz + uz * 3.5 * sg, 0.15, 0.15, rp);
       }
       // an ad board on each side of the arm, facing the road below
