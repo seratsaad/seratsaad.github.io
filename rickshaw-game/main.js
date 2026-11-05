@@ -24,6 +24,8 @@ const BN = "'Hind Siliguri','Kohinoor Bangla','Noto Sans Bengali',sans-serif";
 const BN_ART = "'Baloo Da 2','Hind Siliguri','Kohinoor Bangla',sans-serif";
 const EN = "'DM Sans',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif";
 const $ = (s) => document.querySelector(s);
+// the gameplay layer (life.js: levels, the passenger job, events) plugs in through these
+const HOOKS = { update: [], bump: [], knock: [], bell: [], minimap: [], effort: () => 1, busy: () => false };
 // canvas text only uses a web font once it has loaded, so wait (but never more than 3 s)
 await Promise.race([
   Promise.all(['500 40px "DM Sans"', '700 40px "DM Sans"', '800 40px "DM Sans"', '600 40px "Hind Siliguri"', '700 40px "Hind Siliguri"', '700 40px "Baloo Da 2"', '800 40px "Baloo Da 2"']
@@ -319,7 +321,8 @@ scene.add(sky);
   scene.environment = pmrem.fromScene(envScene, 0, 0.1, 1000).texture;
   scene.environmentIntensity = 0.45;
 }
-scene.add(new THREE.HemisphereLight(0xdfe8ff, 0xa7805c, 0.9));
+const hemi = new THREE.HemisphereLight(0xdfe8ff, 0xa7805c, 0.9);
+scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xffd3a1, 3.1);
 sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048);
@@ -2670,89 +2673,7 @@ const PLACES = [];
     PLACES.push({ name, cat, x, z, stop: curb(s, x, z) });
   }
 }
-const JOB = { state: 'wait', next: 1.5, total: 0, trips: 0, fare: 0, to: null, spot: null, waiting: null, rider: null, slowHint: false };
-const jobRing = new THREE.Mesh(new THREE.RingGeometry(2.65, 3, 48), new THREE.MeshBasicMaterial({ color: '#f6c445', transparent: true, opacity: 0.9 }));
-jobRing.rotation.x = -Math.PI / 2; scene.add(jobRing);
-const jobDisc = new THREE.Mesh(new THREE.CircleGeometry(2.65, 40), new THREE.MeshBasicMaterial({ color: '#f6c445', transparent: true, opacity: 0.15 }));
-jobDisc.rotation.x = -Math.PI / 2; scene.add(jobDisc);
-const jobPin = new THREE.Mesh(makePin(0.6), new THREE.MeshStandardMaterial({ color: '#f6c445', emissive: '#f6c445', emissiveIntensity: 0.45, roughness: 0.35 }));
-scene.add(jobPin);
-function jobColor(c) { for (const m of [jobRing, jobDisc, jobPin]) { m.material.color.set(c); if (m.material.emissive) m.material.emissive.set(c); } }
-// someone at the roadside a little way off, waving you down
-function newFare() {
-  const near = PLACES.filter((p) => { const d = Math.hypot(p.stop[0] - P.x, p.stop[1] - P.z); return d > 60 && d < 220; });
-  let spot = null;
-  if (near.length && rand() < 0.4) spot = pick(near).stop;
-  for (let k = 0; !spot && k < 200; k++) {
-    const r = pick(WALK_ROADS);
-    if (r.cls === 'f') continue;
-    const [x, z] = along(r.pts, r.cum, R(0, r.len)), d = Math.hypot(x - P.x, z - P.z);
-    if (d < 50 || d > 200 || Math.abs(x) > EDGE - 20 || Math.abs(z) > EDGE - 20) continue;
-    spot = curb(snap(x, z, [r.cls]), x + R(-1, 1), z + R(-1, 1));
-  }
-  if (!spot) spot = PLACES.length ? pick(PLACES).stop : [P.x + 40, P.z, 1];
-  // the passenger stands just off the road edge beside the stop (on the pavement where there is one)
-  const person = buildPerson();
-  const [x, z, side] = spot, [, , , dx, dz] = snap(x, z, ['p', 't', 'r', 'g']) || [null, 0, 0, 1, 0];
-  let off = 2.6;
-  while (off > 1.2 && buildingAt(x + dz * side * off, z - dx * side * off)) off -= 0.4;
-  const px = x + dz * side * off, pz = z - dx * side * off;
-  person.g.position.set(px, pavementAt(px, pz) ? KERB + 0.02 : 0.05, pz);
-  person.g.rotation.y = Math.atan2(x - px, z - pz);
-  scene.add(person.g);
-  Object.assign(JOB, { state: 'pickup', spot, waiting: person, slowHint: false });
-  jobColor('#f6c445');
-}
-function updateJob(dt, t) {
-  if (POLICE) { POLICE.arms[0].rotation.x = -1.6 + Math.sin(t * 2.2) * 0.5; POLICE.arms[0].rotation.z = -0.4; POLICE.g.rotation.y = Math.PI / 2 + Math.sin(t * 0.4) * 0.8; }
-  if (JOB.state === 'wait') {
-    jobRing.visible = jobDisc.visible = jobPin.visible = false;
-    if ((JOB.next -= dt) <= 0 && started) newFare();
-    return updateJobHud();
-  }
-  const [tx, tz] = JOB.state === 'pickup' ? JOB.spot : JOB.to.stop;
-  jobRing.visible = jobDisc.visible = jobPin.visible = true;
-  jobRing.position.set(tx, 0.15, tz); jobDisc.position.set(tx, 0.14, tz);
-  jobPin.position.set(tx, 3.4 + Math.sin(t * 2) * 0.25, tz); jobPin.rotation.y = t * 1.5;
-  if (JOB.waiting) {
-    // waving, and turning to watch the rickshaw once it is near
-    const w = JOB.waiting, a = w.arms[1];
-    a.rotation.x = -2.6 + Math.sin(t * 6) * 0.35; a.rotation.z = Math.sin(t * 6) * 0.25;
-    if (Math.hypot(P.x - w.g.position.x, P.z - w.g.position.z) < 45) w.g.rotation.y = Math.atan2(P.x - w.g.position.x, P.z - w.g.position.z);
-  }
-  const d = Math.hypot(P.x - tx, P.z - tz);
-  jobPin.visible = d > 3;
-  if (d < 3) {
-    if (Math.abs(P.v) > 2.5) { if (!JOB.slowHint) { JOB.slowHint = true; toast('Slow down to stop'); } }
-    else if (JOB.state === 'pickup') {
-      scene.remove(JOB.waiting.g); JOB.waiting = null;
-      JOB.rider = seat(buildPerson(), 1.5); JOB.rider.g.position.set(0, 0.27, -0.62); player.body.add(JOB.rider.g);
-      const far = PLACES.filter((p) => { const dd = Math.hypot(p.stop[0] - tx, p.stop[1] - tz); return dd > 140 && dd < 650; });
-      JOB.to = pick(far.length ? far : PLACES);
-      const dist = Math.hypot(JOB.to.stop[0] - tx, JOB.to.stop[1] - tz);
-      JOB.fare = Math.round((25 + dist * 0.09) / 5) * 5;
-      Object.assign(JOB, { state: 'ride', slowHint: false });
-      jobColor('#3fae5a'); bell(); toast(`To ${JOB.to.name} · ৳${JOB.fare}`);
-    } else {
-      player.body.remove(JOB.rider.g); JOB.rider = null;
-      JOB.total += JOB.fare; JOB.trips++;
-      toast(`+৳${JOB.fare} · ${JOB.to.name}`); bell();
-      Object.assign(JOB, { state: 'wait', next: 2.5, to: null });
-    }
-  }
-  updateJobHud();
-}
-const hudJob = $('#job'), hudArrow = $('#job .job-arrow'), hudTo = $('#job .job-to'), hudMeta = $('#job .job-meta'), hudWallet = $('#wallet');
-function updateJobHud() {
-  hudWallet.textContent = `৳${JOB.total} · ${JOB.trips} ${JOB.trips === 1 ? 'trip' : 'trips'}`;
-  if (JOB.state === 'wait') { hudJob.classList.add('hidden'); return; }
-  hudJob.classList.remove('hidden');
-  const [tx, tz] = JOB.state === 'pickup' ? JOB.spot : JOB.to.stop, d = Math.hypot(tx - P.x, tz - P.z);
-  hudTo.textContent = JOB.state === 'pickup' ? 'A passenger is waving' : `To ${JOB.to.name}`;
-  hudMeta.textContent = JOB.state === 'pickup' ? `${Math.round(d)} m away` : `৳${JOB.fare} · ${Math.round(d)} m`;
-  const rel = Math.atan2(tx - P.x, tz - P.z) - camYaw;
-  hudArrow.style.transform = `rotate(${(-rel * 180) / Math.PI}deg)`;
-}
+// the passenger job, levels and events live in life.js
 
 /* ---------------- player ---------------- */
 // start by the Mirpur 10 bus stand, on a lane that runs toward the circle
@@ -2976,7 +2897,7 @@ function knockDown(p, sp) {
   p.g.rotation.order = 'YXZ';
   scream([x, 1.5, z]); thud(Math.min(1, sp / 8));
   shake = Math.min(0.5, 0.15 + sp * 0.03);
-  if (JOB.state === 'ride') { JOB.fare = Math.max(10, JOB.fare - 20); toast('"আস্তে চালান, মামা!" · -৳20'); }
+  for (const f of HOOKS.knock) f(sp);
   for (const w of WALKERS) if (!w.down && Math.hypot(w.g.position.x - x, w.g.position.z - z) < 12) w.pause = R(3, 7);
 }
 // returns false once they are back on their feet: only after a while, and only far out of sight
@@ -3397,16 +3318,17 @@ let camMode = 0, started = false;
 addEventListener('keydown', (e) => {
   if (KEYMAP[e.code]) { K[KEYMAP[e.code]] = true; e.preventDefault(); }
   if (!started) return;
-  if (e.code === 'Space') { e.preventDefault(); if (!e.repeat) bell(); }
+  if (e.code === 'Space') { e.preventDefault(); if (!e.repeat) ringBell(); }
   if (e.code === 'KeyC' && !e.repeat) camMode = (camMode + 1) % 2;
   if (e.code === 'KeyR' && !e.repeat) Object.assign(P, { x: START.x, z: START.z, th: START.th, v: 0 });
 });
 addEventListener('keyup', (e) => { if (KEYMAP[e.code]) K[KEYMAP[e.code]] = false; });
 for (const b of document.querySelectorAll('#touch button')) {
   const k = b.dataset.k;
-  b.addEventListener('pointerdown', (e) => { e.preventDefault(); if (k === 'bell') bell(); else K[k] = true; });
+  b.addEventListener('pointerdown', (e) => { e.preventDefault(); if (k === 'bell') ringBell(); else K[k] = true; });
   for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) b.addEventListener(ev, () => { if (k !== 'bell') K[k] = false; });
 }
+function ringBell() { bell(); for (const f of HOOKS.bell) f(); }
 $('#start').addEventListener('click', () => {
   initAudio(); started = true;
   $('#intro').classList.add('gone');
@@ -3444,7 +3366,7 @@ function pushOut(r, rad = P.r) {
 }
 function hit(n, soft = false) {
   const impact = Math.abs(Math.sin(P.th) * n[0] + Math.cos(P.th) * n[1]);
-  if (!soft && Math.abs(P.v) > 3 && impact > 0.5) { thud(Math.min(1, Math.abs(P.v) / 12)); shake = Math.min(0.5, Math.abs(P.v) * 0.03); }
+  if (!soft && Math.abs(P.v) > 3 && impact > 0.5) { thud(Math.min(1, Math.abs(P.v) / 12)); shake = Math.min(0.5, Math.abs(P.v) * 0.03); for (const f of HOOKS.bump) f(Math.abs(P.v)); }
   P.v *= impact > 0.75 && Math.abs(P.v) > 4 && !soft ? -0.3 : 1 - 0.7 * impact;
 }
 function updatePlayer(dt) {
@@ -3452,9 +3374,10 @@ function updatePlayer(dt) {
   surface = surfaceAt(P.x, P.z);
   const rough = { road: 0.4, foot: 0.8, brick: 1.4, dirt: 1.8 }[surface];
   // pedal power falls off with speed; rolling resistance and drag slow you down
-  const power = K.boost ? 13 : 8.5;
+  // stamina, load and weather (from life.js) scale how hard and how fast you can pedal
+  const eff = HOOKS.effort(), power = (K.boost ? 13 : 8.5) * eff;
   let a = 0;
-  if (thr > 0) a = P.v < 0 ? 16 : power * (1 - P.v / (K.boost ? 21 : 15));
+  if (thr > 0) a = P.v < 0 ? 16 : power * (1 - P.v / ((K.boost ? 21 : 15) * Math.min(1.3, 0.4 + 0.6 * eff)));
   else if (thr < 0) a = P.v > 0 ? -16 : -4 * (1 + P.v / 4);
   a -= Math.sign(P.v) * (0.25 * rough + 0.004 * P.v * P.v);
   if (!thr && Math.abs(P.v) < 0.15) { a = 0; P.v = 0; }
@@ -3627,12 +3550,6 @@ function updateWalkers(dt, t) {
     w.hips[0].rotation.x = sw; w.hips[1].rotation.x = -sw;
     w.arms[0].rotation.x = -sw * 0.8; w.arms[1].rotation.x = sw * 0.8;
     w.g.position.y += Math.abs(Math.sin(w.ph)) * 0.03 * Math.min(1, w.cur);
-    // an empty rickshaw riding past: now and then someone waves it down
-    if (w.hail > 0) {
-      w.hail -= dt;
-      w.arms[1].rotation.x = -2.6 + Math.sin(t * 7) * 0.4;
-      w.g.rotation.y = Math.atan2(dx, dz);
-    } else if (JOB.state !== 'ride' && d < 9 && Math.abs(P.v) > 1 && rand() < dt * 0.25) w.hail = R(1.2, 2.2);
   }
   for (const c of CROSSERS) {
     const lx = c.dz, lz = -c.dx, cx = c.x + c.dx * c.along + lx * c.lat, cz = c.z + c.dz * c.along + lz * c.lat, d = Math.hypot(P.x - cx, P.z - cz);
@@ -3746,12 +3663,7 @@ function drawMinimap() {
   const k = mm.width / view;
   mg.drawImage(mapCanvas, sx, sz, view, view * (mm.height / mm.width), 0, 0, mm.width, mm.height);
   const mx = (x) => ((x + EDGE + 100) * MS - sx) * k, mz = (z) => ((z + EDGE + 100) * MS - sz) * k;
-  if (JOB.state !== 'wait') {
-    const [tx, tz] = JOB.state === 'pickup' ? JOB.spot : JOB.to.stop;
-    const x = clamp(mx(tx), 6, mm.width - 6), y = clamp(mz(tz), 6, mm.height - 6);
-    mg.fillStyle = JOB.state === 'pickup' ? '#f6c445' : '#3fae5a'; mg.strokeStyle = '#3b2a1e'; mg.lineWidth = 1.5;
-    mg.beginPath(); mg.arc(x, y, 5, 0, 7); mg.fill(); mg.stroke();
-  }
+  for (const f of HOOKS.minimap) f(mg, mx, mz, mm);
   mg.save(); mg.translate(mx(P.x), mz(P.z)); mg.rotate(-P.th + Math.PI);
   mg.fillStyle = '#e8364f'; mg.strokeStyle = '#fff'; mg.lineWidth = 1.5;
   mg.beginPath(); mg.moveTo(0, -7); mg.lineTo(5, 5); mg.lineTo(0, 2.5); mg.lineTo(-5, 5); mg.closePath(); mg.fill(); mg.stroke();
@@ -3848,7 +3760,7 @@ function update(dt, t) {
   updateTrains(dt);
   updateCrows(dt, t);
   updateParticles(dt);
-  updateJob(dt, t);
+  for (const f of HOOKS.update) f(dt, t);
   updateCamera(dt);
   updateAudio(dt, started ? (K.up ? 1 : 0) - (K.down ? 1 : 0) : 0);
   WIND.value = t;
@@ -3872,14 +3784,24 @@ frame();
 let simT = 0;
 window.__game = {
   build: { buildRickshaw, buildCNG, buildBus, buildCar, buildTruck, buildBike, buildPerson },
-  P, K, JOB, PLACES, CIRCLE, CIRCLES, SIGNS, CROSSERS, CLIMBERS, NPCS, roadEdge: (x, z) => nearRoad(x, z)[0], WALKERS, STANDERS, BUILDINGS, ROADS, EDGES, renderer, scene, camera,
+  P, K, PLACES, CIRCLE, CIRCLES, SIGNS, CROSSERS, CLIMBERS, NPCS, roadEdge: (x, z) => nearRoad(x, z)[0], WALKERS, STANDERS, BUILDINGS, ROADS, EDGES, renderer, scene, camera,
   step(frames = 60, keys = {}) {
     Object.assign(K, keys);
     for (let i = 0; i < frames; i++) { simT += 1 / 60; update(1 / 60, simT); }
     for (const k in keys) K[k] = false;
     drawMinimap(); renderer.render(scene, camera);
-    return { x: +P.x.toFixed(1), z: +P.z.toFixed(1), v: +P.v.toFixed(1), job: JOB.state, to: JOB.to?.name ?? null, total: JOB.total, surface };
+    return { x: +P.x.toFixed(1), z: +P.z.toFixed(1), v: +P.v.toFixed(1), surface, life: window.__game.life?.debug() };
   },
   look(from, to) { camOverride = from ? [from, to] : null; return this.step(1); },
   audio: () => ({ state: AC?.state, engines: ENGINES.map((e) => e.n?.kind ?? null), chatter: CHATTER.map((c) => !!c.spot) }),
 };
+
+// the gameplay layer: levels, the passenger job, events and upgrades (same ?v= as this file)
+const { initLife } = await import(`./life.js${new URL(import.meta.url).search}`);
+window.__game.life = initLife({
+  THREE, MAP, scene, camera, sun, hemi, sky, HORIZON, headMat, P, K, player, NPCS, WALKERS, CROSSERS, STANDERS, PLACES, CIRCLE, POLICE,
+  SIGN_SPOTS, WALK_ROADS, CIRCLES, along, snap, curb, nearRoad, buildingAt, pavementAt, KERB, EDGE, dm,
+  buildPerson, seat, makePin, mesh, M, canvasTex, grain, BN, EN, $, toast, bell, honk, R, pick, rand, clamp,
+  hooks: HOOKS, isStarted: () => started, camYaw: () => camYaw,
+  audio: { ctx: () => AC, amp: (v) => amp(v), filt: (...a) => filt(...a), loopSrc: (b) => loopSrc(b), master: () => master },
+});
