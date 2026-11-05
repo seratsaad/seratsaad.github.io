@@ -1913,7 +1913,7 @@ function buildCNG() {
   mesh(RB(1.38, 0.55, 2.5, 0.18), green, 0, 0.62, -0.05, g);
   const nose = mesh(new THREE.SphereGeometry(0.62, 18, 12, 0, Math.PI * 2, 0, Math.PI / 2), green, 0, 0.55, 1.05, g);
   nose.scale.set(1.05, 1.15, 0.75);
-  mesh(RB(1.4, 0.12, 2.3, 0.05), green, 0, 1.95, -0.2, g);
+  mesh(RB(1.42, 0.12, 2.32, 0.05), M('#1f2622', { roughness: 0.9 }), 0, 1.95, -0.2, g); // dark canvas roof
   mesh(RB(1.3, 1.05, 0.08, 0.04), green, 0, 1.42, -1.25, g);
   for (const s of [-1, 1]) mesh(new THREE.BoxGeometry(0.06, 1.25, 0.06), green, s * 0.66, 1.35, 0.55, g);
   for (const s of [-1, 1]) mesh(new THREE.BoxGeometry(0.06, 1.25, 0.06), green, s * 0.66, 1.35, -1.2, g);
@@ -1947,9 +1947,14 @@ function buildCNG() {
 }
 
 /* local bus: rounded body, dents and rust, door on the left with a man hanging out */
-function busSide(base, door) {
+function busSide(base, door, swoosh = false) {
   return canvasTex(1024, 320, (c) => {
     c.fillStyle = base; c.fillRect(0, 0, 1024, 320);
+    if (swoosh) { // the big private buses: red and orange swooshes sweeping back along a pale body
+      for (const [col, y0, y1] of [['#d32f2f', 300, 150], ['#f57c00', 320, 200], ['#7a1c1c', 280, 120]]) {
+        c.fillStyle = col; c.beginPath(); c.moveTo(0, y0); c.bezierCurveTo(300, y0 - 10, 520, y1 + 60, 1024, y1); c.lineTo(1024, y1 + 26); c.bezierCurveTo(560, y1 + 90, 320, y0 + 14, 0, y0 + 20); c.fill();
+      }
+    }
     c.fillStyle = '#efe0bc'; c.fillRect(0, 196, 1024, 40);
     c.fillStyle = '#e8c53a'; c.fillRect(0, 246, 1024, 10);
     for (let x = 30; x < 1000; x += 106) {
@@ -1972,10 +1977,13 @@ function busSide(base, door) {
   });
 }
 function buildBus() {
+  // around the circle: battered city buses, big white private buses with swooshes, and red BRTC double-deckers
+  const style = pick(['city', 'city', 'city', 'swoosh', 'swoosh', 'double']);
+  if (style === 'double') return buildDoubleDecker();
   const g = new THREE.Group();
-  const base = pick(['#b8322f', '#1f5fa8', '#2f8a4a', '#c8781c', '#7a2f7a', '#d9d4c7']);
-  const left = new THREE.MeshStandardMaterial({ map: busSide(base, true), roughness: 0.55, metalness: 0.15 });
-  const right = new THREE.MeshStandardMaterial({ map: busSide(base, false), roughness: 0.55, metalness: 0.15 });
+  const base = style === 'swoosh' ? pick(['#f1efe8', '#e9e4d6']) : pick(['#b8322f', '#1f5fa8', '#2f8a4a', '#c8781c', '#7a2f7a', '#d9d4c7']);
+  const left = new THREE.MeshStandardMaterial({ map: busSide(base, true, style === 'swoosh'), roughness: 0.55, metalness: 0.15 });
+  const right = new THREE.MeshStandardMaterial({ map: busSide(base, false, style === 'swoosh'), roughness: 0.55, metalness: 0.15 });
   const front = canvasTex(256, 256, (c) => {
     c.fillStyle = base; c.fillRect(0, 0, 256, 256);
     c.fillStyle = '#111'; c.fillRect(10, 8, 236, 34);
@@ -2025,11 +2033,46 @@ function buildBus() {
   return { g, wheels, L: 9.2, W: 2.6 };
 }
 
-/* cars: a rounded saloon, a yellow-and-black taxi, or a microbus */
+/* a red BRTC double-decker: two rows of windows, the corporation's name along the side */
+function buildDoubleDecker() {
+  const g = new THREE.Group();
+  const side = (door) => canvasTex(1024, 480, (c) => {
+    c.fillStyle = '#c62828'; c.fillRect(0, 0, 1024, 480);
+    for (const [y, h] of [[40, 120], [250, 120]]) for (let x = 40; x < 1000; x += 106) {
+      if (door && y > 200 && x < 150) continue;
+      c.fillStyle = '#1e2630'; c.fillRect(x, y, 90, h);
+      c.fillStyle = 'rgba(255,255,255,.12)'; c.fillRect(x + 6, y + 6, 22, h - 12);
+      if (Math.random() < 0.7) { c.fillStyle = '#2b1d14'; c.beginPath(); c.arc(x + 45, y + h - 30, 14, 0, 7); c.fill(); }
+    }
+    c.fillStyle = '#f2efe6'; c.fillRect(0, 190, 1024, 40);
+    c.fillStyle = '#1d4f91'; c.font = `800 34px ${BN}`; c.textAlign = 'center'; c.fillText('বিআরটিসি', 560, 222);
+    if (door) { c.fillStyle = '#111'; c.fillRect(30, 250, 104, 230); }
+    c.fillStyle = '#f2efe6'; c.fillRect(0, 400, 1024, 14);
+    grain(c, 1024, 480, 16000, 0.2, true); grime(c, 1024, 480, 30);
+  });
+  const front = canvasTex(256, 384, (c) => {
+    c.fillStyle = '#c62828'; c.fillRect(0, 0, 256, 384);
+    c.fillStyle = '#1e2630'; c.fillRect(16, 30, 224, 110); c.fillRect(16, 200, 224, 110);
+    c.fillStyle = '#111'; c.fillRect(30, 160, 196, 26); c.fillStyle = '#ff9a2a'; c.font = `700 20px ${BN}`; c.textAlign = 'center'; c.fillText('মিরপুর - মতিঝিল', 128, 180);
+    c.fillStyle = '#222'; c.fillRect(70, 330, 116, 30);
+    grain(c, 256, 384, 3000, 0.2, true);
+  });
+  const sideL = new THREE.MeshStandardMaterial({ map: side(true), roughness: 0.55 }), sideR = new THREE.MeshStandardMaterial({ map: side(false), roughness: 0.55 });
+  const roof = M('#d9d4c7'), frontM = new THREE.MeshStandardMaterial({ map: front, roughness: 0.4 });
+  mesh(new RoundedBoxGeometry(2.5, 4.1, 9.6, 3, 0.2), [sideL, sideR, roof, roof, frontM, frontM], 0, 2.5, 0, g);
+  for (const z of [4.85, -4.85]) mesh(RB(2.55, 0.3, 0.2, 0.06), M('#2a2a2c', { metalness: 0.4 }), 0, 0.5, z, g);
+  for (const sd of [-1, 1]) { mesh(new THREE.SphereGeometry(0.13, 10, 8), headMat, sd * 0.95, 0.85, 4.82, g); mesh(new THREE.BoxGeometry(0.22, 0.32, 0.05), tailMat, sd * 1.0, 0.95, -4.82, g); }
+  plate(g, 0, 0.7, -4.95, Math.PI, 'ঢাকা মেট্রো ব');
+  bake(g);
+  const wheels = [];
+  for (const z of [-3.2, 3.2]) for (const sd of [-1, 1]) wheels.push(makeTyre(0.52, 0.32, g, sd * 1.08, 0.52, z));
+  return { g, wheels, L: 9.8, W: 2.6 };
+}
+/* cars: in Mirpur mostly white microbuses (Hiace and Noah) and white or silver saloons */
 function buildCar() {
   const g = new THREE.Group();
-  const type = pick(['sedan', 'sedan', 'taxi', 'micro']);
-  const c = type === 'taxi' ? '#f2c230' : pick(['#f2f2f0', '#c9ccd0', '#2b2b2e', '#8a1f22', '#e8e4d8', '#3d4f66']);
+  const type = pick(['sedan', 'sedan', 'micro', 'micro', 'micro']);
+  const c = type === 'micro' ? pick(['#f4f4f2', '#f4f4f2', '#eceae4', '#c9ccd0']) : pick(['#f2f2f0', '#f2f2f0', '#e9e9e6', '#c9ccd0', '#c9ccd0', '#2b2b2e', '#8a1f22']);
   const paintM = M(c, { metalness: 0.45, roughness: 0.25 });
   let L = 4.3;
   if (type === 'micro') {
@@ -2038,6 +2081,8 @@ function buildCar() {
     mesh(RB(1.82, 0.55, 4.0, 0.15), glassMat, 0, 1.55, -0.2, g);
     const ws = mesh(RB(1.65, 0.7, 0.1, 0.05), glassMat, 0, 1.5, 2.28, g); ws.rotation.x = -0.35;
     mesh(new THREE.BoxGeometry(1.82, 0.08, 4.4), M('#2a2a2c'), 0, 0.72, 0, g);
+    for (const z of [0.9, -0.3, -1.4]) for (const sd of [-1, 1]) mesh(new THREE.BoxGeometry(0.03, 0.55, 0.12), paintM, sd * 0.915, 1.55, z, g); // window pillars
+    for (const sd of [-1, 1]) mesh(new THREE.BoxGeometry(0.02, 0.9, 0.03), M('#9a9a98'), sd * 0.905, 1.05, 0.55, g); // sliding door seam
   } else {
     mesh(RB(1.78, 0.6, L, 0.22), paintM, 0, 0.66, 0, g);
     const cab = mesh(RB(1.6, 0.62, 2.2, 0.28), paintM, 0, 1.18, -0.25, g);
@@ -2045,10 +2090,6 @@ function buildCar() {
     mesh(RB(1.62, 0.44, 2.0, 0.2), glassMat, 0, 1.2, -0.25, g);
     const ws = mesh(new THREE.BoxGeometry(1.45, 0.06, 0.75), glassMat, 0, 1.15, 0.95, g); ws.rotation.x = 0.55;
     const rw = mesh(new THREE.BoxGeometry(1.45, 0.06, 0.6), glassMat, 0, 1.17, -1.42, g); rw.rotation.x = -0.6;
-    if (type === 'taxi') {
-      mesh(new THREE.BoxGeometry(1.8, 0.2, L - 0.4), M('#151515'), 0, 0.55, 0, g);
-      mesh(RB(0.5, 0.18, 0.25, 0.05), M('#fffbe8', { emissive: '#ffd060', emissiveIntensity: 0.4 }), 0, 1.58, -0.2, g);
-    }
   }
   for (const s of [-1, 1]) {
     mesh(RB(0.36, 0.14, 0.06, 0.03), headMat, s * 0.6, 0.78, L / 2 + 0.01, g);
@@ -2057,7 +2098,7 @@ function buildCar() {
   mesh(RB(0.7, 0.18, 0.06, 0.03), M('#222'), 0, 0.62, L / 2 + 0.01, g);
   for (const z of [L / 2 + 0.05, -L / 2 - 0.05]) mesh(RB(1.8, 0.16, 0.12, 0.05), M('#3a3a3c', { roughness: 0.6 }), 0, 0.42, z, g);
   mirrors(g, 0.85, 1.05, 0.7, 0.1);
-  plate(g, 0, 0.5, -L / 2 - 0.12, Math.PI, type === 'taxi' ? 'ঢাকা মেট্রো চ' : 'ঢাকা মেট্রো গ');
+  plate(g, 0, 0.5, -L / 2 - 0.12, Math.PI, type === 'micro' ? 'ঢাকা মেট্রো চ' : 'ঢাকা মেট্রো গ');
   bake(g);
   const d = seat(buildPerson('m'), 1.45); d.g.position.set(0.4, 0.15, 0.1); d.g.scale.setScalar(0.85); g.add(d.g);
   const wheels = [];
@@ -2553,7 +2594,7 @@ function nextEdge(n) {
   return out[out.length - 1];
 }
 for (let i = 0; i < 64; i++) {
-  const kind = pick(['cng', 'cng', 'cng', 'bus', 'bus', 'rick', 'rick', 'rick', 'rick', 'rick', 'car', 'car', 'truck', 'bike', 'bike']);
+  const kind = pick(['cng', 'cng', 'cng', 'bus', 'bus', 'bus', 'rick', 'rick', 'rick', 'rick', 'car', 'car', 'car', 'truck', 'bike', 'bike']);
   let v;
   if (kind === 'rick') {
     const r = buildRickshaw(pick(['#1f8a5b', '#f6c445', '#7b3fb0', '#e8364f']), pick(['#d8323f', '#1d6fb8', '#1f8a5b']), pick(['#e4d7b8', '#9cc3e0', '#e0b0a0']));
@@ -3574,6 +3615,7 @@ frame();
 // debug hook: advance the simulation without relying on requestAnimationFrame
 let simT = 0;
 window.__game = {
+  build: { buildRickshaw, buildCNG, buildBus, buildCar, buildTruck, buildBike, buildPerson },
   P, K, JOB, PLACES, CIRCLE, CIRCLES, SIGNS, CROSSERS, CLIMBERS, NPCS, roadEdge: (x, z) => nearRoad(x, z)[0], WALKERS, STANDERS, BUILDINGS, ROADS, EDGES, renderer, scene, camera,
   step(frames = 60, keys = {}) {
     Object.assign(K, keys);
