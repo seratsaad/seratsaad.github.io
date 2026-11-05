@@ -496,13 +496,13 @@ for (const r of ROADS) {
     gridAdd(RGRID, Math.min(ax, bx) - m, Math.max(ax, bx) + m, Math.min(az, bz) - m, Math.max(az, bz) + m, { r, i });
   }
 }
-// a column must not stand in traffic: the nearest spot within reach that is off the road
-// (median, island or pavement), or null if there is none
-function offRoad(x, z, reach = 8) {
-  if (nearRoad(x, z)[0] > 0.3) return [x, z];
+// a column must not stand in traffic: the nearest spot within reach whose centre is at least `clear`
+// metres from any road edge (half the column's width plus a little), or null if there is none
+function offRoad(x, z, reach = 8, clear = 0.5) {
+  if (nearRoad(x, z)[0] >= clear) return [x, z];
   for (let r = 0.5; r <= reach; r += 0.5) for (let k = 0; k < 16; k++) {
     const a = (k / 16) * Math.PI * 2, qx = x + Math.cos(a) * r, qz = z + Math.sin(a) * r;
-    if (nearRoad(qx, qz)[0] > 0.5 && !buildingAt(qx, qz)) return [qx, qz];
+    if (nearRoad(qx, qz)[0] >= clear && !buildingAt(qx, qz)) return [qx, qz];
   }
   return null;
 }
@@ -858,19 +858,11 @@ const GLASS_SRC = new Set([4505]);
     cg.setAttribute('color', new THREE.Float32BufferAttribute(caps.c, 3));
     const cm = new THREE.Mesh(cg, new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide }));
     cm.castShadow = cm.receiveShadow = true; scene.add(cm);
-    // roof posts around the platform, and columns under the concourse along its long middle
+    // roof posts around the platform (the columns underneath stand on the median with the viaduct's)
     const posts = [];
     for (let i = 0; i < b.pts.length; i++) {
       const [ax, az] = b.pts[i], [bx, bz] = b.pts[(i + 1) % b.pts.length], L = Math.hypot(bx - ax, bz - az);
       for (let u = 0; u < L; u += 9) { const q = new THREE.BoxGeometry(0.4, 5.5, 0.4); q.translate(ax + ((bx - ax) * u) / L, 13.65, az + ((bz - az) * u) / L); posts.push(q); }
-    }
-    let far = [0, 1], fd = 0;
-    for (let i = 0; i < b.pts.length; i++) for (let j = i + 1; j < b.pts.length; j++) { const d = Math.hypot(b.pts[i][0] - b.pts[j][0], b.pts[i][1] - b.pts[j][1]); if (d > fd) { fd = d; far = [i, j]; } }
-    const [p0, p1] = [b.pts[far[0]], b.pts[far[1]]];
-    for (let u = 0.08; u < 0.95; u += 12 / fd) {
-      const spot = offRoad(...onMedian([p0[0] + (p1[0] - p0[0]) * u, p0[1] + (p1[1] - p0[1]) * u]));
-      if (!spot || !inPoly(spot[0], spot[1], b.pts)) continue; // only under the station, never in a lane
-      const [x, z] = spot, q = new THREE.BoxGeometry(1.6, 6.5, 1.6); q.translate(x, 3.25, z); posts.push(q); CIRCLES.push({ x, z, r: 1.1 });
     }
     const pm = new THREE.Mesh(mergeGeometries(posts), new THREE.MeshLambertMaterial({ color: '#c3beb5' }));
     pm.castShadow = true; scene.add(pm);
@@ -1109,7 +1101,7 @@ function onMedian([x, z]) {
     }
     for (let s = 10; s < cum[cum.length - 1]; s += 34) {
       const [x, z, dx, dz] = along(pts, cum, s);
-      const q = offRoad(x, z);
+      const q = offRoad(x, z, 8, 1.4);
       if (!q || piers.some(([px, pz]) => Math.hypot(px - q[0], pz - q[1]) < 12)) continue;
       piers.push([q[0], q[1], Math.atan2(dz, dx)]);
     }
@@ -1123,6 +1115,15 @@ function onMedian([x, z]) {
       const cap = new THREE.BoxGeometry(2.4, 1.2, 7); cap.rotateY(-a); cap.translate(x, 9.2, z);
       pg.push(col, cap);
       CIRCLES.push({ x, z, r: 1.3 });
+    }
+    // under the station the line rests on a row of square columns down the middle of the road
+    for (const st of BUILDINGS.filter((b) => b.station)) for (const line of RAIL) for (let s = 0; s < line.len; s += 12) {
+      const [lx, lz] = along(line.pts, line.cum, s);
+      if (!inPoly(lx, lz, st.pts)) continue;
+      const q = offRoad(lx, lz, 6, 1.1);
+      if (!q || CIRCLES.some((c) => c.r >= 1 && Math.hypot(c.x - q[0], c.z - q[1]) < 6)) continue;
+      const col = new THREE.BoxGeometry(1.6, 6.5, 1.6); col.translate(q[0], 3.25, q[1]); pg.push(col);
+      CIRCLES.push({ x: q[0], z: q[1], r: 1.1 });
     }
     const pier = new THREE.Mesh(mergeGeometries(pg), pierMat);
     pier.castShadow = true; scene.add(pier);
@@ -1307,7 +1308,7 @@ let BRIDGE_MID = null;
       const [x, z] = pts[i], [px, pz] = pts[Math.min(i + 1, pts.length - 1)], [qx, qz] = pts[Math.max(i - 1, 0)], L = Math.hypot(px - qx, pz - qz) || 1;
       const nx = -(pz - qz) / L, nz = (px - qx) / L;
       for (const sg of [1, -1]) {
-        const q = offRoad(x + nx * 1.9 * sg, z + nz * 1.9 * sg, 4);
+        const q = offRoad(x + nx * 1.9 * sg, z + nz * 1.9 * sg, 4, 0.7);
         if (q) { column(q[0], q[1], DECK_Y); CIRCLES.push({ x: q[0], z: q[1], r: 0.6 }); }
       }
       beam(x + nx * 2.3, DECK_Y - 0.45, z + nz * 2.3, x - nx * 2.3, DECK_Y - 0.45, z - nz * 2.3, 0.7, 0.6, rp);
