@@ -527,7 +527,24 @@ function nearRoad(x, z, classes = null) {
 
 // buildings: outlines turned clockwise so (-dz, dx) along each wall points outward
 const BUILDINGS = [], WALLS = new Map(), BGRID = new Map();
+// main roads have a pavement in front of the shops; where a mapped outline reaches into that strip
+// (the map and the estimated road widths are each a metre or two out) its corners are pushed back
+const SETBACK = 2.6;
+function setBack(pts) {
+  return pts.map(([x, z]) => {
+    let best = null, bd = SETBACK;
+    for (const { r, i } of gridAt(RGRID, x, z)) {
+      if (r.cls !== 'p' && r.cls !== 't') continue;
+      const [px, pz] = segNear(x, z, ...r.pts[i - 1], ...r.pts[i]), d = Math.hypot(x - px, z - pz) - r.w / 2;
+      if (d < bd) { bd = d; best = [px, pz, Math.hypot(x - px, z - pz)]; }
+    }
+    if (!best || best[2] < 1e-3) return [x, z];
+    const k = (best[2] + (SETBACK - bd)) / best[2];
+    return [best[0] + (x - best[0]) * k, best[1] + (z - best[1]) * k];
+  });
+}
 function addBuilding(pts, lv, kind, src = -1) {
+  if (kind !== 3) pts = setBack(pts);
   let A = 0, minX = 1e9, maxX = -1e9, minZ = 1e9, maxZ = -1e9;
   for (let i = 0; i < pts.length; i++) {
     const [x0, z0] = pts[i], [x1, z1] = pts[(i + 1) % pts.length];
