@@ -607,6 +607,7 @@ function buildingAt(x, z) {
 }
 const CIRCLES = []; // posts and pillars the rickshaw bumps into
 const STALL_SPOTS = [], STALL_SELLERS = []; // tea stalls and fruit vans on the wider pavements
+const TEA_STALLS = []; // the tea stalls for the gameplay layer: { x, z, ry, fx, fz } with (fx, fz) pointing at the road
 const SHRUBS = [], SAPLINGS = []; // median planting and young street trees, grown with the other trees
 
 /* ---------------- textures for the map ---------------- */
@@ -1525,7 +1526,7 @@ let BRIDGE_MID = null;
     if (buildingAt(x, z) || SAPLINGS.some(([sx, sz]) => Math.hypot(sx - x, sz - z) < 3) || CIRCLES.some((c) => Math.hypot(c.x - x, c.z - z) < c.r + 1.6) || stalls.concat(vans).some(([px, pz]) => Math.hypot(px - x, pz - z) < 8)) continue;
     const ry = Math.atan2(fx, fz);
     if (rand() < 0.65) {
-      stalls.push([x, z, ry]); tarps.push([x + fx * 0.1, z + fz * 0.1, ry, pick(['#1e5aa8', '#e2762b', '#2f7d4a', '#c9c3b5', '#a83232'])]);
+      stalls.push([x, z, ry]); TEA_STALLS.push({ x, z, ry, fx, fz }); tarps.push([x + fx * 0.1, z + fz * 0.1, ry, pick(['#1e5aa8', '#e2762b', '#2f7d4a', '#c9c3b5', '#a83232'])]);
       STALL_SELLERS.push([x - fx * 0.6, z - fz * 0.6, ry]);
       CIRCLES.push({ x, z, r: 0.9 });
     } else {
@@ -3800,7 +3801,7 @@ window.__game = {
 const { initLife } = await import(`./life.js${new URL(import.meta.url).search}`);
 window.__game.life = initLife({
   THREE, MAP, scene, camera, sun, hemi, sky, HORIZON, headMat, P, K, player, NPCS, WALKERS, CROSSERS, STANDERS, PLACES, CIRCLE, POLICE,
-  SIGN_SPOTS, WALK_ROADS, CIRCLES, along, snap, curb, nearRoad, buildingAt, pavementAt, KERB, EDGE, dm,
+  SIGN_SPOTS, WALK_ROADS, CIRCLES, TEA_STALLS, along, snap, curb, nearRoad, buildingAt, pavementAt, KERB, EDGE, dm,
   buildPerson, seat, makePin, mesh, M, canvasTex, grain, BN, EN, $, toast, bell, honk, R, pick, rand, clamp,
   hooks: HOOKS, isStarted: () => started, camYaw: () => camYaw,
   audio: { ctx: () => AC, amp: (v) => amp(v), filt: (...a) => filt(...a), loopSrc: (b) => loopSrc(b), master: () => master },
