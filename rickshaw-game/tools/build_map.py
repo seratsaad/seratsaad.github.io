@@ -65,10 +65,17 @@ GREEN = {'stadium', 'pitch', 'park', 'playground', 'meadow', 'grass', 'cemetery'
 
 def main(src, dst):
     els = json.load(open(src))['elements']
-    roads, buildings, rail, station, green, water, pois, landmarks = [], [], [], [], [], [], [], []
+    roads, buildings, rail, station, green, water, pois, landmarks, bridges, steps = [], [], [], [], [], [], [], [], [], []
     uses = collections.Counter(n for e in els if e['type'] == 'way' and e.get('tags', {}).get('highway') in ROAD for n in set(e.get('nodes', [])))
     for e in els:
         t = e.get('tags', {})
+        # foot overbridges and their stairs are kept apart from the ground roads
+        if e['type'] == 'way' and 'geometry' in e and t.get('highway') == 'steps':
+            steps.append(flat([xz(p) for p in e['geometry']]))
+            continue
+        if e['type'] == 'way' and 'geometry' in e and t.get('bridge') and t.get('highway') in ('pedestrian', 'footway', 'path'):
+            bridges.append(flat([xz(p) for p in e['geometry']]))
+            continue
         if e['type'] == 'way' and 'highway' in t and t['highway'] in ROAD and 'geometry' in e:
             cls, lanes, per = ROAD[t['highway']]
             pts = simplify_keep([xz(p) for p in e['geometry']], [uses[n] > 1 for n in e['nodes']], 0.5)
@@ -153,7 +160,8 @@ def main(src, dst):
         t, rnd = b['tags'], random.Random(b['id'])
         cx = sum(p[0] for p in b['pts']) / len(b['pts'])
         cz = sum(p[1] for p in b['pts']) / len(b['pts'])
-        kind = 2 if t.get('building') == 'mosque' or t.get('amenity') == 'place_of_worship' else 1 if t.get('building') in ('roof', 'shed', 'hut', 'kiosk', 'garage', 'garages') else 0
+        # kinds: 0 ordinary, 1 shed or tin roof, 2 mosque, 3 elevated metro station
+        kind = 3 if t.get('building') == 'train_station' or (t.get('public_transport') == 'station' and t.get('railway')) else 2 if t.get('building') == 'mosque' or t.get('amenity') == 'place_of_worship' else 1 if t.get('building') in ('roof', 'shed', 'hut', 'kiosk', 'garage', 'garages') else 0
         lv = None
         for key in ('building:levels',):
             try:
@@ -184,10 +192,10 @@ def main(src, dst):
     data = {
         'note': 'Map data (c) OpenStreetMap contributors, ODbL. Units: decimetres around Mirpur-10 Circle.',
         'origin': [LAT0, LON0], 'bounds': [min(allx), min(allz), max(allx), max(allz)],
-        'b': out_b, 'r': roads, 'rail': rail, 'station': station, 'green': green, 'water': water, 'poi': pois, 'lm': landmarks,
+        'b': out_b, 'r': roads, 'rail': rail, 'station': station, 'green': green, 'water': water, 'poi': pois, 'lm': landmarks, 'bridges': bridges, 'steps': steps,
     }
     json.dump(data, open(dst, 'w'), separators=(',', ':'), ensure_ascii=False)
-    print(f'{len(out_b)} buildings, {len(roads)} roads, {len(rail)} rail, {len(station)} station, {len(green)} green, {len(water)} water, {len(pois)} pois, {len(landmarks)} landmarks')
+    print(f'{len(out_b)} buildings, {len(roads)} roads, {len(rail)} rail, {len(station)} station, {len(green)} green, {len(water)} water, {len(pois)} pois, {len(landmarks)} landmarks, {len(bridges)} bridges, {len(steps)} steps')
 
 if __name__ == '__main__':
     main(sys.argv[1], sys.argv[2])
