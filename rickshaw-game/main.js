@@ -1296,7 +1296,8 @@ let BRIDGE_MID = null;
         const k = adN++ % ADS.length, u0 = (k % 2) / 2, u1 = u0 + 0.5, v1 = 1 - Math.floor(k / 2) / 2, v0 = v1 - 0.5;
         const t0 = 0.5 - 3 / L, t1 = 0.5 + 3 / L, off = 1.95 * sg; // just in front of the banner strip
         const A = [ax + (bx - ax) * t0 + nx * off, az + (bz - az) * t0 + nz * off], B = [ax + (bx - ax) * t1 + nx * off, az + (bz - az) * t1 + nz * off];
-        sg > 0 ? quad(ads, A, B, DECK_Y - 0.9, DECK_Y - 0.9, 3, u0, u1, v0, v1) : quad(ads, B, A, DECK_Y - 0.9, DECK_Y - 0.9, 3, u0, u1, v0, v1);
+        // hung below the walkway, so it never covers the banner row along the truss (about 3.8 m to 6 m up)
+        sg > 0 ? quad(ads, A, B, DECK_Y - 2.6, DECK_Y - 2.6, 2.2, u0, u1, v0, v1) : quad(ads, B, A, DECK_Y - 2.6, DECK_Y - 2.6, 2.2, u0, u1, v0, v1);
       }
     }
     for (const which of [0, pts.length - 1]) {
